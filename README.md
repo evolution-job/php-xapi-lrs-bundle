@@ -8,29 +8,43 @@ The configuration guide proposed below is use **Doctrine** ORM.
 Versions
 --------
 
- - V0.1: Symfony 3.4, Php 7.1, original files from php-xapi/* repositories
-
+ - V0.2: Use evolution-job repositories and lock versions
+ - V0.1: Symfony 4.4, Php 7.1, original files from php-xapi/* repositories
 
 Installation
 ------------
 
-- COMPOSER: add the repository and require to `composer.json` of your project
+- COMPOSER: add repositories and requirements into `composer.json` of your project
 ```
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/php-xapi/lrs-bundle"
+            "url": "https://github.com/evolution-job/lrs-bundle"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/evolution-job/repository-api"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/evolution-job/repository-doctrine"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/evolution-job/repository-doctrine-orm"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/evolution-job/validation"
         }
     ],
     "require": {
         ...,
-        "php-xapi/repository-doctrine": "^0.3.x-dev",
-        "php-xapi/lrs-bundle": "0.1.x-dev"
+        "php-xapi/lrs-bundle": "^0.2"
     }
 ```
-(replace php-xapi by your own user if you have forked the project)
 
-launch `composer update` to download corresponding libraries
+- launch `composer install -W` to download corresponding libraries
 
 - **ADD BUNDLE:** add the bundle to `app/AppKernel.php` in your application
 ```
@@ -95,3 +109,10 @@ services:
             - '@xapi_lrs.doctrine.object_manager'
             - '@xapi_lrs.doctrine.class_metadata'
 ```
+
+- Update your **database** with command `php bin/console doctrine:schema:create`
+
+Endpoints
+---------
+
+- /lrs/statements

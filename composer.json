@@ -2,7 +2,15 @@
     "name": "php-xapi/lrs-bundle",
     "type": "symfony-bundle",
     "description": "Experience API (xAPI) Learning Record Store (LRS) based on the Symfony Framework",
-    "keywords": ["xAPI", "Experience API", "Tin Can API", "LRS", "Learning Record Store", "Symfony", "bundle"],
+    "keywords": [
+        "xAPI",
+        "Experience API",
+        "Tin Can API",
+        "LRS",
+        "Learning Record Store",
+        "Symfony",
+        "bundle"
+    ],
     "homepage": "https://github.com/php-xapi/lrs-bundle",
     "license": "MIT",
     "authors": [
@@ -13,25 +21,52 @@
         {
             "name": "Jérôme Parmentier",
             "homepage": "https://github.com/Lctrs"
+        },
+        {
+            "name": "Entrili",
+            "homepage": "https://github.com/evolution-job"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/evolution-job/repository-api"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/evolution-job/repository-doctrine"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/evolution-job/repository-doctrine-orm"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/evolution-job/validation"
         }
     ],
     "require": {
         "php": "^7.1",
-        "php-xapi/exception": "^0.1 || ^0.2",
-        "php-xapi/model": "^1.1 || ^2.0 || ^3.0",
-        "php-xapi/repository-api": "^0.3@dev || ^0.4@dev",
-        "php-xapi/serializer": "^1.0 || ^2.0",
-        "php-xapi/symfony-serializer": "^1.0 || ^2.0",
-        "symfony/config": "^3.4 || ^4.3",
-        "symfony/dependency-injection": "^3.4 || ^4.3",
-        "symfony/http-foundation": "^3.4 || ^4.3",
-        "symfony/http-kernel": "^3.4 || ^4.3"
+        "doctrine/doctrine-bundle": "^2.3",
+        "doctrine/orm": "^2.7",
+        "php-xapi/exception": "^0.2",
+        "php-xapi/model": "^3.0",
+        "php-xapi/repository-api": "^0.4",
+        "php-xapi/repository-doctrine": "^0.4",
+        "php-xapi/repository-doctrine-orm": "^0.1",
+        "php-xapi/serializer": "^2.2",
+        "php-xapi/symfony-serializer": "^2.0",
+        "php-xapi/validation": "^0.2",
+        "symfony/config": "^4.3",
+        "symfony/dependency-injection": "^4.3",
+        "symfony/http-foundation": "^4.3",
+        "symfony/http-kernel": "^4.3"
     },
     "require-dev": {
         "phpspec/phpspec": "~2.3",
-        "php-xapi/json-test-fixtures": "^1.0 || ^2.0",
+        "php-xapi/json-test-fixtures": "^2.0",
         "php-xapi/test-fixtures": "^1.0.1",
-        "ramsey/uuid": "^2.9 || ^3.0"
+        "ramsey/uuid": "^3.0"
     },
     "autoload": {
         "psr-4": {
@@ -45,7 +80,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "0.1.x-dev"
+            "dev-master": "0.2.x-dev"
         }
     }
 }
