@@ -32,9 +32,7 @@ use XApi\Repository\Api\StatementRepositoryInterface;
  */
 final class StatementGetController
 {
-    private static $getParameters = array(
-        'statementId' => true,
-        'voidedStatementId' => true,
+    private static $notAllowed = array(
         'agent' => true,
         'verb' => true,
         'activity' => true,
@@ -44,8 +42,6 @@ final class StatementGetController
         'since' => true,
         'until' => true,
         'limit' => true,
-        'format' => true,
-        'attachments' => true,
         'ascending' => true,
     );
 
@@ -71,7 +67,7 @@ final class StatementGetController
      */
     public function getStatement(Request $request)
     {
-        $query = new ParameterBag(\array_intersect_key($request->query->all(), self::$getParameters));
+        $query = $request->query;
 
         $this->validate($query);
 
@@ -133,12 +129,6 @@ final class StatementGetController
      */
     protected function buildMultiStatementsResponse(array $statements, $includeAttachments = false)
     {
-        for ($i = 0, $iMax = count($statements); $i < $iMax; ++$i) {
-            if (null === $statements[$i]->getVersion()) {
-                $statements[$i] = $statements[$i]->withVersion('1.0.0');
-            }
-        }
-
         $json = $this->statementResultSerializer->serializeStatementResult(new StatementResult($statements));
 
         $response = new JsonResponse($json, 200, array(), true);
@@ -185,20 +175,12 @@ final class StatementGetController
             throw new BadRequestHttpException('Request must not have both statementId and voidedStatementId parameters at the same time.');
         }
 
-        $hasAttachments = $query->has('attachments');
-        $hasFormat = $query->has('format');
-        $queryCount = $query->count();
+        if ($hasStatementId || $hasVoidedStatementId) {
+            $badKeys = \array_intersect_key($query->all(), self::$notAllowed);
 
-        if (($hasStatementId || $hasVoidedStatementId) && $hasAttachments && $hasFormat && $queryCount > 3) {
-            throw new BadRequestHttpException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter besides "attachments" or "format".');
-        }
-
-        if (($hasStatementId || $hasVoidedStatementId) && ($hasAttachments || $hasFormat) && $queryCount > 2) {
-            throw new BadRequestHttpException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter besides "attachments" or "format".');
-        }
-
-        if (($hasStatementId || $hasVoidedStatementId) && $queryCount > 1) {
-            throw new BadRequestHttpException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter besides "attachments" or "format".');
+            if (0 !== \count($badKeys)) {
+                throw new BadRequestHttpException(sprintf('Cannot have "%s" parameters. Only "format" and/or "attachments" are allowed with "statementId" or "voidedStatementId".', implode('", "', \array_keys($badKeys))));
+            }
         }
     }
 }
