@@ -5,6 +5,10 @@
         http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
+        <service id="xapi_lrs.activity.serializer" class="Xabbuh\XApi\Serializer\ActivitySerializerInterface" public="false">
+            <factory service="xapi_lrs.serializer.factory" method="createActivitySerializer"/>
+        </service>
+
         <service id="xapi_lrs.statement.serializer" class="Xabbuh\XApi\Serializer\StatementSerializerInterface" public="false">
             <factory service="xapi_lrs.serializer.factory" method="createStatementSerializer"/>
         </service>
