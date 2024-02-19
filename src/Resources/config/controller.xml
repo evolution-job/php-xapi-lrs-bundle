@@ -5,12 +5,33 @@
         http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
+        <!-- Activity -->
         <service id="xapi_lrs.controller.activity.get" class="XApi\LrsBundle\Controller\ActivityGetController">
             <argument type="service" id="xapi_lrs.repository.activity" />
-            <argument type="service" id="xapi_lrs.serializer.activity" />
+            <argument type="service" id="xapi_lrs.activity.serializer" />
             <tag name="controller.service_arguments"/>
         </service>
 
+        <service id="xapi_lrs.controller.activity.options" class="XApi\LrsBundle\Controller\ActivityOptionsController">
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <!-- State -->
+        <service id="xapi_lrs.controller.state.get" class="XApi\LrsBundle\Controller\StateGetController">
+            <argument type="service" id="xapi_lrs.repository.state"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <service id="xapi_lrs.controller.state.options" class="XApi\LrsBundle\Controller\StateOptionsController">
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <service id="xapi_lrs.controller.state.put" class="XApi\LrsBundle\Controller\StatePutController">
+            <argument type="service" id="xapi_lrs.repository.state"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <!-- Statement -->
         <service id="xapi_lrs.controller.statement.get" class="XApi\LrsBundle\Controller\StatementGetController">
             <argument type="service" id="xapi_lrs.repository.statement"/>
             <argument type="service" id="xapi_lrs.statement.serializer"/>
@@ -19,7 +40,12 @@
             <tag name="controller.service_arguments"/>
         </service>
 
+        <service id="xapi_lrs.controller.statement.options" class="XApi\LrsBundle\Controller\StatementOptionsController">
+            <tag name="controller.service_arguments"/>
+        </service>
+
         <service id="xapi_lrs.controller.statement.post" class="XApi\LrsBundle\Controller\StatementPostController">
+            <argument type="service" id="xapi_lrs.repository.statement"/>
             <tag name="controller.service_arguments"/>
         </service>
 

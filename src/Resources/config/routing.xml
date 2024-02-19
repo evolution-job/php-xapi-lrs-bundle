@@ -4,21 +4,40 @@
     xsi:schemaLocation="http://symfony.com/schema/routing
         http://symfony.com/schema/routing/routing-1.0.xsd">
 
+    <!-- Activity -->
     <route id="xapi_lrs.activity.get" path="/activities" methods="GET">
         <default key="_controller">xapi_lrs.controller.activity.get:getActivity</default>
         <default key="xapi_lrs.route">
             <bool>true</bool>
         </default>
     </route>
+    <route id="xapi_lrs.activities.options" path="/activities" methods="OPTIONS">
+        <default key="_controller">xapi_lrs.controller.activity.options:optionsActivity</default>
+    </route>
 
-    <route id="xapi_lrs.statement.put" path="/statements" methods="PUT">
-        <default key="_controller">xapi_lrs.controller.statement.put:putStatement</default>
-        <default key="xapi_serializer">statement</default>
+    <!-- State -->
+    <route id="xapi_lrs.state.get" path="/activities/state" methods="GET">
+        <default key="_controller">xapi_lrs.controller.state.get:getState</default>
+        <default key="xapi_serializer">state</default>
+    </route>
+    <route id="xapi_lrs.state.options" path="/activities/state" methods="OPTIONS">
+        <default key="_controller">xapi_lrs.controller.state.options:optionsState</default>
+    </route>
+    <route id="xapi_lrs.state.put" path="/activities/state" methods="PUT,POST">
+        <default key="_controller">xapi_lrs.controller.state.put:putState</default>
+        <default key="xapi_serializer">state</default>
+    </route>
+
+    <!-- Statement -->
+    <route id="xapi_lrs.statement.get" path="/statements" methods="GET">
+        <default key="_controller">xapi_lrs.controller.statement.get:getStatement</default>
         <default key="xapi_lrs.route">
             <bool>true</bool>
         </default>
     </route>
-
+    <route id="xapi_lrs.statement.options" path="/statements" methods="OPTIONS">
+        <default key="_controller">xapi_lrs.controller.statement.options:optionsStatement</default>
+    </route>
     <route id="xapi_lrs.statement.post" path="/statements" methods="POST">
         <default key="_controller">xapi_lrs.controller.statement.post:postStatement</default>
         <default key="xapi_serializer">statement</default>
@@ -26,9 +45,9 @@
             <bool>true</bool>
         </default>
     </route>
-
-    <route id="xapi_lrs.statement.get" path="/statements" methods="GET">
-        <default key="_controller">xapi_lrs.controller.statement.get:getStatement</default>
+    <route id="xapi_lrs.statement.put" path="/statements" methods="PUT">
+        <default key="_controller">xapi_lrs.controller.statement.put:putStatement</default>
+        <default key="xapi_serializer">statement</default>
         <default key="xapi_lrs.route">
             <bool>true</bool>
         </default>

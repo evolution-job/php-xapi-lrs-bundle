@@ -42,6 +42,7 @@ final class XApiLrsExtension extends Extension
 
                 $container->setAlias('xapi_lrs.doctrine.object_manager', $config['object_manager_service']);
                 $container->setAlias('xapi_lrs.repository.activity', 'xapi_lrs.repository.activity.doctrine');
+                $container->setAlias('xapi_lrs.repository.state', 'xapi_lrs.repository.state.doctrine');
                 $container->setAlias('xapi_lrs.repository.statement', 'xapi_lrs.repository.statement.doctrine');
                 break;
             case 'orm':
@@ -50,6 +51,7 @@ final class XApiLrsExtension extends Extension
 
                 $container->setAlias('xapi_lrs.doctrine.object_manager', $config['object_manager_service']);
                 $container->setAlias('xapi_lrs.repository.activity', 'xapi_lrs.repository.activity.doctrine');
+                $container->setAlias('xapi_lrs.repository.state', 'xapi_lrs.repository.state.doctrine');
                 $container->setAlias('xapi_lrs.repository.statement', 'xapi_lrs.repository.statement.doctrine');
                 break;
         }
