@@ -11,12 +11,14 @@
 
 namespace XApi\LrsBundle\Controller;
 
+use DateTime;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
+use Xabbuh\XApi\Common\Exception\UnsupportedStatementVersionException;
 use Xabbuh\XApi\Model\Statement;
 use Xabbuh\XApi\Model\StatementId;
 use Xabbuh\XApi\Model\StatementResult;
@@ -32,18 +34,18 @@ use XApi\Repository\Api\StatementRepositoryInterface;
  */
 final class StatementGetController
 {
-    private static $notAllowed = array(
-        'agent' => true,
-        'verb' => true,
-        'activity' => true,
-        'registration' => true,
+    private static $notAllowed = [
+        'agent'              => true,
+        'verb'               => true,
+        'activity'           => true,
+        'registration'       => true,
         'related_activities' => true,
-        'related_agents' => true,
-        'since' => true,
-        'until' => true,
-        'limit' => true,
-        'ascending' => true,
-    );
+        'related_agents'     => true,
+        'since'              => true,
+        'until'              => true,
+        'limit'              => true,
+        'ascending'          => true,
+    ];
 
     private $repository;
     private $statementSerializer;
@@ -61,9 +63,9 @@ final class StatementGetController
     /**
      * @param Request $request
      *
+     * @return Response
      * @throws BadRequestHttpException if the query parameters does not comply with xAPI specification
      *
-     * @return Response
      */
     public function getStatement(Request $request)
     {
@@ -86,23 +88,24 @@ final class StatementGetController
 
                 $response = $this->buildMultiStatementsResponse($statements, $includeAttachments);
             }
-        } catch (NotFoundException $e) {
-            $response = $this->buildMultiStatementsResponse(array());
+        } catch (NotFoundException|UnsupportedStatementVersionException $e) {
+            $response = $this->buildMultiStatementsResponse([]);
         }
 
-        $now = new \DateTime();
-        $response->headers->set('X-Experience-API-Consistent-Through', $now->format(\DateTime::ATOM));
+        $now = new DateTime();
+        $response->headers->set('X-Experience-API-Consistent-Through', $now->format(DateTime::ATOM));
 
         return $response;
     }
 
     /**
      * @param Statement $statement
-     * @param bool      $includeAttachments true to include the attachments in the response, false otherwise
+     * @param bool $includeAttachments true to include the attachments in the response, false otherwise
      *
      * @return JsonResponse|MultipartResponse
+     * @throws UnsupportedStatementVersionException
      */
-    protected function buildSingleStatementResponse(Statement $statement, $includeAttachments = false)
+    protected function buildSingleStatementResponse(Statement $statement, bool $includeAttachments = false)
     {
         if (null === $statement->getVersion()) {
             $statement = $statement->withVersion('1.0.0');
@@ -110,10 +113,10 @@ final class StatementGetController
 
         $json = $this->statementSerializer->serializeStatement($statement);
 
-        $response = new JsonResponse($json, 200, array(), true);
+        $response = new JsonResponse($json, 200, [], true);
 
         if ($includeAttachments) {
-            $response = $this->buildMultipartResponse($response, array($statement));
+            $response = $this->buildMultipartResponse($response, [$statement]);
         }
 
         $response->setLastModified($statement->getStored());
@@ -123,15 +126,15 @@ final class StatementGetController
 
     /**
      * @param Statement[] $statements
-     * @param bool        $includeAttachments true to include the attachments in the response, false otherwise
+     * @param bool $includeAttachments true to include the attachments in the response, false otherwise
      *
      * @return JsonResponse|MultipartResponse
      */
-    protected function buildMultiStatementsResponse(array $statements, $includeAttachments = false)
+    protected function buildMultiStatementsResponse(array $statements, bool $includeAttachments = false)
     {
         $json = $this->statementResultSerializer->serializeStatementResult(new StatementResult($statements));
 
-        $response = new JsonResponse($json, 200, array(), true);
+        $response = new JsonResponse($json, 200, [], true);
 
         if ($includeAttachments) {
             $response = $this->buildMultipartResponse($response, $statements);
@@ -142,16 +145,16 @@ final class StatementGetController
 
     /**
      * @param JsonResponse $statementResponse
-     * @param Statement[]  $statements
+     * @param Statement[] $statements
      *
      * @return MultipartResponse
      */
-    protected function buildMultipartResponse(JsonResponse $statementResponse, array $statements)
+    protected function buildMultipartResponse(JsonResponse $statementResponse, array $statements): MultipartResponse
     {
-        $attachmentsParts = array();
+        $attachmentsParts = [];
 
         foreach ($statements as $statement) {
-            foreach ((array) $statement->getAttachments() as $attachment) {
+            foreach ((array)$statement->getAttachments() as $attachment) {
                 $attachmentsParts[] = new AttachmentResponse($attachment);
             }
         }
@@ -166,7 +169,7 @@ final class StatementGetController
      *
      * @throws BadRequestHttpException if the parameters does not comply with the xAPI specification
      */
-    private function validate(ParameterBag $query)
+    private function validate(ParameterBag $query): void
     {
         $hasStatementId = $query->has('statementId');
         $hasVoidedStatementId = $query->has('voidedStatementId');
@@ -176,10 +179,10 @@ final class StatementGetController
         }
 
         if ($hasStatementId || $hasVoidedStatementId) {
-            $badKeys = \array_intersect_key($query->all(), self::$notAllowed);
+            $badKeys = array_intersect_key($query->all(), self::$notAllowed);
 
-            if (0 !== \count($badKeys)) {
-                throw new BadRequestHttpException(sprintf('Cannot have "%s" parameters. Only "format" and/or "attachments" are allowed with "statementId" or "voidedStatementId".', implode('", "', \array_keys($badKeys))));
+            if (0 !== count($badKeys)) {
+                throw new BadRequestHttpException(sprintf('Cannot have "%s" parameters. Only "format" and/or "attachments" are allowed with "statementId" or "voidedStatementId".', implode('", "', array_keys($badKeys))));
             }
         }
     }
