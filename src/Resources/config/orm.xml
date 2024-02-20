@@ -5,6 +5,8 @@
         http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
+
+        <!-- Repository -->
         <service id="xapi_lrs.doctrine.class_metadata" class="Doctrine\ORM\Mapping\ClassMetadata" public="false">
             <argument>XApi\Repository\Doctrine\Mapping\Statement</argument>
             <factory service="xapi_lrs.doctrine.object_manager" method="getClassMetadata" />
@@ -18,6 +20,10 @@
         <service id="xapi_lrs.repository.mapped_statement" class="XApi\Repository\ORM\StatementRepository" public="false">
             <argument type="service" id="xapi_lrs.doctrine.object_manager" />
             <argument type="service" id="xapi_lrs.doctrine.class_metadata" />
+        </service>
+
+        <!-- Quote Strategy for Doctrine ORM -->
+        <service id="xapi_lrs.doctrine.orm.quote.strategy" class="XApi\LrsBundle\Doctrine\ORM\QuoteStrategy" public="false">
         </service>
 
     </services>
