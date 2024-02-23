@@ -29,24 +29,33 @@
     ],
     "repositories": [
         {
-            "type": "vcs",
-            "url": "https://github.com/evolution-job/repository-api"
+            "type": "git",
+            "url": "https://github.com/evolution-job/php-xapi-model.git"
         },
         {
-            "type": "vcs",
-            "url": "https://github.com/evolution-job/repository-doctrine"
+            "type": "git",
+            "url": "https://github.com/evolution-job/php-xapi-repository-api.git"
         },
         {
-            "type": "vcs",
-            "url": "https://github.com/evolution-job/repository-doctrine-orm"
+            "type": "git",
+            "url": "https://github.com/evolution-job/php-xapi-repository-doctrine.git"
         },
         {
-            "type": "vcs",
-            "url": "https://github.com/evolution-job/validation"
+            "type": "git",
+            "url": "https://github.com/evolution-job/php-xapi-repository-doctrine-orm.git"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/evolution-job/php-xapi-serializer.git"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/evolution-job/php-xapi-symfony-serializer.git"
         }
     ],
     "require": {
         "php": "^7.1",
+        "ext-json": "*",
         "doctrine/doctrine-bundle": "^2.3",
         "doctrine/orm": "^2.7",
         "php-xapi/exception": "^0.2",
@@ -54,18 +63,17 @@
         "php-xapi/repository-api": "^0.4",
         "php-xapi/repository-doctrine": "^0.4",
         "php-xapi/repository-doctrine-orm": "^0.1",
-        "php-xapi/serializer": "^2.2",
-        "php-xapi/symfony-serializer": "^2.0",
-        "php-xapi/validation": "^0.2",
+        "php-xapi/serializer": "^3.0",
+        "php-xapi/symfony-serializer": "^3.0",
         "symfony/config": "^4.3",
         "symfony/dependency-injection": "^4.3",
         "symfony/http-foundation": "^4.3",
         "symfony/http-kernel": "^4.3"
     },
     "require-dev": {
-        "phpspec/phpspec": "~2.3",
+        "phpspec/phpspec": "^5.1",
         "php-xapi/json-test-fixtures": "^2.0",
-        "php-xapi/test-fixtures": "^1.0.1",
+        "php-xapi/test-fixtures": "^1.1.1",
         "ramsey/uuid": "^3.0"
     },
     "autoload": {
