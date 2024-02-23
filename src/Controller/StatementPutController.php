@@ -11,6 +11,7 @@
 
 namespace XApi\LrsBundle\Controller;
 
+use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -32,7 +33,7 @@ final class StatementPutController
         $this->repository = $repository;
     }
 
-    public function putStatement(Request $request, Statement $statement)
+    public function putStatement(Request $request, Statement $statement): Response
     {
         if (null === $statementId = $request->query->get('statementId')) {
             throw new BadRequestHttpException('Required statementId parameter is missing.');
@@ -40,7 +41,7 @@ final class StatementPutController
 
         try {
             $id = StatementId::fromString($statementId);
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             throw new BadRequestHttpException(sprintf('Parameter statementId ("%s") is not a valid UUID.', $statementId), $e);
         }
 

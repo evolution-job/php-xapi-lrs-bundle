@@ -35,8 +35,8 @@ final class StateGetController
     public function getState(State $state): Response
     {
         $mappedState = $this->repository->findState([
-            "stateId"      => $state->getStateId(),
-            "activity"     => $state->getActivity()->getId()->getValue(),
+            "stateId"        => $state->getStateId(),
+            "activityId"     => $state->getActivity()->getId()->getValue(),
             "registrationId" => $state->getRegistrationId()
         ]);
 

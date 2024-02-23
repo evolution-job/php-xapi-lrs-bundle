@@ -12,7 +12,6 @@
 namespace XApi\LrsBundle\Controller;
 
 use DateTime;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Model\State;
 use XApi\Repository\Api\StateRepositoryInterface;
@@ -30,25 +29,12 @@ final class StatePutController
     }
 
     /**
-     * @param Request $request
      * @param State $state
      * @return Response
      */
-    public function putState(Request $request, State $state): Response
+    public function putState(State $state): Response
     {
-        $mappedState = $this->repository->findState([
-            "stateId"      => $state->getStateId(),
-            "activity"     => $state->getActivity()->getId()->getValue(),
-            "registrationId" => $state->getRegistrationId()
-        ]);
-
-        if ($mappedState instanceof \XApi\Repository\Doctrine\Mapping\State) {
-            $mappedState->data = json_encode($request->request->get('data'));
-            $this->repository->updateState($mappedState);
-        } else {
-            $this->repository->storeState($state);
-        }
-
+        $this->repository->storeState($state);
 
         $response = new Response();
         $now = new DateTime();
