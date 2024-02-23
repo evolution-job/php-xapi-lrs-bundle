@@ -6,20 +6,26 @@
 
     <services>
 
-        <!-- Repository -->
-        <service id="xapi_lrs.doctrine.class_metadata" class="Doctrine\ORM\Mapping\ClassMetadata" public="false">
-            <argument>XApi\Repository\Doctrine\Mapping\Statement</argument>
+        <!-- State Repository -->
+        <service id="xapi_lrs.doctrine.state.class_metadata" class="Doctrine\ORM\Mapping\ClassMetadata" public="false">
+            <argument>XApi\Repository\Doctrine\Mapping\State</argument>
             <factory service="xapi_lrs.doctrine.object_manager" method="getClassMetadata" />
         </service>
 
         <service id="xapi_lrs.repository.mapped_state" class="XApi\Repository\ORM\StateRepository" public="false">
             <argument type="service" id="xapi_lrs.doctrine.object_manager" />
-            <argument type="service" id="xapi_lrs.doctrine.class_metadata" />
+            <argument type="service" id="xapi_lrs.doctrine.state.class_metadata" />
+        </service>
+
+        <!-- Statement Repository -->
+        <service id="xapi_lrs.doctrine.statement.class_metadata" class="Doctrine\ORM\Mapping\ClassMetadata" public="false">
+            <argument>XApi\Repository\Doctrine\Mapping\Statement</argument>
+            <factory service="xapi_lrs.doctrine.object_manager" method="getClassMetadata" />
         </service>
 
         <service id="xapi_lrs.repository.mapped_statement" class="XApi\Repository\ORM\StatementRepository" public="false">
             <argument type="service" id="xapi_lrs.doctrine.object_manager" />
-            <argument type="service" id="xapi_lrs.doctrine.class_metadata" />
+            <argument type="service" id="xapi_lrs.doctrine.statement.class_metadata" />
         </service>
 
         <!-- Quote Strategy for Doctrine ORM -->

@@ -19,6 +19,9 @@
     <route id="xapi_lrs.state.get" path="/activities/state" methods="GET">
         <default key="_controller">xapi_lrs.controller.state.get:getState</default>
         <default key="xapi_serializer">state</default>
+        <default key="xapi_lrs.route">
+            <bool>true</bool>
+        </default>
     </route>
     <route id="xapi_lrs.state.options" path="/activities/state" methods="OPTIONS">
         <default key="_controller">xapi_lrs.controller.state.options:optionsState</default>
@@ -26,6 +29,9 @@
     <route id="xapi_lrs.state.put" path="/activities/state" methods="PUT,POST">
         <default key="_controller">xapi_lrs.controller.state.put:putState</default>
         <default key="xapi_serializer">state</default>
+        <default key="xapi_lrs.route">
+            <bool>true</bool>
+        </default>
     </route>
 
     <!-- Statement -->

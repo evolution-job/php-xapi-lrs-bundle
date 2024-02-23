@@ -5,16 +5,38 @@
         http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
+
+        <service id="xapi_lrs.serializer" class="Symfony\Component\Serializer\SerializerInterface"
+                 public="false">
+            <factory class="Xabbuh\XApi\Serializer\Symfony\Serializer" method="createSerializer"/>
+        </service>
+
+        <service id="xapi_lrs.serializer.factory" class="Xabbuh\XApi\Serializer\Symfony\SerializerFactory"
+                 public="false">
+            <argument type="service" id="xapi_lrs.serializer"/>
+        </service>
+        
         <service id="xapi_lrs.activity.serializer" class="Xabbuh\XApi\Serializer\ActivitySerializerInterface"
                  public="false">
             <factory service="xapi_lrs.serializer.factory" method="createActivitySerializer"/>
         </service>
 
-        <service id="xapi_lrs.state.serializer" class="Xabbuh\XApi\Serializer\StateSerializerInterface" public="false">
+        <service id="xapi_lrs.actor.serializer" class="Xabbuh\XApi\Serializer\ActorSerializerInterface"
+                 public="false">
+            <factory service="xapi_lrs.serializer.factory" method="createActorSerializer"/>
+        </service>
+
+        <service id="xapi_lrs.document_data.serializer" class="Xabbuh\XApi\Serializer\DocumentDataSerializerInterface"
+                 public="false">
+            <factory service="xapi_lrs.serializer.factory" method="createDocumentDataSerializer"/>
+        </service>
+
+        <service id="xapi_lrs.state.serializer" class="Xabbuh\XApi\Serializer\StateSerializerInterface"
+                 public="false">
             <factory service="xapi_lrs.serializer.factory" method="createStateSerializer"/>
         </service>
 
-        <service id="xapi_lrs.state.document.serializer" class="Xabbuh\XApi\Serializer\StateDocumentSerializer"
+        <service id="xapi_lrs.state.document.serializer" class="Xabbuh\XApi\Serializer\StateDocumentSerializerInterface"
                  public="false">
             <factory service="xapi_lrs.serializer.factory" method="createStateDocumentSerializer"/>
         </service>
@@ -29,27 +51,9 @@
             <factory service="xapi_lrs.serializer.factory" method="createStatementSerializer"/>
         </service>
 
-        <service id="xapi_lrs.statement_result.serializer"
-                 class="Xabbuh\XApi\Serializer\StatementResultSerializerInterface" public="false">
+        <service id="xapi_lrs.statement_result.serializer" class="Xabbuh\XApi\Serializer\StatementResultSerializerInterface"
+                 public="false">
             <factory service="xapi_lrs.serializer.factory" method="createStatementResultSerializer"/>
-        </service>
-
-        <service id="xapi_lrs.actor.serializer" class="Xabbuh\XApi\Serializer\ActorSerializerInterface" public="false">
-            <factory service="xapi_lrs.serializer.factory" method="createActorSerializer"/>
-        </service>
-
-        <service id="xapi_lrs.document_data.serializer" class="Xabbuh\XApi\Serializer\DocumentDataSerializerInterface"
-                 public="false">
-            <factory service="xapi_lrs.serializer.factory" method="createDocumentDataSerializer"/>
-        </service>
-
-        <service id="xapi_lrs.serializer.factory" class="Xabbuh\XApi\Serializer\Symfony\SerializerFactory"
-                 public="false">
-            <argument type="service" id="xapi_lrs.serializer"/>
-        </service>
-
-        <service id="xapi_lrs.serializer" class="Symfony\Component\Serializer\SerializerInterface" public="false">
-            <factory class="Xabbuh\XApi\Serializer\Symfony\Serializer" method="createSerializer"/>
         </service>
     </services>
 </container>
