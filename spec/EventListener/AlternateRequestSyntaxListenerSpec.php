@@ -2,6 +2,8 @@
 
 namespace spec\XApi\LrsBundle\EventListener;
 
+use ArrayIterator;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use PhpSpec\ObjectBehavior;
 use Symfony\Component\HttpFoundation\FileBag;
 use Symfony\Component\HttpFoundation\HeaderBag;
@@ -12,12 +14,12 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 
 class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
 {
-    function let(GetResponseEvent $event, Request $request, ParameterBag $query, ParameterBag $post, ParameterBag $attributes, HeaderBag $headers)
+    public function let(GetResponseEvent $getResponseEvent, Request $request, ParameterBag $query, ParameterBag $post, ParameterBag $attributes, HeaderBag $headerBag): void
     {
         $query->count()->willReturn(1);
         $query->get('method')->willReturn('GET');
 
-        $post->getIterator()->willReturn(new \ArrayIterator());
+        $post->getIterator()->willReturn(new ArrayIterator());
         $post->get('content')->willReturn(null);
 
         $attributes->has('xapi_lrs.route')->willReturn(true);
@@ -25,97 +27,87 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
         $request->query = $query;
         $request->request = $post;
         $request->attributes = $attributes;
-        $request->headers = $headers;
+        $request->headers = $headerBag;
         $request->getMethod()->willReturn('POST');
 
-        $event->isMasterRequest()->willReturn(true);
-        $event->getRequest()->willReturn($request);
+        $getResponseEvent->isMasterRequest()->willReturn(true);
+        $getResponseEvent->getRequest()->willReturn($request);
     }
 
-    function it_returns_null_if_request_is_not_master(GetResponseEvent $event)
+    public function it_returns_null_if_request_is_not_master(GetResponseEvent $getResponseEvent): void
     {
-        $event->isMasterRequest()->willReturn(false);
-        $event->getRequest()->shouldNotBeCalled();
+        $getResponseEvent->isMasterRequest()->willReturn(false);
+        $getResponseEvent->getRequest()->shouldNotBeCalled();
 
-        $this->onKernelRequest($event)->shouldReturn(null);
+        $this->onKernelRequest($getResponseEvent)->shouldReturn(null);
     }
 
-    function it_returns_null_if_request_has_no_attribute_xapi_lrs_route(GetResponseEvent $event, ParameterBag $attributes)
+    public function it_returns_null_if_request_has_no_attribute_xapi_lrs_route(GetResponseEvent $getResponseEvent, ParameterBag $parameterBag): void
     {
-        $attributes->has('xapi_lrs.route')->shouldBeCalled()->willReturn(false);
+        $parameterBag->has('xapi_lrs.route')->shouldBeCalled()->willReturn(false);
 
-        $this->onKernelRequest($event)->shouldReturn(null);
+        $this->onKernelRequest($getResponseEvent)->shouldReturn(null);
     }
 
-    function it_returns_null_if_request_method_is_get(GetResponseEvent $event, Request $request, ParameterBag $query)
+    public function it_returns_null_if_request_method_is_get(GetResponseEvent $getResponseEvent, Request $request, ParameterBag $parameterBag): void
     {
-        $query->get('method')->shouldNotBeCalled();
+        $parameterBag->get('method')->shouldNotBeCalled();
         $request->getMethod()->willReturn('GET');
 
-        $this->onKernelRequest($event)->shouldReturn(null);
+        $this->onKernelRequest($getResponseEvent)->shouldReturn(null);
     }
 
-    function it_returns_null_if_request_method_is_put(GetResponseEvent $event, Request $request, ParameterBag $query)
+    public function it_returns_null_if_request_method_is_put(GetResponseEvent $getResponseEvent, Request $request, ParameterBag $parameterBag): void
     {
-        $query->get('method')->shouldNotBeCalled();
+        $parameterBag->get('method')->shouldNotBeCalled();
         $request->getMethod()->willReturn('PUT');
 
-        $this->onKernelRequest($event)->shouldReturn(null);
+        $this->onKernelRequest($getResponseEvent)->shouldReturn(null);
     }
 
-    function it_throws_a_badrequesthttpexception_if_other_query_parameter_than_method_is_set(GetResponseEvent $event, ParameterBag $query)
+    public function it_throws_a_badrequesthttpexception_if_other_query_parameter_than_method_is_set(GetResponseEvent $getResponseEvent, ParameterBag $parameterBag): void
     {
-        $query->count()->shouldBeCalled()->willReturn(2);
+        $parameterBag->count()->shouldBeCalled()->willReturn(2);
 
         $this
-            ->shouldThrow('\Symfony\Component\HttpKernel\Exception\BadRequestHttpException')
-            ->during('onKernelRequest', array($event));
+            ->shouldThrow(BadRequestHttpException::class)
+            ->during('onKernelRequest', [$getResponseEvent]);
     }
 
-    function it_sets_the_request_method_equals_to_method_query_parameter(GetResponseEvent $event, Request $request, ParameterBag $query)
+    public function it_sets_the_request_method_equals_to_method_query_parameter(GetResponseEvent $getResponseEvent, Request $request, ParameterBag $parameterBag): void
     {
-        $query->remove('method')->shouldBeCalled();
+        $parameterBag->remove('method')->shouldBeCalled();
         $request->setMethod('GET')->shouldBeCalled();
 
-        $this->onKernelRequest($event);
+        $this->onKernelRequest($getResponseEvent);
     }
 
-    function it_sets_defined_post_parameters_as_header(GetResponseEvent $event, Request $request, ParameterBag $query, ParameterBag $post, HeaderBag $headers)
+    public function it_sets_defined_post_parameters_as_header(GetResponseEvent $getResponseEvent, Request $request, ParameterBag $query, ParameterBag $post, HeaderBag $headerBag): void
     {
         $request->setMethod('GET')->shouldBeCalled();
         $query->remove('method')->shouldBeCalled();
 
-        $headerList = array(
-            'Authorization' => 'Authorization',
-            'X-Experience-API-Version' => 'X-Experience-API-Version',
-            'Content-Type' => 'Content-Type',
-            'Content-Length' => 'Content-Length',
-            'If-Match' => 'If-Match',
-            'If-None-Match' => 'If-None-Match',
-        );
+        $headerList = ['Authorization' => 'Authorization', 'X-Experience-API-Version' => 'X-Experience-API-Version', 'Content-Type' => 'Content-Type', 'Content-Length' => 'Content-Length', 'If-Match' => 'If-Match', 'If-None-Match' => 'If-None-Match'];
 
-        $post->getIterator()->shouldBeCalled()->willReturn(new \ArrayIterator($headerList));
+        $post->getIterator()->shouldBeCalled()->willReturn(new ArrayIterator($headerList));
 
         foreach ($headerList as $key => $value) {
             $post->remove($key)->shouldBeCalled();
 
-            $headers->set($key, $value)->shouldBeCalled();
+            $headerBag->set($key, $value)->shouldBeCalled();
         }
 
-        $this->onKernelRequest($event);
+        $this->onKernelRequest($getResponseEvent);
     }
 
-    function it_sets_other_post_parameters_as_query_parameters(GetResponseEvent $event, Request $request, ParameterBag $query, ParameterBag $post)
+    public function it_sets_other_post_parameters_as_query_parameters(GetResponseEvent $getResponseEvent, Request $request, ParameterBag $query, ParameterBag $post): void
     {
         $request->setMethod('GET')->shouldBeCalled();
         $query->remove('method')->shouldBeCalled();
 
-        $parameterList = array(
-            'token' => 'a-token',
-            'attachments' => true,
-        );
+        $parameterList = ['token' => 'a-token', 'attachments' => true];
 
-        $post->getIterator()->shouldBeCalled()->willReturn(new \ArrayIterator($parameterList));
+        $post->getIterator()->shouldBeCalled()->willReturn(new ArrayIterator($parameterList));
 
         foreach ($parameterList as $key => $value) {
             $post->remove($key)->shouldBeCalled();
@@ -123,38 +115,38 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
             $query->set($key, $value)->shouldBeCalled();
         }
 
-        $this->onKernelRequest($event);
+        $this->onKernelRequest($getResponseEvent);
     }
 
-    function it_sets_content_from_post_parameters(GetResponseEvent $event, Request $request, ParameterBag $query, ParameterBag $post, ParameterBag $attributes, ParameterBag $cookies, FileBag $files, ServerBag $server)
+    public function it_sets_content_from_post_parameters(GetResponseEvent $getResponseEvent, Request $request, ParameterBag $query, ParameterBag $post, ParameterBag $attributes, ParameterBag $cookies, FileBag $fileBag, ServerBag $serverBag): void
     {
-        $query->all()->shouldBeCalled()->willReturn(array());
+        $query->all()->shouldBeCalled()->willReturn([]);
         $query->remove('method')->shouldBeCalled();
 
-        $post->all()->shouldBeCalled()->willReturn(array());
+        $post->all()->shouldBeCalled()->willReturn([]);
         $post->get('content')->shouldBeCalled()->willReturn('a content');
         $post->remove('content')->shouldBeCalled();
 
-        $attributes->all()->shouldBeCalled()->willReturn(array());
-        $cookies->all()->shouldBeCalled()->willReturn(array());
-        $files->all()->shouldBeCalled()->willReturn(array());
-        $server->all()->shouldBeCalled()->willReturn(array());
+        $attributes->all()->shouldBeCalled()->willReturn([]);
+        $cookies->all()->shouldBeCalled()->willReturn([]);
+        $fileBag->all()->shouldBeCalled()->willReturn([]);
+        $serverBag->all()->shouldBeCalled()->willReturn([]);
 
         $request->setMethod('GET')->shouldBeCalled();
         $request->initialize(
-            array(),
-            array(),
-            array(),
-            array(),
-            array(),
-            array(),
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
             'a content'
         )->shouldBeCalled();
 
         $request->cookies = $cookies;
-        $request->files = $files;
-        $request->server = $server;
+        $request->files = $fileBag;
+        $request->server = $serverBag;
 
-        $this->onKernelRequest($event);
+        $this->onKernelRequest($getResponseEvent);
     }
 }

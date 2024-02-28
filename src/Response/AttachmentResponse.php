@@ -11,6 +11,7 @@
 
 namespace XApi\LrsBundle\Response;
 
+use LogicException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Model\Attachment;
@@ -20,22 +21,15 @@ use Xabbuh\XApi\Model\Attachment;
  */
 class AttachmentResponse extends Response
 {
-    protected $attachment;
-
-    /**
-     * @param Attachment $attachment
-     */
-    public function __construct(Attachment $attachment)
+    public function __construct(protected Attachment $attachment)
     {
         parent::__construct(null);
-
-        $this->attachment = $attachment;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function prepare(Request $request)
+    public function prepare(Request $request): void
     {
         if (!$this->headers->has('Content-Type')) {
             $this->headers->set('Content-Type', $this->attachment->getContentType());
@@ -48,31 +42,29 @@ class AttachmentResponse extends Response
     /**
      * {@inheritdoc}
      *
-     * @throws \LogicException
+     * @throws LogicException
      */
-    public function sendContent()
+    public function sendContent(): Response
     {
-        throw new \LogicException('An AttachmentResponse is only meant to be part of a multipart Response.');
+        throw new LogicException('An AttachmentResponse is only meant to be part of a multipart Response.');
     }
 
     /**
      * {@inheritdoc}
      *
-     * @throws \LogicException when the content is not null
+     * @throws LogicException when the content is not null
      */
-    public function setContent($content)
+    public function setContent($content): void
     {
         if (null !== $content) {
-            throw new \LogicException('The content cannot be set on an AttachmentResponse instance.');
+            throw new LogicException('The content cannot be set on an AttachmentResponse instance.');
         }
     }
 
     /**
      * {@inheritdoc}
-     *
-     * @return null|string
      */
-    public function getContent()
+    public function getContent(): ?string
     {
         return $this->attachment->getContent();
     }

@@ -8,19 +8,19 @@ use Symfony\Component\HttpFoundation\Request;
 
 class MultipartResponseSpec extends ObjectBehavior
 {
-    function let(JsonResponse $statementResponse)
+    public function let(JsonResponse $jsonResponse): void
     {
-        $this->beConstructedWith($statementResponse);
+        $this->beConstructedWith($jsonResponse);
     }
 
-    function it_should_throw_a_logicexception_when_setting_content()
+    public function it_should_throw_a_logicexception_when_setting_content(): void
     {
         $this
             ->shouldThrow('\LogicException')
-            ->during('setContent', array('a custom content'));
+            ->during('setContent', ['a custom content']);
     }
 
-    function it_should_set_Content_Type_header_of_a_multipart_response()
+    public function it_should_set_Content_Type_header_of_a_multipart_response(): void
     {
         $request = new Request();
 

@@ -1,9 +1,12 @@
 <?php
 
-namespace Spec\XApi\LrsBundle\Controller;
+namespace spec\XApi\LrsBundle\Controller;
 
 use PhpSpec\ObjectBehavior;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\ActivityFixtures;
 use Xabbuh\XApi\Model\IRI;
@@ -13,35 +16,35 @@ use XApi\Repository\Api\ActivityRepositoryInterface;
 
 class ActivityGetControllerSpec extends ObjectBehavior
 {
-    function let(ActivityRepositoryInterface $repository, ActivitySerializerInterface $serializer)
+    public function let(ActivityRepositoryInterface $activityRepository, ActivitySerializerInterface $activitySerializer): void
     {
-        $this->beConstructedWith($repository, $serializer);
+        $this->beConstructedWith($activityRepository, $activitySerializer);
     }
 
-    function it_should_throws_a_badrequesthttpexception_if_an_activityid_is_not_part_of_a_get_request()
+    public function it_should_throws_a_badrequesthttpexception_if_an_activityid_is_not_part_of_a_get_request(): void
     {
         $request = new Request();
 
         $this
-            ->shouldThrow('\Symfony\Component\HttpKernel\Exception\BadRequestHttpException')
-            ->during('getActivity', array($request));
+            ->shouldThrow(BadRequestHttpException::class)
+            ->during('getActivity', [$request]);
     }
 
-    function it_should_throws_a_notfoundhttpexception_if_no_activity_matches_activityid(ActivityRepositoryInterface $repository)
+    public function it_should_throws_a_notfoundhttpexception_if_no_activity_matches_activityid(ActivityRepositoryInterface $activityRepository): void
     {
         $activityId = 'http://tincanapi.com/conformancetest/activityid';
 
         $request = new Request();
         $request->query->set('activityId', $activityId);
 
-        $repository->findActivityById(IRI::fromString($activityId))->shouldBeCalled()->willThrow(new NotFoundException(''));
+        $activityRepository->findActivityById(IRI::fromString($activityId))->shouldBeCalled()->willThrow(new NotFoundException(''));
 
         $this
-            ->shouldThrow('\Symfony\Component\HttpKernel\Exception\NotFoundHttpException')
-            ->during('getActivity', array($request));
+            ->shouldThrow(NotFoundHttpException::class)
+            ->during('getActivity', [$request]);
     }
 
-    function it_should_returns_a_jsonresponse(ActivityRepositoryInterface $repository, ActivitySerializerInterface $serializer)
+    public function it_should_returns_a_jsonresponse(ActivityRepositoryInterface $activityRepository, ActivitySerializerInterface $activitySerializer): void
     {
         $activityId = 'http://tincanapi.com/conformancetest/activityid';
         $activity = ActivityFixtures::getTypicalActivity();
@@ -49,9 +52,9 @@ class ActivityGetControllerSpec extends ObjectBehavior
         $request = new Request();
         $request->query->set('activityId', $activityId);
 
-        $repository->findActivityById(IRI::fromString($activityId))->shouldBeCalled()->willReturn($activity);
-        $serializer->serializeActivity($activity)->shouldBeCalled()->willReturn(ActivityJsonFixtures::getTypicalActivity());
+        $activityRepository->findActivityById(IRI::fromString($activityId))->shouldBeCalled()->willReturn($activity);
+        $activitySerializer->serializeActivity($activity)->shouldBeCalled()->willReturn(ActivityJsonFixtures::getTypicalActivity());
 
-        $this->getActivity($request)->shouldReturnAnInstanceOf('\Symfony\Component\HttpFoundation\JsonResponse');
+        $this->getActivity($request)->shouldReturnAnInstanceOf(JsonResponse::class);
     }
 }

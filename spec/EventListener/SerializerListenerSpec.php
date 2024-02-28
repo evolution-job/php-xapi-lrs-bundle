@@ -2,6 +2,8 @@
 
 namespace spec\XApi\LrsBundle\EventListener;
 
+use Symfony\Component\Serializer\Exception\InvalidArgumentException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use PhpSpec\ObjectBehavior;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,49 +13,49 @@ use XApi\Fixtures\Json\StatementJsonFixtures;
 
 class SerializerListenerSpec extends ObjectBehavior
 {
-    function let(StatementSerializerInterface $statementSerializer, GetResponseEvent $event, Request $request, ParameterBag $attributes)
+    public function let(StatementSerializerInterface $statementSerializer, GetResponseEvent $getResponseEvent, Request $request, ParameterBag $parameterBag): void
     {
-        $attributes->has('xapi_lrs.route')->willReturn(true);
+        $parameterBag->has('xapi_lrs.route')->willReturn(true);
 
-        $request->attributes = $attributes;
+        $request->attributes = $parameterBag;
 
-        $event->getRequest()->willReturn($request);
+        $getResponseEvent->getRequest()->willReturn($request);
 
         $this->beConstructedWith($statementSerializer);
     }
 
-    function it_returns_null_if_request_has_no_attribute_xapi_lrs_route(GetResponseEvent $event, ParameterBag $attributes)
+    public function it_returns_null_if_request_has_no_attribute_xapi_lrs_route(GetResponseEvent $getResponseEvent, ParameterBag $parameterBag): void
     {
-        $attributes->has('xapi_lrs.route')->shouldBeCalled()->willReturn(false);
-        $attributes->get('xapi_serializer')->shouldNotBeCalled();
+        $parameterBag->has('xapi_lrs.route')->shouldBeCalled()->willReturn(false);
+        $parameterBag->get('xapi_serializer')->shouldNotBeCalled();
 
-        $this->onKernelRequest($event)->shouldReturn(null);
+        $this->onKernelRequest($getResponseEvent)->shouldReturn(null);
     }
 
-    function it_sets_unserialized_data_as_request_attributes(StatementSerializerInterface $statementSerializer, GetResponseEvent $event, Request $request, ParameterBag $attributes)
+    public function it_sets_unserialized_data_as_request_attributes(StatementSerializerInterface $statementSerializer, GetResponseEvent $getResponseEvent, Request $request, ParameterBag $parameterBag): void
     {
         $jsonString = StatementJsonFixtures::getTypicalStatement();
 
         $statementSerializer->deserializeStatement($jsonString)->shouldBeCalled();
 
-        $attributes->get('xapi_serializer')->willReturn('statement');
-        $attributes->set('statement', null)->shouldBeCalled();
+        $parameterBag->get('xapi_serializer')->willReturn('statement');
+        $parameterBag->set('statement', null)->shouldBeCalled();
 
         $request->getContent()->shouldBeCalled()->willReturn($jsonString);
 
-        $this->onKernelRequest($event);
+        $this->onKernelRequest($getResponseEvent);
     }
 
-    function it_throws_a_badrequesthttpexception_if_the_serializer_fails(StatementSerializerInterface $statementSerializer, GetResponseEvent $event, Request $request, ParameterBag $attributes)
+    public function it_throws_a_badrequesthttpexception_if_the_serializer_fails(StatementSerializerInterface $statementSerializer, GetResponseEvent $getResponseEvent, Request $request, ParameterBag $parameterBag): void
     {
-        $statementSerializer->deserializeStatement(null)->shouldBeCalled()->willThrow('\Symfony\Component\Serializer\Exception\InvalidArgumentException');
+        $statementSerializer->deserializeStatement(null)->shouldBeCalled()->willThrow(InvalidArgumentException::class);
 
-        $attributes->get('xapi_serializer')->willReturn('statement');
+        $parameterBag->get('xapi_serializer')->willReturn('statement');
 
-        $request->attributes = $attributes;
+        $request->attributes = $parameterBag;
 
         $this
-            ->shouldThrow('\Symfony\Component\HttpKernel\Exception\BadRequestHttpException')
-            ->during('onKernelRequest', array($event));
+            ->shouldThrow(BadRequestHttpException::class)
+            ->during('onKernelRequest', [$getResponseEvent]);
     }
 }

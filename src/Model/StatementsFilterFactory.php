@@ -11,6 +11,8 @@
 
 namespace XApi\LrsBundle\Model;
 
+use DateTime;
+use DateTimeInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Xabbuh\XApi\Model\Activity;
 use Xabbuh\XApi\Model\IRI;
@@ -23,66 +25,56 @@ use Xabbuh\XApi\Serializer\ActorSerializerInterface;
  */
 class StatementsFilterFactory
 {
-    private $actorSerializer;
+    public function __construct(private readonly ActorSerializerInterface $actorSerializer) { }
 
-    public function __construct(ActorSerializerInterface $actorSerializer)
+    public function createFromParameterBag(ParameterBag $parameterBag): StatementsFilter
     {
-        $this->actorSerializer = $actorSerializer;
-    }
+        $statementsFilter = new StatementsFilter();
 
-    /**
-     * @param ParameterBag $parameters
-     *
-     * @return StatementsFilter
-     */
-    public function createFromParameterBag(ParameterBag $parameters)
-    {
-        $filter = new StatementsFilter();
-
-        if (($actor = $parameters->get('agent')) !== null) {
-            $filter->byActor($this->actorSerializer->deserializeActor($actor));
+        if (($actor = $parameterBag->get('agent')) !== null) {
+            $statementsFilter->byActor($this->actorSerializer->deserializeActor($actor));
         }
 
-        if (($verbId = $parameters->get('verb')) !== null) {
-            $filter->byVerb(new Verb(IRI::fromString($verbId)));
+        if (($verbId = $parameterBag->get('verb')) !== null) {
+            $statementsFilter->byVerb(new Verb(IRI::fromString($verbId)));
         }
 
-        if (($activityId = $parameters->get('activity')) !== null) {
-            $filter->byActivity(new Activity(IRI::fromString($activityId)));
+        if (($activityId = $parameterBag->get('activity')) !== null) {
+            $statementsFilter->byActivity(new Activity(IRI::fromString($activityId)));
         }
 
-        if (($registration = $parameters->get('registration')) !== null) {
-            $filter->byRegistration($registration);
+        if (($registration = $parameterBag->get('registration')) !== null) {
+            $statementsFilter->byRegistration($registration);
         }
 
-        if ($parameters->filter('related_activities', false, FILTER_VALIDATE_BOOLEAN)) {
-            $filter->enableRelatedActivityFilter();
+        if ($parameterBag->filter('related_activities', false, FILTER_VALIDATE_BOOLEAN)) {
+            $statementsFilter->enableRelatedActivityFilter();
         } else {
-            $filter->disableRelatedActivityFilter();
+            $statementsFilter->disableRelatedActivityFilter();
         }
 
-        if ($parameters->filter('related_agents', false, FILTER_VALIDATE_BOOLEAN)) {
-            $filter->enableRelatedAgentFilter();
+        if ($parameterBag->filter('related_agents', false, FILTER_VALIDATE_BOOLEAN)) {
+            $statementsFilter->enableRelatedAgentFilter();
         } else {
-            $filter->disableRelatedAgentFilter();
+            $statementsFilter->disableRelatedAgentFilter();
         }
 
-        if (($since = $parameters->get('since')) !== null) {
-            $filter->since(\DateTime::createFromFormat(\DateTime::ATOM, $since));
+        if (($since = $parameterBag->get('since')) !== null) {
+            $statementsFilter->since(DateTime::createFromFormat(DateTimeInterface::ATOM, $since));
         }
 
-        if (($until = $parameters->get('until')) !== null) {
-            $filter->until(\DateTime::createFromFormat(\DateTime::ATOM, $until));
+        if (($until = $parameterBag->get('until')) !== null) {
+            $statementsFilter->until(DateTime::createFromFormat(DateTimeInterface::ATOM, $until));
         }
 
-        if ($parameters->filter('ascending', false, FILTER_VALIDATE_BOOLEAN)) {
-            $filter->ascending();
+        if ($parameterBag->filter('ascending', false, FILTER_VALIDATE_BOOLEAN)) {
+            $statementsFilter->ascending();
         } else {
-            $filter->descending();
+            $statementsFilter->descending();
         }
 
-        $filter->limit($parameters->getInt('limit'));
+        $statementsFilter->limit($parameterBag->getInt('limit'));
 
-        return $filter;
+        return $statementsFilter;
     }
 }

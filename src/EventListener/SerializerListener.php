@@ -2,7 +2,8 @@
 
 namespace XApi\LrsBundle\EventListener;
 
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
@@ -13,20 +14,15 @@ use Xabbuh\XApi\Serializer\StateSerializerInterface;
  */
 class SerializerListener
 {
-    private $statementSerializer;
-    private $stateSerializer;
 
     public function __construct(
-        StatementSerializerInterface $statementSerializer,
-        StateSerializerInterface $stateSerializer
-    ) {
-        $this->statementSerializer = $statementSerializer;
-        $this->stateSerializer = $stateSerializer;
-    }
+        private readonly StatementSerializerInterface $statementSerializer,
+        private readonly StateSerializerInterface $stateSerializer
+    ) { }
 
-    public function onKernelRequest(GetResponseEvent $event)
+    public function onKernelRequest(RequestEvent $requestEvent): void
     {
-        $request = $event->getRequest();
+        $request = $requestEvent->getRequest();
 
         if (!$request->attributes->has('xapi_lrs.route')) {
             return;
@@ -42,8 +38,8 @@ class SerializerListener
                     $request->attributes->set('statement', $this->statementSerializer->deserializeStatement($request->getContent()));
                     break;
             }
-        } catch (ExceptionInterface $e) {
-            throw new BadRequestHttpException(sprintf('The content of the request cannot be deserialized into a valid xAPI %s.', $request->attributes->get('xapi_serializer')), $e);
+        } catch (ExceptionInterface $exception) {
+            throw new BadRequestHttpException(sprintf('The content of the request cannot be deserialized into a valid xAPI %s.', $request->attributes->get('xapi_serializer')), $exception);
         }
     }
 }

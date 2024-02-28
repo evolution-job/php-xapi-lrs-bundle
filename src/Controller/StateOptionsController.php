@@ -17,10 +17,6 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 final class StateOptionsController
 {
-    /**
-     * @param Request $request
-     * @return Response
-     */
     public function optionsState(Request $request): Response
     {
         if (null === $request->query->get('stateId')) {

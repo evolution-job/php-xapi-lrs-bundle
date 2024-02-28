@@ -27,15 +27,7 @@ use XApi\Repository\Api\StatementRepositoryInterface;
  */
 final class StatementPostController
 {
-    private $repository;
-
-    /**
-     * @param StatementRepositoryInterface $repository
-     */
-    public function __construct(StatementRepositoryInterface $repository)
-    {
-        $this->repository = $repository;
-    }
+    public function __construct(private readonly StatementRepositoryInterface $statementRepository) {}
 
     public function postStatement(Request $request, Statement $statement): JsonResponse
     {
@@ -62,34 +54,30 @@ final class StatementPostController
         return new JsonResponse($uuids, 200);
     }
 
-    /**
-     * @param Statement $statement
-     * @return void
-     */
     private function storeStatement(Statement $statement): void
     {
         try {
             $id = StatementId::fromString($statement->getId());
-        } catch (InvalidArgumentException $e) {
-            throw new BadRequestHttpException(sprintf('Parameter statementId ("%s") is not a valid UUID.', $statement->getId()->getValue()), $e);
+        } catch (InvalidArgumentException $invalidArgumentException) {
+            throw new BadRequestHttpException(sprintf('Parameter statementId ("%s") is not a valid UUID.', $statement->getId()?->getValue()), $invalidArgumentException);
         }
 
-        if (null !== $statement->getId() && !$id->equals($statement->getId())) {
+        if ($statement->getId() instanceof StatementId && !$id->equals($statement->getId())) {
             throw new ConflictHttpException(sprintf('Id parameter ("%s") and statement id ("%s") do not match.', $id->getValue(), $statement->getId()->getValue()));
         }
 
-        if (null === $statement->getId()) {
+        if (!$statement->getId() instanceof StatementId) {
             $statement = $statement->withId($id);
         }
 
         try {
-            $existingStatement = $this->repository->findStatementById($statement->getId());
+            $existingStatement = $this->statementRepository->findStatementById($statement->getId());
 
             if (!$existingStatement->equals($statement)) {
                 throw new ConflictHttpException('The new statement is not equal to an existing statement with the same id.');
             }
-        } catch (NotFoundException $e) {
-            $this->repository->storeStatement($statement);
+        } catch (NotFoundException) {
+            $this->statementRepository->storeStatement($statement);
         }
     }
 }

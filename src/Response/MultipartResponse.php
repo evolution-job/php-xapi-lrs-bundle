@@ -11,6 +11,7 @@
 
 namespace XApi\LrsBundle\Response;
 
+use LogicException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,23 +21,29 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class MultipartResponse extends Response
 {
-    protected $subtype;
-    protected $boundary;
-    protected $statementPart;
+    protected ?string $subtype = null;
+
+    protected string $boundary;
+
     /**
      * @var Response[]
      */
     protected $parts;
 
     /**
-     * @param JsonResponse         $statementPart
+     * @param JsonResponse $jsonResponse
      * @param AttachmentResponse[] $attachmentsParts
-     * @param int                  $status
-     * @param array                $headers
-     * @param null|string          $subtype
+     * @param int $status
+     * @param array $headers
+     * @param null|string $subtype
      */
-    public function __construct(JsonResponse $statementPart, array $attachmentsParts = array(), $status = 200, array $headers = array(), $subtype = null)
-    {
+    public function __construct(
+        protected JsonResponse $jsonResponse,
+        array $attachmentsParts = [],
+        int $status = 200,
+        array $headers = [],
+        ?string $subtype = null
+    ) {
         parent::__construct(null, $status, $headers);
 
         if (null === $subtype) {
@@ -45,20 +52,14 @@ class MultipartResponse extends Response
 
         $this->subtype = $subtype;
         $this->boundary = uniqid('', true);
-        $this->statementPart = $statementPart;
 
         $this->setAttachmentsParts($attachmentsParts);
     }
 
-    /**
-     * @param AttachmentResponse $part
-     *
-     * @return $this
-     */
-    public function addAttachmentPart(AttachmentResponse $part)
+    public function addAttachmentPart(AttachmentResponse $attachmentResponse): static
     {
-        if ($part->getContent() !== null) {
-            $this->parts[] = $part;
+        if ($attachmentResponse->getContent() !== null) {
+            $this->parts[] = $attachmentResponse;
         }
 
         return $this;
@@ -66,15 +67,13 @@ class MultipartResponse extends Response
 
     /**
      * @param AttachmentResponse[] $attachmentsParts
-     *
-     * @return $this
      */
-    public function setAttachmentsParts(array $attachmentsParts)
+    public function setAttachmentsParts(array $attachmentsParts): static
     {
-        $this->parts = array($this->statementPart);
+        $this->parts = [$this->jsonResponse];
 
-        foreach ($attachmentsParts as $part) {
-            $this->addAttachmentPart($part);
+        foreach ($attachmentsParts as $attachmentPart) {
+            $this->addAttachmentPart($attachmentPart);
         }
 
         return $this;
@@ -83,7 +82,7 @@ class MultipartResponse extends Response
     /**
      * {@inheritdoc}
      */
-    public function prepare(Request $request)
+    public function prepare(Request $request): MultipartResponse|Response
     {
         foreach ($this->parts as $part) {
             $part->prepare($request);
@@ -98,17 +97,17 @@ class MultipartResponse extends Response
     /**
      * {@inheritdoc}
      */
-    public function sendContent()
+    public function sendContent(): MultipartResponse|Response|static
     {
         $content = '';
         foreach ($this->parts as $part) {
-            $content .= sprintf('--%s', $this->boundary)."\r\n";
-            $content .= $part->headers."\r\n";
+            $content .= sprintf('--%s', $this->boundary) . "\r\n";
+            $content .= $part->headers . "\r\n";
             $content .= $part->getContent();
             $content .= "\r\n";
         }
 
-        $content .= sprintf('--%s--', $this->boundary)."\r\n";
+        $content .= sprintf('--%s--', $this->boundary) . "\r\n";
 
         echo $content;
 
@@ -118,21 +117,19 @@ class MultipartResponse extends Response
     /**
      * {@inheritdoc}
      *
-     * @throws \LogicException when the content is not null
+     * @throws LogicException when the content is not null
      */
-    public function setContent($content)
+    public function setContent($content): void
     {
         if (null !== $content) {
-            throw new \LogicException('The content cannot be set on a MultipartResponse instance.');
+            throw new LogicException('The content cannot be set on a MultipartResponse instance.');
         }
     }
 
     /**
      * {@inheritdoc}
-     *
-     * @return false
      */
-    public function getContent()
+    public function getContent(): bool
     {
         return false;
     }

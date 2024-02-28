@@ -25,27 +25,24 @@ use XApi\Repository\Api\ActivityRepositoryInterface;
  */
 final class ActivityGetController
 {
-    private $repository;
-    private $serializer;
 
-    public function __construct(ActivityRepositoryInterface $repository, ActivitySerializerInterface $serializer)
-    {
-        $this->repository = $repository;
-        $this->serializer = $serializer;
-    }
+    public function __construct(
+        private readonly ActivityRepositoryInterface $activityRepository,
+        private readonly ActivitySerializerInterface $activitySerializer
+    ) {}
 
-    public function getActivity(Request $request)
+    public function getActivity(Request $request): JsonResponse
     {
         if (null === $activityId = $request->query->get('activityId')) {
             throw new BadRequestHttpException('Required activityId parameter is missing.');
         }
 
         try {
-            $activity = $this->repository->findActivityById(IRI::fromString($activityId));
-        } catch (NotFoundException $e) {
-            throw new NotFoundHttpException(sprintf('No activity matching the following id "%s" has been found.', $activityId), $e);
+            $activity = $this->activityRepository->findActivityById(IRI::fromString($activityId));
+        } catch (NotFoundException $notFoundException) {
+            throw new NotFoundHttpException(sprintf('No activity matching the following id "%s" has been found.', $activityId), $notFoundException);
         }
 
-        return new JsonResponse($this->serializer->serializeActivity($activity), 200, array(), true);
+        return new JsonResponse($this->activitySerializer->serializeActivity($activity), 200, [], true);
     }
 }
