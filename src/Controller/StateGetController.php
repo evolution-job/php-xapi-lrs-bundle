@@ -15,39 +15,28 @@ use DateTime;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Model\State;
 use XApi\Repository\Api\StateRepositoryInterface;
+use XApi\Repository\Doctrine\Mapping\State as MappedState;
 
 final class StateGetController
 {
-    private $repository;
+    public function __construct(private readonly StateRepositoryInterface $stateRepository) {}
 
-    /**
-     * @param StateRepositoryInterface $repository
-     */
-    public function __construct(StateRepositoryInterface $repository)
-    {
-        $this->repository = $repository;
-    }
-
-    /**
-     * @param State $state
-     * @return Response
-     */
     public function getState(State $state): Response
     {
-        $mappedState = $this->repository->findState([
+        $mappedState = $this->stateRepository->findState([
             "stateId"        => $state->getStateId(),
             "activityId"     => $state->getActivity()->getId()->getValue(),
             "registrationId" => $state->getRegistrationId()
         ]);
 
-        if ($mappedState instanceof \XApi\Repository\Doctrine\Mapping\State) {
+        if ($mappedState instanceof MappedState) {
             $response = new Response($mappedState->data, Response::HTTP_OK, []);
         } else {
             $response = new Response('', Response::HTTP_NOT_FOUND, []);
         }
 
-        $now = new DateTime();
-        $response->headers->set('X-Experience-API-Consistent-Through', $now->format('Y-m-d\TH:i:sP'));
+        $dateTime = new DateTime();
+        $response->headers->set('X-Experience-API-Consistent-Through', $dateTime->format('Y-m-d\TH:i:sP'));
 
         return $response;
     }

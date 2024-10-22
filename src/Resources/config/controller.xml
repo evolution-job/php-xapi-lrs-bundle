@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<container xmlns="http://symfony.com/schema/dic/services"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://symfony.com/schema/dic/services
+<container xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns="http://symfony.com/schema/dic/services"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services
         http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
         <!-- Activity -->
         <service id="xapi_lrs.controller.activity.get" class="XApi\LrsBundle\Controller\ActivityGetController">
-            <argument type="service" id="xapi_lrs.repository.activity" />
-            <argument type="service" id="xapi_lrs.activity.serializer" />
+            <argument type="service" id="xapi_lrs.repository.activity"/>
+            <argument type="service" id="xapi_lrs.activity.serializer"/>
             <tag name="controller.service_arguments"/>
         </service>
 
@@ -40,7 +40,8 @@
             <tag name="controller.service_arguments"/>
         </service>
 
-        <service id="xapi_lrs.controller.statement.options" class="XApi\LrsBundle\Controller\StatementOptionsController">
+        <service id="xapi_lrs.controller.statement.options"
+                 class="XApi\LrsBundle\Controller\StatementOptionsController">
             <tag name="controller.service_arguments"/>
         </service>
 

@@ -2,6 +2,7 @@
 
 namespace spec\XApi\LrsBundle\Model;
 
+use DateTime;
 use PhpSpec\ObjectBehavior;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Xabbuh\XApi\DataFixtures\ActorFixtures;
@@ -12,12 +13,12 @@ use XApi\Fixtures\Json\ActorJsonFixtures;
 
 class StatementsFilterFactorySpec extends ObjectBehavior
 {
-    function let(ActorSerializerInterface $actorSerializer)
+    public function let(ActorSerializerInterface $actorSerializer): void
     {
         $this->beConstructedWith($actorSerializer);
     }
 
-    function it_sets_default_filter_when_parameters_are_empty()
+    public function it_sets_default_filter_when_parameters_are_empty(): void
     {
         $filter = $this->createFromParameterBag(new ParameterBag())->getFilter();
 
@@ -33,7 +34,7 @@ class StatementsFilterFactorySpec extends ObjectBehavior
         $filter->shouldHaveKeyWithValue('limit', 0);
     }
 
-    function it_sets_an_agent_filter(ActorSerializerInterface $actorSerializer)
+    public function it_sets_an_agent_filter(ActorSerializerInterface $actorSerializer): void
     {
         $json = ActorJsonFixtures::getTypicalAgent();
         $actor = ActorFixtures::getTypicalAgent();
@@ -42,117 +43,117 @@ class StatementsFilterFactorySpec extends ObjectBehavior
 
         $this->beConstructedWith($actorSerializer);
 
-        $parameters = new ParameterBag();
-        $parameters->set('agent', $json);
+        $parameterBag = new ParameterBag();
+        $parameterBag->set('agent', $json);
 
         /** @var StatementsFilter $filter */
-        $filter = $this->createFromParameterBag($parameters);
+        $filter = $this->createFromParameterBag($parameterBag);
 
         $filter->getFilter()->shouldHaveKeyWithValue('agent', $actor);
     }
 
-    function it_sets_a_verb_filter()
+    public function it_sets_a_verb_filter(): void
     {
         $verbId = 'http://tincanapi.com/conformancetest/verbid';
-        $parameters = new ParameterBag();
-        $parameters->set('verb', $verbId);
+        $parameterBag = new ParameterBag();
+        $parameterBag->set('verb', $verbId);
 
         /** @var StatementsFilter $filter */
-        $filter = $this->createFromParameterBag($parameters);
+        $filter = $this->createFromParameterBag($parameterBag);
 
         $filter->getFilter()->shouldHaveKeyWithValue('verb', $verbId);
     }
 
-    function it_sets_an_activity_filter()
+    public function it_sets_an_activity_filter(): void
     {
         $activityId = 'http://tincanapi.com/conformancetest/activityid';
-        $parameters = new ParameterBag();
-        $parameters->set('activity', $activityId);
+        $parameterBag = new ParameterBag();
+        $parameterBag->set('activity', $activityId);
 
         /** @var StatementsFilter $filter */
-        $filter = $this->createFromParameterBag($parameters);
+        $filter = $this->createFromParameterBag($parameterBag);
 
         $filter->getFilter()->shouldHaveKeyWithValue('activity', $activityId);
     }
 
-    function it_sets_a_registration_filter()
+    public function it_sets_a_registration_filter(): void
     {
         $registration = UuidFixtures::getGoodUuid();
-        $parameters = new ParameterBag();
-        $parameters->set('registration', $registration);
+        $parameterBag = new ParameterBag();
+        $parameterBag->set('registration', $registration);
 
         /** @var StatementsFilter $filter */
-        $filter = $this->createFromParameterBag($parameters);
+        $filter = $this->createFromParameterBag($parameterBag);
 
         $filter->getFilter()->shouldHaveKeyWithValue('registration', $registration);
     }
 
-    function it_sets_a_related_activities_filter()
+    public function it_sets_a_related_activities_filter(): void
     {
-        $parameters = new ParameterBag();
-        $parameters->set('related_activities', true);
+        $parameterBag = new ParameterBag();
+        $parameterBag->set('related_activities', true);
 
         /** @var StatementsFilter $filter */
-        $filter = $this->createFromParameterBag($parameters);
+        $filter = $this->createFromParameterBag($parameterBag);
 
         $filter->getFilter()->shouldHaveKeyWithValue('related_activities', 'true');
     }
 
-    function it_sets_a_related_agents_filter()
+    public function it_sets_a_related_agents_filter(): void
     {
-        $parameters = new ParameterBag();
-        $parameters->set('related_agents', true);
+        $parameterBag = new ParameterBag();
+        $parameterBag->set('related_agents', true);
 
         /** @var StatementsFilter $filter */
-        $filter = $this->createFromParameterBag($parameters);
+        $filter = $this->createFromParameterBag($parameterBag);
 
         $filter->getFilter()->shouldHaveKeyWithValue('related_agents', 'true');
     }
 
-    function it_sets_a_since_filter()
+    public function it_sets_a_since_filter(): void
     {
-        $now = new \DateTime();
+        $dateTime = new DateTime();
 
-        $parameters = new ParameterBag();
-        $parameters->set('since', $now->format(\DateTime::ATOM));
+        $parameterBag = new ParameterBag();
+        $parameterBag->set('since', $dateTime->format(DateTime::ATOM));
 
         /** @var StatementsFilter $filter */
-        $filter = $this->createFromParameterBag($parameters);
+        $filter = $this->createFromParameterBag($parameterBag);
 
-        $filter->getFilter()->shouldHaveKeyWithValue('since', $now->format('c'));
+        $filter->getFilter()->shouldHaveKeyWithValue('since', $dateTime->format('c'));
     }
 
-    function it_sets_an_until_filter()
+    public function it_sets_an_until_filter(): void
     {
-        $now = new \DateTime();
+        $dateTime = new DateTime();
 
-        $parameters = new ParameterBag();
-        $parameters->set('until', $now->format(\DateTime::ATOM));
+        $parameterBag = new ParameterBag();
+        $parameterBag->set('until', $dateTime->format(DateTime::ATOM));
 
         /** @var StatementsFilter $filter */
-        $filter = $this->createFromParameterBag($parameters);
+        $filter = $this->createFromParameterBag($parameterBag);
 
-        $filter->getFilter()->shouldHaveKeyWithValue('until', $now->format('c'));
+        $filter->getFilter()->shouldHaveKeyWithValue('until', $dateTime->format('c'));
     }
 
-    function it_sets_an_ascending_filter()
+    public function it_sets_an_ascending_filter(): void
     {
-        $parameters = new ParameterBag();
-        $parameters->set('ascending', true);
+        $parameterBag = new ParameterBag();
+        $parameterBag->set('ascending', true);
 
         /** @var StatementsFilter $filter */
-        $filter = $this->createFromParameterBag($parameters);
+        $filter = $this->createFromParameterBag($parameterBag);
 
         $filter->getFilter()->shouldHaveKeyWithValue('ascending', 'true');
     }
 
-    function it_sets_a_limit_filter()
+    public function it_sets_a_limit_filter(): void
     {
-        $parameters = new ParameterBag();
-        $parameters->set('limit', 10);
+        $parameterBag = new ParameterBag();
+        $parameterBag->set('limit', 10);
 
         /** @var StatementsFilter $filter */
-        $filter = $this->createFromParameterBag($parameters);
+        $filter = $this->createFromParameterBag($parameterBag);
 
         $filter->getFilter()->shouldHaveKeyWithValue('limit', 10);
     }

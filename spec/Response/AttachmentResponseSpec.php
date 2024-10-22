@@ -14,33 +14,33 @@ class AttachmentResponseSpec extends ObjectBehavior
      */
     private $attachment;
 
-    function let()
+    public function let(): void
     {
         $this->attachment = AttachmentFixtures::getTextAttachment();
 
         $this->beConstructedWith($this->attachment);
     }
 
-    function it_should_throw_a_logicexception_when_sending_content()
+    public function it_should_throw_a_logicexception_when_sending_content(): void
     {
         $this
             ->shouldThrow('\LogicException')
             ->during('sendContent');
     }
 
-    function it_should_throw_a_logicexception_when_setting_content()
+    public function it_should_throw_a_logicexception_when_setting_content(): void
     {
         $this
             ->shouldThrow('\LogicException')
-            ->during('setContent', array('a custom content'));
+            ->during('setContent', ['a custom content']);
     }
 
-    function it_should_return_content_of_the_attachment()
+    public function it_should_return_content_of_the_attachment(): void
     {
         $this->getContent()->shouldBe($this->attachment->getContent());
     }
 
-    function it_should_set_Content_Type_header_equals_to_ContentType_property_of_attachment()
+    public function it_should_set_Content_Type_header_equals_to_ContentType_property_of_attachment(): void
     {
         $request = new Request();
 
@@ -49,7 +49,7 @@ class AttachmentResponseSpec extends ObjectBehavior
         $this->headers->get('Content-Type')->shouldBe($this->attachment->getContentType());
     }
 
-    function it_should_set_Content_Transfer_Encoding_header_equals_to_binary()
+    public function it_should_set_Content_Transfer_Encoding_header_equals_to_binary(): void
     {
         $request = new Request();
 
@@ -58,7 +58,7 @@ class AttachmentResponseSpec extends ObjectBehavior
         $this->headers->get('Content-Transfer-Encoding')->shouldBe('binary');
     }
 
-    function it_should_set_X_Experience_API_Hash_header_equals_to_sha2_property_of_attachment()
+    public function it_should_set_X_Experience_API_Hash_header_equals_to_sha2_property_of_attachment(): void
     {
         $request = new Request();
 

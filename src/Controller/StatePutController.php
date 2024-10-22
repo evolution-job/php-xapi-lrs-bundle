@@ -18,27 +18,15 @@ use XApi\Repository\Api\StateRepositoryInterface;
 
 final class StatePutController
 {
-    private $repository;
+    public function __construct(private readonly StateRepositoryInterface $stateRepository) {}
 
-    /**
-     * @param StateRepositoryInterface $repository
-     */
-    public function __construct(StateRepositoryInterface $repository)
-    {
-        $this->repository = $repository;
-    }
-
-    /**
-     * @param State $state
-     * @return Response
-     */
     public function putState(State $state): Response
     {
-        $this->repository->storeState($state);
+        $this->stateRepository->storeState($state);
 
         $response = new Response();
-        $now = new DateTime();
-        $response->headers->set('X-Experience-API-Consistent-Through', $now->format('Y-m-d\TH:i:sP'));
+        $dateTime = new DateTime();
+        $response->headers->set('X-Experience-API-Consistent-Through', $dateTime->format('Y-m-d\TH:i:sP'));
 
         return $response;
     }

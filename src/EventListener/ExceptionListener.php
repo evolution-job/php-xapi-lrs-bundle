@@ -2,7 +2,7 @@
 
 namespace XApi\LrsBundle\EventListener;
 
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
 /**
  * Converts Experience API specific domain exceptions into proper HTTP responses.
@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
  */
 class ExceptionListener
 {
-    public function onKernelException(GetResponseForExceptionEvent $event)
+    public function onKernelException(ExceptionEvent $exceptionEvent)
     {
     }
 }

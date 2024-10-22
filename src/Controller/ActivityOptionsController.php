@@ -19,10 +19,6 @@ use Xabbuh\XApi\Model\IRI;
 
 final class ActivityOptionsController
 {
-    /**
-     * @param Request $request
-     * @return Response
-     */
     public function optionsActivity(Request $request): Response
     {
         if (null === $activityId = $request->query->get('activityId')) {
@@ -31,8 +27,8 @@ final class ActivityOptionsController
 
         try {
             IRI::fromString($activityId);
-        } catch (Exception $e) {
-            throw new BadRequestHttpException(sprintf('Parameter activityId ("%s") is not a valid IRI.', $activityId), $e);
+        } catch (Exception $exception) {
+            throw new BadRequestHttpException(sprintf('Parameter activityId ("%s") is not a valid IRI.', $activityId), $exception);
         }
 
         return new Response('', 204);

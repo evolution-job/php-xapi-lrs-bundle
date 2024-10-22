@@ -2,12 +2,13 @@
 
 namespace spec\XApi\LrsBundle;
 
+use Symfony\Component\HttpKernel\Bundle\Bundle;
 use PhpSpec\ObjectBehavior;
 
 class XApiLrsBundleSpec extends ObjectBehavior
 {
-    function it_is_a_bundle()
+    public function it_is_a_bundle(): void
     {
-        $this->shouldHaveType('Symfony\Component\HttpKernel\Bundle\Bundle');
+        $this->shouldHaveType(Bundle::class);
     }
 }

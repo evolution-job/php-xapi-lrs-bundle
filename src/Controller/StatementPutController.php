@@ -26,12 +26,7 @@ use XApi\Repository\Api\StatementRepositoryInterface;
  */
 final class StatementPutController
 {
-    private $repository;
-
-    public function __construct(StatementRepositoryInterface $repository)
-    {
-        $this->repository = $repository;
-    }
+    public function __construct(private readonly StatementRepositoryInterface $statementRepository) {}
 
     public function putStatement(Request $request, Statement $statement): Response
     {
@@ -41,26 +36,26 @@ final class StatementPutController
 
         try {
             $id = StatementId::fromString($statementId);
-        } catch (InvalidArgumentException $e) {
-            throw new BadRequestHttpException(sprintf('Parameter statementId ("%s") is not a valid UUID.', $statementId), $e);
+        } catch (InvalidArgumentException $invalidArgumentException) {
+            throw new BadRequestHttpException(sprintf('Parameter statementId ("%s") is not a valid UUID.', $statementId), $invalidArgumentException);
         }
 
-        if (null !== $statement->getId() && !$id->equals($statement->getId())) {
+        if ($statement->getId() instanceof StatementId && !$id->equals($statement->getId())) {
             throw new ConflictHttpException(sprintf('Id parameter ("%s") and statement id ("%s") do not match.', $id->getValue(), $statement->getId()->getValue()));
         }
 
-        if (null === $statement->getId()) {
+        if (!$statement->getId() instanceof StatementId) {
             $statement = $statement->withId($id);
         }
 
         try {
-            $existingStatement = $this->repository->findStatementById($id);
+            $existingStatement = $this->statementRepository->findStatementById($id);
 
             if (!$existingStatement->equals($statement)) {
                 throw new ConflictHttpException('The new statement is not equal to an existing statement with the same id.');
             }
-        } catch (NotFoundException $e) {
-            $this->repository->storeStatement($statement, true);
+        } catch (NotFoundException) {
+            $this->statementRepository->storeStatement($statement, true);
         }
 
         return new Response('', 204);

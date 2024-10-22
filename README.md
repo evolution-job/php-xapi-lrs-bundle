@@ -5,12 +5,6 @@ This Symfony bundle helps to generate a Learning Record Store, as defined by the
 
 The configuration guide proposed below use **Doctrine** ORM.
 
-Versions
---------
-
- - V0.2: add old pull-requests from Jérôme Parmentier (Lctrs),  update dependencies to ^V3.0, use Entrili GIT repositories
- - V0.1: Symfony 4.4, Php 7.1, original files from php-xapi/* repositories
-
 Installation
 ------------
 
@@ -20,6 +14,18 @@ Installation
         {
             "type": "git",
             "url": "https://github.com/evolution-job/php-xapi-lrs-bundle.git"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/evolution-job/php-xapi-exception.git"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/evolution-job/php-xapi-json-test-fixtures.git"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/evolution-job/php-xapi-model.git"
         },
         {
             "type": "git",
@@ -40,11 +46,15 @@ Installation
         {
             "type": "git",
             "url": "https://github.com/evolution-job/php-xapi-symfony-serializer.git"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/evolution-job/php-xapi-test-fixtures.git"
         }
     ],
     "require": {
         ...,
-        "php-xapi/lrs-bundle": "^0.2"
+        "php-xapi/lrs-bundle": "^0.3"
     }
 ```
 
@@ -78,7 +88,7 @@ Installation
             auto_generate_proxy_classes: true
             naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
             auto_mapping: true
-            quote_strategy: '@xapi_lrs.doctrine.orm.quote.strategy'
+            quote_strategy: 'xapi_lrs.doctrine.orm.quote.strategy'
             mappings:
                 XApiLrsBundle:
                     mapping: true

@@ -15,7 +15,7 @@
                  public="false">
             <argument type="service" id="xapi_lrs.serializer"/>
         </service>
-        
+
         <service id="xapi_lrs.activity.serializer" class="Xabbuh\XApi\Serializer\ActivitySerializerInterface"
                  public="false">
             <factory service="xapi_lrs.serializer.factory" method="createActivitySerializer"/>
@@ -51,7 +51,8 @@
             <factory service="xapi_lrs.serializer.factory" method="createStatementSerializer"/>
         </service>
 
-        <service id="xapi_lrs.statement_result.serializer" class="Xabbuh\XApi\Serializer\StatementResultSerializerInterface"
+        <service id="xapi_lrs.statement_result.serializer"
+                 class="Xabbuh\XApi\Serializer\StatementResultSerializerInterface"
                  public="false">
             <factory service="xapi_lrs.serializer.factory" method="createStatementResultSerializer"/>
         </service>
