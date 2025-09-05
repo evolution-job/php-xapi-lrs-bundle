@@ -16,21 +16,29 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Xabbuh\XApi\Model\IRI;
+use XApi\LrsBundle\Response\XapiJsonResponse;
 
+/**
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
+ */
 final class ActivityOptionsController
 {
-    public function optionsActivity(Request $request): Response
+    public function optionsActivity(Request $request): XapiJsonResponse
     {
-        if (null === $activityId = $request->query->get('activityId')) {
-            throw new BadRequestHttpException('Required stateId parameter is missing.');
+        if (!$activityId = $request->query->all()['activityId'] ?? null) {
+            throw new BadRequestHttpException('Required activityId parameter is missing.');
+        }
+
+        if (!is_string($activityId)) {
+            throw new BadRequestHttpException('Required activityId parameter is not a string.');
         }
 
         try {
             IRI::fromString($activityId);
         } catch (Exception $exception) {
-            throw new BadRequestHttpException(sprintf('Parameter activityId ("%s") is not a valid IRI.', $activityId), $exception);
+            throw new BadRequestHttpException(sprintf('Parameter activityId %s is not a valid IRI.', json_encode($activityId, JSON_THROW_ON_ERROR)), $exception);
         }
 
-        return new Response('', 204);
+        return new XapiJsonResponse('', Response::HTTP_NO_CONTENT);
     }
 }

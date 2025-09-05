@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
  */
 class ExceptionListener
 {
-    public function onKernelException(ExceptionEvent $exceptionEvent)
+    public function onKernelException(ExceptionEvent $exceptionEvent): void
     {
     }
 }

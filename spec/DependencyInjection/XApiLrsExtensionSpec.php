@@ -2,8 +2,8 @@
 
 namespace spec\XApi\LrsBundle\DependencyInjection;
 
-use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use PhpSpec\ObjectBehavior;
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 
 class XApiLrsExtensionSpec extends ObjectBehavior
 {

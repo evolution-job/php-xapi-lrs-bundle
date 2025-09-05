@@ -13,7 +13,7 @@ namespace XApi\LrsBundle\Controller;
 
 use DateTime;
 use DateTimeInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,11 +23,14 @@ use Xabbuh\XApi\Common\Exception\UnsupportedStatementVersionException;
 use Xabbuh\XApi\Model\Statement;
 use Xabbuh\XApi\Model\StatementId;
 use Xabbuh\XApi\Model\StatementResult;
+use Xabbuh\XApi\Model\StatementsFilter;
 use Xabbuh\XApi\Serializer\StatementResultSerializerInterface;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
+use XApi\LrsBundle\EventListener\VersionListener;
 use XApi\LrsBundle\Model\StatementsFilterFactory;
 use XApi\LrsBundle\Response\AttachmentResponse;
 use XApi\LrsBundle\Response\MultipartResponse;
+use XApi\LrsBundle\Response\XapiJsonResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
 /**
@@ -36,16 +39,16 @@ use XApi\Repository\Api\StatementRepositoryInterface;
 final class StatementGetController
 {
     private static array $notAllowed = [
-        'agent'              => true,
-        'verb'               => true,
         'activity'           => true,
+        'agent'              => true,
+        'ascending'          => true,
+        'limit'              => true,
         'registration'       => true,
         'related_activities' => true,
         'related_agents'     => true,
         'since'              => true,
         'until'              => true,
-        'limit'              => true,
-        'ascending'          => true,
+        'verb'               => true,
     ];
 
     public function __construct(
@@ -65,18 +68,20 @@ final class StatementGetController
         $this->validate($query);
 
         $includeAttachments = $query->filter('attachments', false, FILTER_VALIDATE_BOOLEAN);
+
         try {
             if (($statementId = $query->get('statementId')) !== null) {
+                // Unique
                 $statement = $this->statementRepository->findStatementById(StatementId::fromString($statementId));
-
                 $response = $this->buildSingleStatementResponse($statement, $includeAttachments);
             } elseif (($voidedStatementId = $query->get('voidedStatementId')) !== null) {
+                // Voided
                 $statement = $this->statementRepository->findVoidedStatementById(StatementId::fromString($voidedStatementId));
-
                 $response = $this->buildSingleStatementResponse($statement, $includeAttachments);
-            } else {
-                $statements = $this->statementRepository->findStatementsBy($this->statementsFilterFactory->createFromParameterBag($query));
 
+            } else {
+                // Multiple
+                $statements = $this->statementRepository->findStatementsBy($this->createStatementsFilters($query));
                 $response = $this->buildMultiStatementsResponse($statements, $includeAttachments);
             }
         } catch (NotFoundException|UnsupportedStatementVersionException) {
@@ -90,20 +95,18 @@ final class StatementGetController
     }
 
     /**
-     * @param Statement $statement
      * @param bool $includeAttachments true to include the attachments in the response, false otherwise
-     * @return JsonResponse|MultipartResponse
      * @throws UnsupportedStatementVersionException
      */
-    protected function buildSingleStatementResponse(Statement $statement, bool $includeAttachments = false): JsonResponse|MultipartResponse
+    protected function buildSingleStatementResponse(Statement $statement, bool $includeAttachments = false): XapiJsonResponse|MultipartResponse
     {
         if (null === $statement->getVersion()) {
-            $statement = $statement->withVersion('1.0.0');
+            $statement = $statement->withVersion(VersionListener::XAPI_VERSION_1_0_0);
         }
 
         $json = $this->statementSerializer->serializeStatement($statement);
 
-        $response = new JsonResponse($json, 200, [], true);
+        $response = new XapiJsonResponse($json, 200, [], true);
 
         if ($includeAttachments) {
             $response = $this->buildMultipartResponse($response, [$statement]);
@@ -117,25 +120,24 @@ final class StatementGetController
     /**
      * @param Statement[] $statements
      * @param bool $includeAttachments true to include the attachments in the response, false otherwise
-     * @return JsonResponse|MultipartResponse
      */
-    protected function buildMultiStatementsResponse(array $statements, bool $includeAttachments = false): JsonResponse|MultipartResponse
+    protected function buildMultiStatementsResponse(array $statements, bool $includeAttachments = false): XapiJsonResponse|MultipartResponse
     {
         $json = $this->statementResultSerializer->serializeStatementResult(new StatementResult($statements));
 
-        $response = new JsonResponse($json, 200, [], true);
+        $xApiJsonResponse = new XapiJsonResponse($json, 200, [], true);
 
         if ($includeAttachments) {
-            $response = $this->buildMultipartResponse($response, $statements);
+            return $this->buildMultipartResponse($xApiJsonResponse, $statements);
         }
 
-        return $response;
+        return $xApiJsonResponse;
     }
 
     /**
      * @param Statement[] $statements
      */
-    protected function buildMultipartResponse(JsonResponse $jsonResponse, array $statements): MultipartResponse
+    protected function buildMultipartResponse(XapiJsonResponse $xApiJsonResponse, array $statements): MultipartResponse
     {
         $attachmentsParts = [];
 
@@ -145,11 +147,12 @@ final class StatementGetController
             }
         }
 
-        return new MultipartResponse($jsonResponse, $attachmentsParts);
+        return new MultipartResponse($xApiJsonResponse, $attachmentsParts);
     }
 
     /**
      * Validate the parameters.
+     *
      * @throws BadRequestHttpException if the parameters does not comply with the xAPI specification
      */
     private function validate(ParameterBag $parameterBag): void
@@ -168,5 +171,16 @@ final class StatementGetController
                 throw new BadRequestHttpException(sprintf('Cannot have "%s" parameters. Only "format" and/or "attachments" are allowed with "statementId" or "voidedStatementId".', implode('", "', array_keys($badKeys))));
             }
         }
+    }
+
+    private function createStatementsFilters(InputBag $query): StatementsFilter
+    {
+        $limit = $query->getInt('limit');
+
+        if ($limit === 0 || $limit > 1000) {
+            $query->set('limit', 1000); // Server limit
+        }
+
+        return $this->statementsFilterFactory->createFromParameterBag($query);
     }
 }

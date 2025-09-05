@@ -26,8 +26,22 @@
     <route id="xapi_lrs.state.options" path="/activities/state" methods="OPTIONS">
         <default key="_controller">xapi_lrs.controller.state.options::optionsState</default>
     </route>
-    <route id="xapi_lrs.state.put" path="/activities/state" methods="PUT,POST">
+    <route id="xapi_lrs.state.post" path="/activities/state" methods="POST">
+        <default key="_controller">xapi_lrs.controller.state.post::postState</default>
+        <default key="xapi_serializer">state</default>
+        <default key="xapi_lrs.route">
+            <bool>true</bool>
+        </default>
+    </route>
+    <route id="xapi_lrs.state.put" path="/activities/state" methods="PUT">
         <default key="_controller">xapi_lrs.controller.state.put::putState</default>
+        <default key="xapi_serializer">state</default>
+        <default key="xapi_lrs.route">
+            <bool>true</bool>
+        </default>
+    </route>
+    <route id="xapi_lrs.state.delete" path="/activities/state" methods="DELETE">
+        <default key="_controller">xapi_lrs.controller.state.delete::deleteState</default>
         <default key="xapi_serializer">state</default>
         <default key="xapi_lrs.route">
             <bool>true</bool>

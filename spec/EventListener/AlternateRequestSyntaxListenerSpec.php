@@ -2,137 +2,132 @@
 
 namespace spec\XApi\LrsBundle\EventListener;
 
-use ArrayIterator;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use PhpSpec\ObjectBehavior;
 use Symfony\Component\HttpFoundation\FileBag;
 use Symfony\Component\HttpFoundation\HeaderBag;
+use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ServerBag;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
 {
-    public function let(GetResponseEvent $getResponseEvent, Request $request, ParameterBag $query, ParameterBag $post, ParameterBag $attributes, HeaderBag $headerBag): void
+    public function let(RequestEvent $requestEvent, Request $request, ParameterBag $attributes, HeaderBag $headerBag): void
     {
-        $query->count()->willReturn(1);
-        $query->get('method')->willReturn('GET');
-
-        $post->getIterator()->willReturn(new ArrayIterator());
-        $post->get('content')->willReturn(null);
-
         $attributes->has('xapi_lrs.route')->willReturn(true);
 
-        $request->query = $query;
-        $request->request = $post;
         $request->attributes = $attributes;
         $request->headers = $headerBag;
+        $request->query = new InputBag(['method' => 'POST']);
+        $request->request = new InputBag();
         $request->getMethod()->willReturn('POST');
 
-        $getResponseEvent->isMasterRequest()->willReturn(true);
-        $getResponseEvent->getRequest()->willReturn($request);
+        $requestEvent->isMainRequest()->willReturn(true);
+        $requestEvent->getRequest()->willReturn($request);
     }
 
-    public function it_returns_null_if_request_is_not_master(GetResponseEvent $getResponseEvent): void
+    public function it_returns_null_if_request_is_not_main(RequestEvent $requestEvent): void
     {
-        $getResponseEvent->isMasterRequest()->willReturn(false);
-        $getResponseEvent->getRequest()->shouldNotBeCalled();
+        $requestEvent->isMainRequest()->willReturn(false);
+        $requestEvent->getRequest()->shouldNotBeCalled();
 
-        $this->onKernelRequest($getResponseEvent)->shouldReturn(null);
+        $this->onKernelRequest($requestEvent)->shouldReturn(null);
     }
 
-    public function it_returns_null_if_request_has_no_attribute_xapi_lrs_route(GetResponseEvent $getResponseEvent, ParameterBag $parameterBag): void
+    public function it_returns_null_if_request_has_no_attribute_xapi_lrs_route(RequestEvent $requestEvent, Request $request, ParameterBag $parameterBag): void
     {
         $parameterBag->has('xapi_lrs.route')->shouldBeCalled()->willReturn(false);
 
-        $this->onKernelRequest($getResponseEvent)->shouldReturn(null);
+        $request->attributes = $parameterBag;
+        $requestEvent->getRequest()->willReturn($request);
+
+        $this->onKernelRequest($requestEvent)->shouldReturn(null);
     }
 
-    public function it_returns_null_if_request_method_is_get(GetResponseEvent $getResponseEvent, Request $request, ParameterBag $parameterBag): void
+    public function it_returns_null_if_request_method_is_get(RequestEvent $requestEvent, Request $request, ParameterBag $parameterBag): void
     {
         $parameterBag->get('method')->shouldNotBeCalled();
         $request->getMethod()->willReturn('GET');
 
-        $this->onKernelRequest($getResponseEvent)->shouldReturn(null);
+        $this->onKernelRequest($requestEvent)->shouldReturn(null);
     }
 
-    public function it_returns_null_if_request_method_is_put(GetResponseEvent $getResponseEvent, Request $request, ParameterBag $parameterBag): void
+    public function it_returns_null_if_request_method_is_put(RequestEvent $requestEvent, Request $request, ParameterBag $parameterBag): void
     {
         $parameterBag->get('method')->shouldNotBeCalled();
         $request->getMethod()->willReturn('PUT');
 
-        $this->onKernelRequest($getResponseEvent)->shouldReturn(null);
+        $this->onKernelRequest($requestEvent)->shouldReturn(null);
     }
 
-    public function it_throws_a_badrequesthttpexception_if_other_query_parameter_than_method_is_set(GetResponseEvent $getResponseEvent, ParameterBag $parameterBag): void
+    public function it_throws_a_BadRequestHttpException_if_other_query_parameter_than_method_is_set(RequestEvent $requestEvent): void
     {
-        $parameterBag->count()->shouldBeCalled()->willReturn(2);
+        $request = new Request(
+            query: ['method' => 'POST', 'foo' => 'bar'],
+            attributes: ['xapi_lrs.route' => true],
+        );
 
-        $this
-            ->shouldThrow(BadRequestHttpException::class)
-            ->during('onKernelRequest', [$getResponseEvent]);
+        $requestEvent->getRequest()->willReturn($request);
+
+        $this->onKernelRequest($requestEvent)->shouldThrow(BadRequestHttpException::class);
     }
 
-    public function it_sets_the_request_method_equals_to_method_query_parameter(GetResponseEvent $getResponseEvent, Request $request, ParameterBag $parameterBag): void
+    public function it_sets_the_request_method_equals_to_method_query_parameter(RequestEvent $requestEvent, Request $request, ParameterBag $parameterBag): void
     {
-        $parameterBag->remove('method')->shouldBeCalled();
-        $request->setMethod('GET')->shouldBeCalled();
+        $parameterBag->has('xapi_lrs.route')->shouldBeCalled()->willReturn(true);
 
-        $this->onKernelRequest($getResponseEvent);
+        $request->attributes = $parameterBag;
+
+        $query = new InputBag(['method' => 'POST']);
+        $request->setMethod('POST')->shouldBeCalled();
+        $request->query = $query;
+
+        $request->request = new InputBag();
+
+        $this->onKernelRequest($requestEvent);
     }
 
-    public function it_sets_defined_post_parameters_as_header(GetResponseEvent $getResponseEvent, Request $request, ParameterBag $query, ParameterBag $post, HeaderBag $headerBag): void
+    public function it_sets_defined_post_parameters_as_header(RequestEvent $requestEvent, Request $request, HeaderBag $headerBag): void
     {
-        $request->setMethod('GET')->shouldBeCalled();
-        $query->remove('method')->shouldBeCalled();
-
-        $headerList = ['Authorization' => 'Authorization', 'X-Experience-API-Version' => 'X-Experience-API-Version', 'Content-Type' => 'Content-Type', 'Content-Length' => 'Content-Length', 'If-Match' => 'If-Match', 'If-None-Match' => 'If-None-Match'];
-
-        $post->getIterator()->shouldBeCalled()->willReturn(new ArrayIterator($headerList));
+        $headerList = [
+            'Authorization'            => 'Authorization',
+            'X-Experience-API-Version' => 'X-Experience-API-Version',
+            'Content-Type'             => 'Content-Type',
+            'Content-Length'           => 'Content-Length',
+            'If-Match'                 => 'If-Match',
+            'If-None-Match'            => 'If-None-Match'
+        ];
 
         foreach ($headerList as $key => $value) {
-            $post->remove($key)->shouldBeCalled();
-
             $headerBag->set($key, $value)->shouldBeCalled();
         }
 
-        $this->onKernelRequest($getResponseEvent);
-    }
-
-    public function it_sets_other_post_parameters_as_query_parameters(GetResponseEvent $getResponseEvent, Request $request, ParameterBag $query, ParameterBag $post): void
-    {
+        $request->request = new InputBag($headerList);
+        $request->query = new InputBag(['method' => 'GET']);
         $request->setMethod('GET')->shouldBeCalled();
-        $query->remove('method')->shouldBeCalled();
 
-        $parameterList = ['token' => 'a-token', 'attachments' => true];
+        $requestEvent->getRequest()->willReturn($request);
 
-        $post->getIterator()->shouldBeCalled()->willReturn(new ArrayIterator($parameterList));
-
-        foreach ($parameterList as $key => $value) {
-            $post->remove($key)->shouldBeCalled();
-
-            $query->set($key, $value)->shouldBeCalled();
-        }
-
-        $this->onKernelRequest($getResponseEvent);
+        $this->onKernelRequest($requestEvent);
     }
 
-    public function it_sets_content_from_post_parameters(GetResponseEvent $getResponseEvent, Request $request, ParameterBag $query, ParameterBag $post, ParameterBag $attributes, ParameterBag $cookies, FileBag $fileBag, ServerBag $serverBag): void
+    public function it_sets_content_from_post_parameters(RequestEvent $requestEvent, Request $request, ParameterBag $attributes, FileBag $fileBag, ServerBag $serverBag): void
     {
-        $query->all()->shouldBeCalled()->willReturn([]);
-        $query->remove('method')->shouldBeCalled();
-
-        $post->all()->shouldBeCalled()->willReturn([]);
-        $post->get('content')->shouldBeCalled()->willReturn('a content');
-        $post->remove('content')->shouldBeCalled();
-
         $attributes->all()->shouldBeCalled()->willReturn([]);
-        $cookies->all()->shouldBeCalled()->willReturn([]);
         $fileBag->all()->shouldBeCalled()->willReturn([]);
         $serverBag->all()->shouldBeCalled()->willReturn([]);
 
-        $request->setMethod('GET')->shouldBeCalled();
+        $request->attributes = $attributes;
+        $request->cookies = new InputBag();
+        $request->files = $fileBag;
+        $request->query = new InputBag(['method' => 'POST']);
+        $request->request = new InputBag(['content' => 'a content']);
+        $request->server = $serverBag;
+
+        $request->setMethod('POST')->shouldBeCalled();
+
         $request->initialize(
             [],
             [],
@@ -143,10 +138,8 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
             'a content'
         )->shouldBeCalled();
 
-        $request->cookies = $cookies;
-        $request->files = $fileBag;
-        $request->server = $serverBag;
+        $requestEvent->getRequest()->willReturn($request);
 
-        $this->onKernelRequest($getResponseEvent);
+        $this->onKernelRequest($requestEvent);
     }
 }

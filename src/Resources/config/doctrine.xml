@@ -6,7 +6,9 @@
 
     <services>
         <service id="xapi_lrs.repository.activity.doctrine"
-                 class="XApi\Repository\Doctrine\Repository\ActivityRepository" public="false"/>
+                 class="XApi\Repository\Doctrine\Repository\ActivityRepository" public="false">
+            <argument type="service" id="xapi_lrs.repository.mapped_statementObject"/>
+        </service>
 
         <service id="xapi_lrs.repository.state.doctrine" class="XApi\Repository\Doctrine\Repository\StateRepository"
                  public="false">

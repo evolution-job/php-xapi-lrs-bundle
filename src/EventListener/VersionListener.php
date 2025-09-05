@@ -20,6 +20,10 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  */
 class VersionListener
 {
+    public const string XAPI_HEADER = 'X-Experience-API-Version';
+    public const string XAPI_VERSION_1_0_0 = '1.0.0';
+    public const string XAPI_VERSION_1_0_3 = '1.0.3';
+
     public function onKernelRequest(RequestEvent $requestEvent): void
     {
         if (!$requestEvent->isMainRequest()) {
@@ -32,13 +36,13 @@ class VersionListener
             return;
         }
 
-        if (null === $version = $request->headers->get('X-Experience-API-Version')) {
-            $request->headers->set('X-Experience-API-Version', '1.0.0');
+        if (null === $version = $request->headers->get(self::XAPI_HEADER)) {
+            throw new BadRequestHttpException('Missing required "X-Experience-API-Version" header.');
         }
 
         if (preg_match('/^1\.0(?:\.\d+)?$/', (string)$version)) {
             if ('1.0' === $version) {
-                $request->headers->set('X-Experience-API-Version', '1.0.0');
+                $request->headers->set(self::XAPI_HEADER, self::XAPI_VERSION_1_0_0);
             }
 
             return;
@@ -47,20 +51,20 @@ class VersionListener
         throw new BadRequestHttpException(sprintf('xAPI version "%s" is not supported.', $version));
     }
 
-    public function onKernelResponse(ResponseEvent $filterResponseEvent): void
+    public function onKernelResponse(ResponseEvent $responseEvent): void
     {
-        if (!$filterResponseEvent->isMainRequest()) {
+        if (!$responseEvent->isMainRequest()) {
             return;
         }
 
-        if (!$filterResponseEvent->getRequest()->attributes->has('xapi_lrs.route')) {
+        if (!$responseEvent->getRequest()->attributes->has('xapi_lrs.route')) {
             return;
         }
 
-        $headers = $filterResponseEvent->getResponse()->headers;
+        $headers = $responseEvent->getResponse()->headers;
 
-        if (!$headers->has('X-Experience-API-Version')) {
-            $headers->set('X-Experience-API-Version', '1.0.3');
+        if (!$headers->has(self::XAPI_HEADER)) {
+            $headers->set(self::XAPI_HEADER, self::XAPI_VERSION_1_0_3);
         }
     }
 }

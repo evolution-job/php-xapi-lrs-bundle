@@ -12,19 +12,18 @@
 namespace XApi\LrsBundle\Controller;
 
 use DateTime;
-use XApi\LrsBundle\Response\XapiJsonResponse;
 use Xabbuh\XApi\Model\State;
+use XApi\LrsBundle\Response\XapiJsonResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
-
 
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
-final readonly class StatePutController
+final readonly class StatePostController
 {
     public function __construct(private StateRepositoryInterface $stateRepository) { }
 
-    public function putState(State $state): XapiJsonResponse
+    public function postState(State $state): XapiJsonResponse
     {
         $this->stateRepository->storeState($state);
 

@@ -9,10 +9,7 @@ use Xabbuh\XApi\Model\Attachment;
 
 class AttachmentResponseSpec extends ObjectBehavior
 {
-    /**
-     * @var Attachment
-     */
-    private $attachment;
+    private ?Attachment $attachment = null;
 
     public function let(): void
     {
