@@ -17,9 +17,9 @@ use Xabbuh\XApi\Model\State;
 use XApi\Repository\Api\StateRepositoryInterface;
 use XApi\Repository\Doctrine\Mapping\State as MappedState;
 
-final class StateGetController
+final readonly class StateGetController
 {
-    public function __construct(private readonly StateRepositoryInterface $stateRepository) {}
+    public function __construct(private StateRepositoryInterface $stateRepository) {}
 
     public function getState(State $state): Response
     {

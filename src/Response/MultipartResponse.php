@@ -28,14 +28,10 @@ class MultipartResponse extends Response
     /**
      * @var Response[]
      */
-    protected $parts;
+    protected array $parts;
 
     /**
-     * @param JsonResponse $jsonResponse
      * @param AttachmentResponse[] $attachmentsParts
-     * @param int $status
-     * @param array $headers
-     * @param null|string $subtype
      */
     public function __construct(
         protected JsonResponse $jsonResponse,
@@ -82,7 +78,7 @@ class MultipartResponse extends Response
     /**
      * {@inheritdoc}
      */
-    public function prepare(Request $request): MultipartResponse|Response
+    public function prepare(Request $request): static
     {
         foreach ($this->parts as $part) {
             $part->prepare($request);
@@ -97,7 +93,7 @@ class MultipartResponse extends Response
     /**
      * {@inheritdoc}
      */
-    public function sendContent(): MultipartResponse|Response|static
+    public function sendContent(): static
     {
         $content = '';
         foreach ($this->parts as $part) {
@@ -119,17 +115,19 @@ class MultipartResponse extends Response
      *
      * @throws LogicException when the content is not null
      */
-    public function setContent($content): void
+    public function setContent($content): static
     {
         if (null !== $content) {
             throw new LogicException('The content cannot be set on a MultipartResponse instance.');
         }
+
+        return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getContent(): bool
+    public function getContent(): false|string
     {
         return false;
     }

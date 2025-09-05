@@ -16,9 +16,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Model\State;
 use XApi\Repository\Api\StateRepositoryInterface;
 
-final class StatePutController
+final readonly class StatePutController
 {
-    public function __construct(private readonly StateRepositoryInterface $stateRepository) {}
+    public function __construct(private StateRepositoryInterface $stateRepository) {}
 
     public function putState(State $state): Response
     {

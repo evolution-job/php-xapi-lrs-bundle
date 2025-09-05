@@ -24,9 +24,9 @@ use XApi\Repository\Api\StatementRepositoryInterface;
 /**
  * @author Christian Flothmann <christian.flothmann@xabbuh.de>
  */
-final class StatementPutController
+final readonly class StatementPutController
 {
-    public function __construct(private readonly StatementRepositoryInterface $statementRepository) {}
+    public function __construct(private StatementRepositoryInterface $statementRepository) {}
 
     public function putStatement(Request $request, Statement $statement): Response
     {

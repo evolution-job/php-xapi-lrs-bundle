@@ -25,9 +25,9 @@ use XApi\Repository\Api\StatementRepositoryInterface;
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
-final class StatementPostController
+final readonly class StatementPostController
 {
-    public function __construct(private readonly StatementRepositoryInterface $statementRepository) {}
+    public function __construct(private StatementRepositoryInterface $statementRepository) {}
 
     public function postStatement(Request $request, Statement $statement): JsonResponse
     {

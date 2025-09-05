@@ -3,21 +3,19 @@
 namespace XApi\LrsBundle\EventListener;
 
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\Serializer\Exception\ExceptionInterface;
+use Xabbuh\XApi\Common\Exception\UnsupportedStatementVersionException;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use Xabbuh\XApi\Serializer\StateSerializerInterface;
 
 /**
  * @author Christian Flothmann <christian.flothmann@xabbuh.de>
  */
-class SerializerListener
+readonly class SerializerListener
 {
-
     public function __construct(
-        private readonly StatementSerializerInterface $statementSerializer,
-        private readonly StateSerializerInterface $stateSerializer
+        private StatementSerializerInterface $statementSerializer,
+        private StateSerializerInterface $stateSerializer
     ) { }
 
     public function onKernelRequest(RequestEvent $requestEvent): void
@@ -38,7 +36,7 @@ class SerializerListener
                     $request->attributes->set('statement', $this->statementSerializer->deserializeStatement($request->getContent()));
                     break;
             }
-        } catch (ExceptionInterface $exception) {
+        } catch (UnsupportedStatementVersionException $exception) {
             throw new BadRequestHttpException(sprintf('The content of the request cannot be deserialized into a valid xAPI %s.', $request->attributes->get('xapi_serializer')), $exception);
         }
     }

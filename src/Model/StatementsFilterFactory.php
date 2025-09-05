@@ -23,9 +23,9 @@ use Xabbuh\XApi\Serializer\ActorSerializerInterface;
 /**
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
  */
-class StatementsFilterFactory
+readonly class StatementsFilterFactory
 {
-    public function __construct(private readonly ActorSerializerInterface $actorSerializer) { }
+    public function __construct(private ActorSerializerInterface $actorSerializer) { }
 
     public function createFromParameterBag(ParameterBag $parameterBag): StatementsFilter
     {

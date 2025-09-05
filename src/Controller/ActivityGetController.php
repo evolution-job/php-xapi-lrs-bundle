@@ -23,12 +23,12 @@ use XApi\Repository\Api\ActivityRepositoryInterface;
 /**
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
  */
-final class ActivityGetController
+final readonly class ActivityGetController
 {
 
     public function __construct(
-        private readonly ActivityRepositoryInterface $activityRepository,
-        private readonly ActivitySerializerInterface $activitySerializer
+        private ActivityRepositoryInterface $activityRepository,
+        private ActivitySerializerInterface $activitySerializer
     ) {}
 
     public function getActivity(Request $request): JsonResponse
