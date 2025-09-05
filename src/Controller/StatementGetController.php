@@ -13,7 +13,7 @@ namespace XApi\LrsBundle\Controller;
 
 use DateTime;
 use DateTimeInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use XApi\LrsBundle\Response\XapiJsonResponse;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,16 +36,16 @@ use XApi\Repository\Api\StatementRepositoryInterface;
 final class StatementGetController
 {
     private static array $notAllowed = [
-        'agent'              => true,
-        'verb'               => true,
         'activity'           => true,
+        'agent'              => true,
+        'ascending'          => true,
+        'limit'              => true,
         'registration'       => true,
         'related_activities' => true,
         'related_agents'     => true,
         'since'              => true,
         'until'              => true,
-        'limit'              => true,
-        'ascending'          => true,
+        'verb'               => true,
     ];
 
     public function __construct(
@@ -90,12 +90,10 @@ final class StatementGetController
     }
 
     /**
-     * @param Statement $statement
      * @param bool $includeAttachments true to include the attachments in the response, false otherwise
-     * @return JsonResponse|MultipartResponse
      * @throws UnsupportedStatementVersionException
      */
-    protected function buildSingleStatementResponse(Statement $statement, bool $includeAttachments = false): JsonResponse|MultipartResponse
+    protected function buildSingleStatementResponse(Statement $statement, bool $includeAttachments = false): XapiJsonResponse|MultipartResponse
     {
         if (null === $statement->getVersion()) {
             $statement = $statement->withVersion('1.0.0');
@@ -103,7 +101,7 @@ final class StatementGetController
 
         $json = $this->statementSerializer->serializeStatement($statement);
 
-        $response = new JsonResponse($json, 200, [], true);
+        $response = new XapiJsonResponse($json, 200, [], true);
 
         if ($includeAttachments) {
             $response = $this->buildMultipartResponse($response, [$statement]);
@@ -117,25 +115,24 @@ final class StatementGetController
     /**
      * @param Statement[] $statements
      * @param bool $includeAttachments true to include the attachments in the response, false otherwise
-     * @return JsonResponse|MultipartResponse
      */
-    protected function buildMultiStatementsResponse(array $statements, bool $includeAttachments = false): JsonResponse|MultipartResponse
+    protected function buildMultiStatementsResponse(array $statements, bool $includeAttachments = false): XapiJsonResponse|MultipartResponse
     {
         $json = $this->statementResultSerializer->serializeStatementResult(new StatementResult($statements));
 
-        $response = new JsonResponse($json, 200, [], true);
+        $XapiJsonResponse = new XapiJsonResponse($json, 200, [], true);
 
         if ($includeAttachments) {
-            $response = $this->buildMultipartResponse($response, $statements);
+            return $this->buildMultipartResponse($XapiJsonResponse, $statements);
         }
 
-        return $response;
+        return $XapiJsonResponse;
     }
 
     /**
      * @param Statement[] $statements
      */
-    protected function buildMultipartResponse(JsonResponse $jsonResponse, array $statements): MultipartResponse
+    protected function buildMultipartResponse(XapiJsonResponse $XapiJsonResponse, array $statements): MultipartResponse
     {
         $attachmentsParts = [];
 
@@ -145,11 +142,12 @@ final class StatementGetController
             }
         }
 
-        return new MultipartResponse($jsonResponse, $attachmentsParts);
+        return new MultipartResponse($XapiJsonResponse, $attachmentsParts);
     }
 
     /**
      * Validate the parameters.
+     *
      * @throws BadRequestHttpException if the parameters does not comply with the xAPI specification
      */
     private function validate(ParameterBag $parameterBag): void

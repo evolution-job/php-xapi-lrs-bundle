@@ -2,8 +2,8 @@
 
 namespace spec\XApi\LrsBundle;
 
-use Symfony\Component\HttpKernel\Bundle\Bundle;
 use PhpSpec\ObjectBehavior;
+use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class XApiLrsBundleSpec extends ObjectBehavior
 {

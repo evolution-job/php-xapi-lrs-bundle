@@ -19,13 +19,14 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\StatementFixtures;
 use Xabbuh\XApi\Model\StatementId;
+use XApi\LrsBundle\Response\XapiJsonResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
 
 /**
- * @author Christian Flothmann <christian.flothmann@xabbuh.de>
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
-class StatementPutControllerSpec extends ObjectBehavior
+class StatementPostControllerSpec extends ObjectBehavior
 {
     public function it_throws_a_BadRequestHttpException_if_a_statement_id_is_not_part_of_a_put_request(StatementRepositoryInterface $statementRepository): void
     {
@@ -36,7 +37,7 @@ class StatementPutControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(BadRequestHttpException::class)
-            ->during('putStatement', [$request, $statement]);
+            ->during('postStatement', [$request, $statement]);
     }
 
     public function it_throws_a_BadRequestHttpException_if_the_given_statement_id_as_part_of_a_put_request_is_not_a_valid_uuid(StatementRepositoryInterface $statementRepository): void
@@ -49,7 +50,7 @@ class StatementPutControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(BadRequestHttpException::class)
-            ->during('putStatement', [$request, $statement]);
+            ->during('postStatement', [$request, $statement]);
     }
 
     public function it_stores_a_statement_and_returns_a_204_response_if_the_statement_did_not_exist_before(StatementRepositoryInterface $statementRepository): void
@@ -63,7 +64,7 @@ class StatementPutControllerSpec extends ObjectBehavior
 
         $this->beConstructedWith($statementRepository);
 
-        $response = $this->putStatement($request, $statement);
+        $response = $this->postStatement($request, $statement);
 
         $response->shouldHaveType(Response::class);
         $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
@@ -80,7 +81,7 @@ class StatementPutControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(ConflictHttpException::class)
-            ->during('putStatement', [$request, $statement]);
+            ->during('postStatement', [$request, $statement]);
     }
 
     public function it_uses_id_parameter_in_put_request_if_statement_id_is_null(StatementRepositoryInterface $statementRepository): void
@@ -96,7 +97,7 @@ class StatementPutControllerSpec extends ObjectBehavior
         $this->beConstructedWith($statementRepository);
 
         $statement = $statement->withId(null);
-        $this->putStatement($request, $statement);
+        $this->postStatement($request, $statement);
     }
 
     public function it_does_not_override_an_existing_statement(StatementRepositoryInterface $statementRepository): void
@@ -106,11 +107,11 @@ class StatementPutControllerSpec extends ObjectBehavior
         $request->query->set('statementId', $statement->getId()->getValue());
 
         $statementRepository->findStatementById($statement->getId())->willReturn($statement);
-        $statementRepository->storeStatement($statement, true)->shouldNotBeCalled();
+        $statementRepository->storeStatement($statement)->shouldNotBeCalled();
 
         $this->beConstructedWith($statementRepository);
 
-        $this->putStatement($request, $statement);
+        $this->postStatement($request, $statement);
     }
 
     public function it_throws_a_ConflictHttpException_if_an_existing_statement_with_the_same_id_is_not_equal_during_a_put_request(StatementRepositoryInterface $statementRepository): void
@@ -126,6 +127,26 @@ class StatementPutControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(ConflictHttpException::class)
-            ->during('putStatement', [$request, $statement]);
+            ->during('postStatement', [$request, $statement]);
+    }
+
+    public function it_stores_statements_and_returns_a_204_response_if_the_statement_did_not_exist_before(StatementRepositoryInterface $statementRepository): void
+    {
+        $statements = [];
+        $uuids = [];
+        foreach(StatementFixtures::getStatementCollection() as $statement) {
+            $statements[] = $statement;
+            $uuids[] = $statement->getId()->getValue();
+            $statementRepository->findStatementById($statement->getId())->willThrow(new NotFoundException(''));
+            $statementRepository->storeStatement($statement)->shouldBeCalled()->willReturn($statement->getId());
+        }
+
+        $this->beConstructedWith($statementRepository);
+
+        $response = $this->postStatements($statements);
+
+        $response->shouldHaveType(XapiJsonResponse::class);
+        $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
+        $response->getContent()->shouldReturn(json_encode($uuids, JSON_THROW_ON_ERROR));
     }
 }

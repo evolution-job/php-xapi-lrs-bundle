@@ -31,6 +31,11 @@
             <tag name="controller.service_arguments"/>
         </service>
 
+        <service id="xapi_lrs.controller.state.delete" class="XApi\LrsBundle\Controller\StateDeleteController">
+            <argument type="service" id="xapi_lrs.repository.state"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+
         <!-- Statement -->
         <service id="xapi_lrs.controller.statement.get" class="XApi\LrsBundle\Controller\StatementGetController">
             <argument type="service" id="xapi_lrs.repository.statement"/>

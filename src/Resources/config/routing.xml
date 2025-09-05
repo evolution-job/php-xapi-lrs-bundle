@@ -33,6 +33,13 @@
             <bool>true</bool>
         </default>
     </route>
+    <route id="xapi_lrs.state.delete" path="/activities/state" methods="DELETE">
+        <default key="_controller">xapi_lrs.controller.state.delete::deleteState</default>
+        <default key="xapi_serializer">state</default>
+        <default key="xapi_lrs.route">
+            <bool>true</bool>
+        </default>
+    </route>
 
     <!-- Statement -->
     <route id="xapi_lrs.statement.get" path="/statements" methods="GET">

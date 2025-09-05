@@ -16,17 +16,17 @@ final class Configuration implements ConfigurationInterface
 
         $treeBuilder
             ->getRootNode()
-                ->beforeNormalization()
-                    ->ifTrue(static fn(array $v): bool => isset($v['type']) && $v['type'] === 'orm' && !isset($v['object_manager_service']))
-                    ->thenInvalid('You need to configure the object manager service when the repository type is "mongodb" or "orm".')
-                ->end()
-                ->children()
-                    ->enumNode('type')
-                        ->isRequired()
-                        ->values(['in_memory', 'mongodb', 'orm'])
-                    ->end()
-                    ?->scalarNode('object_manager_service')->end()
-                ?->end()
+            ->beforeNormalization()
+            ->ifTrue(static fn(array $v): bool => isset($v['type']) && $v['type'] === 'orm' && !isset($v['object_manager_service']))
+            ->thenInvalid('You need to configure the object manager service when the repository type is "mongodb" or "orm".')
+            ->end()
+            ->children()
+            ->enumNode('type')
+            ->isRequired()
+            ->values(['in_memory', 'mongodb', 'orm'])
+            ->end()
+            ?->scalarNode('object_manager_service')->end()
+            ?->end()
             ->end();
 
         return $treeBuilder;

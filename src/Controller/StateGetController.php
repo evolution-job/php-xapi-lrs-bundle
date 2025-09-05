@@ -11,33 +11,45 @@
 
 namespace XApi\LrsBundle\Controller;
 
-use DateTime;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Model\State;
+use XApi\LrsBundle\Response\XapiJsonResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
-use XApi\Repository\Doctrine\Mapping\State as MappedState;
 
-final class StateGetController
+/**
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
+ */
+final readonly class StateGetController
 {
-    public function __construct(private readonly StateRepositoryInterface $stateRepository) {}
+    public function __construct(private StateRepositoryInterface $stateRepository) { }
 
-    public function getState(State $state): Response
+    public function getState(State $state): XapiJsonResponse
     {
-        $mappedState = $this->stateRepository->findState([
-            "stateId"        => $state->getStateId(),
-            "activityId"     => $state->getActivity()->getId()->getValue(),
-            "registrationId" => $state->getRegistrationId()
-        ]);
+        $foundState = $this->stateRepository->findState($state);
 
-        if ($mappedState instanceof MappedState) {
-            $response = new Response($mappedState->data, Response::HTTP_OK, []);
-        } else {
-            $response = new Response('', Response::HTTP_NOT_FOUND, []);
+        if ($foundState instanceof State) {
+
+            return new XapiJsonResponse($foundState->getData(), Response::HTTP_OK);
         }
 
-        $dateTime = new DateTime();
-        $response->headers->set('X-Experience-API-Consistent-Through', $dateTime->format('Y-m-d\TH:i:sP'));
+        if ($state->getStateId() !== null) {
 
-        return $response;
+            return new XapiJsonResponse('', Response::HTTP_NOT_FOUND);
+        }
+
+        // List of available States
+        $states = $this->stateRepository->findStates($state);
+
+        if (!$states) {
+
+            return new XapiJsonResponse('', Response::HTTP_NOT_FOUND);
+        }
+
+        $stateIds = [];
+        foreach ($states as $foundState) {
+            $stateIds[] = $foundState->getStateId();
+        }
+
+        return new XapiJsonResponse(array_unique($stateIds), Response::HTTP_NOT_FOUND);
     }
 }
