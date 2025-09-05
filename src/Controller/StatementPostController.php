@@ -11,65 +11,53 @@
 
 namespace XApi\LrsBundle\Controller;
 
-use InvalidArgumentException;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
+use Exception;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\Model\Statement;
 use Xabbuh\XApi\Model\StatementId;
+use XApi\LrsBundle\Response\XapiJsonResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
 /**
- * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
-final class StatementPostController
+final readonly class StatementPostController
 {
-    public function __construct(private readonly StatementRepositoryInterface $statementRepository) {}
+    public function __construct(private StatementRepositoryInterface $statementRepository) { }
 
-    public function postStatement(Request $request, Statement $statement): JsonResponse
+    public function postStatement(Statement $statement): XapiJsonResponse
     {
-        if (null === $request->query->get('statementId')) {
-            throw new BadRequestHttpException('Required statementId parameter is missing.');
-        }
+        $statement = $this->resolveStatement($statement);
 
         $this->storeStatement($statement);
 
-        return new JsonResponse($statement->getId(), 200);
+        return new XapiJsonResponse($statement->getId(), Response::HTTP_OK);
     }
 
-    public function postStatements(array $statements): JsonResponse
+    public function postStatements(array $statements): XapiJsonResponse
     {
         $uuids = [];
 
+        /** @var Statement $statement */
         foreach ($statements as $statement) {
 
-            $this->storeStatement($statement);
-
-            $uuids[] = $statement->getId();
+            try {
+                $statement = $this->resolveStatement($statement);
+                $this->storeStatement($statement);
+                $uuids[] = $statement->getId()?->getValue();
+            } catch (Exception) {
+                // Ignore...
+            }
         }
 
-        return new JsonResponse($uuids, 200);
+        return new XapiJsonResponse($uuids, Response::HTTP_OK);
     }
 
     private function storeStatement(Statement $statement): void
     {
-        try {
-            $id = StatementId::fromString($statement->getId());
-        } catch (InvalidArgumentException $invalidArgumentException) {
-            throw new BadRequestHttpException(sprintf('Parameter statementId ("%s") is not a valid UUID.', $statement->getId()?->getValue()), $invalidArgumentException);
-        }
-
-        if ($statement->getId() instanceof StatementId && !$id->equals($statement->getId())) {
-            throw new ConflictHttpException(sprintf('Id parameter ("%s") and statement id ("%s") do not match.', $id->getValue(), $statement->getId()->getValue()));
-        }
-
-        if (!$statement->getId() instanceof StatementId) {
-            $statement = $statement->withId($id);
-        }
-
         try {
             $existingStatement = $this->statementRepository->findStatementById($statement->getId());
 
@@ -79,5 +67,14 @@ final class StatementPostController
         } catch (NotFoundException) {
             $this->statementRepository->storeStatement($statement);
         }
+    }
+
+    private function resolveStatement(Statement $statement): Statement
+    {
+        if (!$statement->getId() instanceof StatementId) {
+            throw new BadRequestHttpException(sprintf('Parameter statementId ("%s") is not a valid UUID.', $statement->getId()?->getValue()));
+        }
+
+        return $statement;
     }
 }

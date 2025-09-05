@@ -11,8 +11,9 @@
 
 namespace XApi\LrsBundle\Controller;
 
-use Symfony\Component\HttpFoundation\JsonResponse;
+use XApi\LrsBundle\Response\XapiJsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
@@ -21,28 +22,33 @@ use Xabbuh\XApi\Serializer\ActivitySerializerInterface;
 use XApi\Repository\Api\ActivityRepositoryInterface;
 
 /**
- * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
-final class ActivityGetController
+final readonly class ActivityGetController
 {
 
     public function __construct(
-        private readonly ActivityRepositoryInterface $activityRepository,
-        private readonly ActivitySerializerInterface $activitySerializer
+        private ActivityRepositoryInterface $activityRepository,
+        private ActivitySerializerInterface $activitySerializer
     ) {}
 
-    public function getActivity(Request $request): JsonResponse
+    public function getActivity(Request $request): XapiJsonResponse
     {
-        if (null === $activityId = $request->query->get('activityId')) {
+        if (!$activityId = $request->query->all()['activityId'] ?? null) {
             throw new BadRequestHttpException('Required activityId parameter is missing.');
+        }
+
+        if (!is_string($activityId)) {
+            throw new BadRequestHttpException('Required activityId parameter is not a string.');
         }
 
         try {
             $activity = $this->activityRepository->findActivityById(IRI::fromString($activityId));
+
+            return new XapiJsonResponse($this->activitySerializer->serializeActivity($activity), Response::HTTP_OK, [], true);
+
         } catch (NotFoundException $notFoundException) {
             throw new NotFoundHttpException(sprintf('No activity matching the following id "%s" has been found.', $activityId), $notFoundException);
         }
-
-        return new JsonResponse($this->activitySerializer->serializeActivity($activity), 200, [], true);
     }
 }

@@ -3,6 +3,7 @@
 namespace spec\XApi\LrsBundle\Model;
 
 use DateTime;
+use DateTimeInterface;
 use PhpSpec\ObjectBehavior;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Xabbuh\XApi\DataFixtures\ActorFixtures;
@@ -37,9 +38,9 @@ class StatementsFilterFactorySpec extends ObjectBehavior
     public function it_sets_an_agent_filter(ActorSerializerInterface $actorSerializer): void
     {
         $json = ActorJsonFixtures::getTypicalAgent();
-        $actor = ActorFixtures::getTypicalAgent();
+        $agent = ActorFixtures::getTypicalAgent();
 
-        $actorSerializer->deserializeActor($json)->shouldBeCalled()->willReturn($actor);
+        $actorSerializer->deserializeActor($json)->shouldBeCalled()->willReturn($agent);
 
         $this->beConstructedWith($actorSerializer);
 
@@ -49,7 +50,7 @@ class StatementsFilterFactorySpec extends ObjectBehavior
         /** @var StatementsFilter $filter */
         $filter = $this->createFromParameterBag($parameterBag);
 
-        $filter->getFilter()->shouldHaveKeyWithValue('agent', $actor);
+        $filter->getFilter()->shouldHaveKeyWithValue('agent', $agent);
     }
 
     public function it_sets_a_verb_filter(): void
@@ -115,7 +116,7 @@ class StatementsFilterFactorySpec extends ObjectBehavior
         $dateTime = new DateTime();
 
         $parameterBag = new ParameterBag();
-        $parameterBag->set('since', $dateTime->format(DateTime::ATOM));
+        $parameterBag->set('since', $dateTime->format(DateTimeInterface::ATOM));
 
         /** @var StatementsFilter $filter */
         $filter = $this->createFromParameterBag($parameterBag);

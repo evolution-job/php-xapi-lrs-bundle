@@ -11,25 +11,25 @@
 
 namespace XApi\LrsBundle\Controller;
 
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Xabbuh\XApi\Model\State;
 use XApi\LrsBundle\Response\XapiJsonResponse;
-
+use XApi\Repository\Api\StateRepositoryInterface;
 
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
-final class StateOptionsController
+final readonly class StateDeleteController
 {
-    public function optionsState(Request $request): XapiJsonResponse
-    {
-        if (!$stateId = $request->query->all()['stateId'] ?? null) {
-            throw new BadRequestHttpException('Required stateId parameter is missing.');
-        }
+    public function __construct(private StateRepositoryInterface $stateRepository) { }
 
-        if (!is_string($stateId)) {
-            throw new BadRequestHttpException('Required stateId parameter is not a string.');
+    public function deleteState(State $state): XapiJsonResponse
+    {
+        $foundState = $this->stateRepository->findState($state);
+
+        if ($foundState instanceof State) {
+
+            $this->stateRepository->removeState($state);
         }
 
         return new XapiJsonResponse('', Response::HTTP_NO_CONTENT);

@@ -1,19 +1,26 @@
 <?php
 
+/*
+ * This file is part of the xAPI package.
+ *
+ * (c) Christian Flothmann <christian.flothmann@xabbuh.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace spec\XApi\LrsBundle\Controller;
 
 use DateTime;
-use Symfony\Component\HttpFoundation\ParameterBag;
-use Xabbuh\XApi\Model\Statement;
-use XApi\LrsBundle\Response\MultipartResponse;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Xabbuh\XApi\Common\Exception\NotFoundException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\StatementFixtures;
+use Xabbuh\XApi\Model\Statement;
 use Xabbuh\XApi\Model\StatementId;
 use Xabbuh\XApi\Model\StatementResult;
 use Xabbuh\XApi\Model\StatementsFilter;
@@ -22,8 +29,13 @@ use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use XApi\Fixtures\Json\StatementJsonFixtures;
 use XApi\Fixtures\Json\StatementResultJsonFixtures;
 use XApi\LrsBundle\Model\StatementsFilterFactory;
+use XApi\LrsBundle\Response\MultipartResponse;
+use XApi\LrsBundle\Response\XapiJsonResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
+/**
+ * @author Christian Flothmann <christian.flothmann@xabbuh.de>
+ */
 class StatementGetControllerSpec extends ObjectBehavior
 {
     public function let(StatementRepositoryInterface $statementRepository, StatementSerializerInterface $statementSerializer, StatementResultSerializerInterface $statementResultSerializer, StatementsFilterFactory $statementsFilterFactory): void
@@ -46,7 +58,7 @@ class StatementGetControllerSpec extends ObjectBehavior
         $this->beConstructedWith($statementRepository, $statementSerializer, $statementResultSerializer, $statementsFilterFactory);
     }
 
-    public function it_throws_a_badrequesthttpexception_if_the_request_has_given_statement_id_and_voided_statement_id(): void
+    public function it_throws_a_BadRequestHttpException_if_the_request_has_given_statement_id_and_voided_statement_id(): void
     {
         $request = new Request();
         $request->query->set('statementId', StatementFixtures::DEFAULT_STATEMENT_ID);
@@ -57,7 +69,7 @@ class StatementGetControllerSpec extends ObjectBehavior
             ->during('getStatement', [$request]);
     }
 
-    public function it_throws_a_badrequesthttpexception_if_the_request_has_statement_id_and_format_and_attachements_and_any_other_parameters(): void
+    public function it_throws_a_BadRequestHttpException_if_the_request_has_statement_id_and_format_and_attachements_and_any_other_parameters(): void
     {
         $request = new Request();
         $request->query->set('statementId', StatementFixtures::DEFAULT_STATEMENT_ID);
@@ -70,7 +82,7 @@ class StatementGetControllerSpec extends ObjectBehavior
             ->during('getStatement', [$request]);
     }
 
-    public function it_throws_a_badrequesthttpexception_if_the_request_has_voided_statement_id_and_format_and_any_other_parameters_except_attachments(): void
+    public function it_throws_a_BadRequestHttpException_if_the_request_has_voided_statement_id_and_format_and_any_other_parameters_except_attachments(): void
     {
         $request = new Request();
         $request->query->set('voidedStatementId', StatementFixtures::DEFAULT_STATEMENT_ID);
@@ -82,7 +94,7 @@ class StatementGetControllerSpec extends ObjectBehavior
             ->during('getStatement', [$request]);
     }
 
-    public function it_throws_a_badrequesthttpexception_if_the_request_has_statement_id_and_attachments_and_any_other_parameters_except_format(): void
+    public function it_throws_a_BadRequestHttpException_if_the_request_has_statement_id_and_attachments_and_any_other_parameters_except_format(): void
     {
         $request = new Request();
         $request->query->set('statementId', StatementFixtures::DEFAULT_STATEMENT_ID);
@@ -94,7 +106,7 @@ class StatementGetControllerSpec extends ObjectBehavior
             ->during('getStatement', [$request]);
     }
 
-    public function it_throws_a_badrequesthttpexception_if_the_request_has_voided_statement_id_and_any_other_parameters_except_format_and_attachments(): void
+    public function it_throws_a_BadRequestHttpException_if_the_request_has_voided_statement_id_and_any_other_parameters_except_format_and_attachments(): void
     {
         $request = new Request();
         $request->query->set('voidedStatementId', StatementFixtures::DEFAULT_STATEMENT_ID);
@@ -149,15 +161,15 @@ class StatementGetControllerSpec extends ObjectBehavior
         $this->getStatement($request)->shouldReturnAnInstanceOf(MultipartResponse::class);
     }
 
-    public function it_returns_a_jsonresponse_if_attachments_parameter_is_false_or_not_set(): void
+    public function it_returns_a_XapiJsonResponse_if_attachments_parameter_is_false_or_not_set(): void
     {
         $request = new Request();
 
-        $this->getStatement($request)->shouldReturnAnInstanceOf(JsonResponse::class);
+        $this->getStatement($request)->shouldReturnAnInstanceOf(XapiJsonResponse::class);
 
         $request->query->set('attachments', false);
 
-        $this->getStatement($request)->shouldReturnAnInstanceOf(JsonResponse::class);
+        $this->getStatement($request)->shouldReturnAnInstanceOf(XapiJsonResponse::class);
     }
 
     public function it_should_fetch_a_statement(StatementRepositoryInterface $statementRepository): void

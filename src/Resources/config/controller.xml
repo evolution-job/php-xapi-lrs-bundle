@@ -26,7 +26,17 @@
             <tag name="controller.service_arguments"/>
         </service>
 
+        <service id="xapi_lrs.controller.state.post" class="XApi\LrsBundle\Controller\StatePostController">
+            <argument type="service" id="xapi_lrs.repository.state"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+
         <service id="xapi_lrs.controller.state.put" class="XApi\LrsBundle\Controller\StatePutController">
+            <argument type="service" id="xapi_lrs.repository.state"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <service id="xapi_lrs.controller.state.delete" class="XApi\LrsBundle\Controller\StateDeleteController">
             <argument type="service" id="xapi_lrs.repository.state"/>
             <tag name="controller.service_arguments"/>
         </service>

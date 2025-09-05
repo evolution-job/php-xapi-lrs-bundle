@@ -11,6 +11,7 @@
 
 namespace XApi\LrsBundle;
 
+use Override;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use XApi\LrsBundle\DependencyInjection\XApiLrsExtension;
@@ -20,6 +21,7 @@ use XApi\LrsBundle\DependencyInjection\XApiLrsExtension;
  */
 class XApiLrsBundle extends Bundle
 {
+    #[Override]
     public function getContainerExtension(): ?ExtensionInterface
     {
         return new XApiLrsExtension();
