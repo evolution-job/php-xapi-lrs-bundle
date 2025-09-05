@@ -17,12 +17,19 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Xabbuh\XApi\Model\StatementId;
 
+/**
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
+ */
 final class StatementOptionsController
 {
     public function optionsStatement(Request $request): Response
     {
-        if (null === $statementId = $request->query->get('statementId')) {
+        if (!$statementId = $request->query->all()['statementId'] ?? null) {
             throw new BadRequestHttpException('Required statementId parameter is missing.');
+        }
+
+        if (!is_string($statementId)) {
+            throw new BadRequestHttpException('Required statementId parameter is not a string.');
         }
 
         try {
@@ -31,6 +38,6 @@ final class StatementOptionsController
             throw new BadRequestHttpException(sprintf('Parameter statementId ("%s") is not a valid UUID.', $statementId), $invalidArgumentException);
         }
 
-        return new Response('', 204);
+        return new Response('', Response::HTTP_NO_CONTENT);
     }
 }

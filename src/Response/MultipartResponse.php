@@ -11,7 +11,8 @@
 
 namespace XApi\LrsBundle\Response;
 
-use LogicException;
+use Override;
+use Symfony\Component\HttpFoundation\Exception\LogicException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,7 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
  */
-class MultipartResponse extends Response
+class MultipartResponse extends JsonResponse
 {
     protected ?string $subtype = null;
 
@@ -28,14 +29,10 @@ class MultipartResponse extends Response
     /**
      * @var Response[]
      */
-    protected $parts;
+    protected array $parts;
 
     /**
-     * @param JsonResponse $jsonResponse
      * @param AttachmentResponse[] $attachmentsParts
-     * @param int $status
-     * @param array $headers
-     * @param null|string $subtype
      */
     public function __construct(
         protected JsonResponse $jsonResponse,
@@ -79,10 +76,8 @@ class MultipartResponse extends Response
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function prepare(Request $request): MultipartResponse|Response
+    #[Override]
+    public function prepare(Request $request): static
     {
         foreach ($this->parts as $part) {
             $part->prepare($request);
@@ -94,10 +89,8 @@ class MultipartResponse extends Response
         return parent::prepare($request);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function sendContent(): MultipartResponse|Response|static
+    #[Override]
+    public function sendContent(): static
     {
         $content = '';
         foreach ($this->parts as $part) {
@@ -115,22 +108,44 @@ class MultipartResponse extends Response
     }
 
     /**
-     * {@inheritdoc}
-     *
      * @throws LogicException when the content is not null
      */
-    public function setContent($content): void
+    #[Override]
+    public function setContent($content): static
     {
-        if (null !== $content) {
+        if ($content === '{}') {
+            return $this;
+        }
+
+        if (!empty($content)) {
             throw new LogicException('The content cannot be set on a MultipartResponse instance.');
         }
+
+        return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getContent(): bool
+    #[Override]
+    public function getContent(): false|string
     {
         return false;
+    }
+
+    #[Override]
+    protected function update(): static
+    {
+        if (null !== $this->callback) {
+            // Not using application/javascript for compatibility reasons with older browsers.
+            $this->headers->set('Content-Type', 'text/javascript');
+
+            return $this->setContent(\sprintf('/**/%s(%s);', $this->callback, $this->data));
+        }
+
+        // Only set the header when there is none or when it equals 'text/javascript' (from a previous update with callback)
+        // in order to not overwrite a custom definition.
+        if (!$this->headers->has('Content-Type') || 'text/javascript' === $this->headers->get('Content-Type')) {
+            $this->headers->set('Content-Type', 'application/json');
+        }
+
+        return $this;
     }
 }

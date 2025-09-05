@@ -12,27 +12,31 @@
 namespace XApi\LrsBundle\Controller;
 
 use DateTime;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Model\State;
 use XApi\Repository\Api\StateRepositoryInterface;
 use XApi\Repository\Doctrine\Mapping\State as MappedState;
 
-final class StateGetController
+/**
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
+ */
+final readonly class StateGetController
 {
-    public function __construct(private readonly StateRepositoryInterface $stateRepository) {}
+    public function __construct(private StateRepositoryInterface $stateRepository) { }
 
-    public function getState(State $state): Response
+    public function getState(State $state): JsonResponse
     {
-        $mappedState = $this->stateRepository->findState([
-            "stateId"        => $state->getStateId(),
-            "activityId"     => $state->getActivity()->getId()->getValue(),
-            "registrationId" => $state->getRegistrationId()
+        $foundState = $this->stateRepository->findState([
+            'stateId'        => $state->getStateId(),
+            'activityId'     => $state->getActivity()->getId()->getValue(),
+            'registrationId' => $state->getRegistrationId()
         ]);
 
-        if ($mappedState instanceof MappedState) {
-            $response = new Response($mappedState->data, Response::HTTP_OK, []);
+        if ($foundState instanceof State) {
+            $response = new JsonResponse($foundState->getData(), Response::HTTP_OK);
         } else {
-            $response = new Response('', Response::HTTP_NOT_FOUND, []);
+            $response = new JsonResponse('', Response::HTTP_NOT_FOUND);
         }
 
         $dateTime = new DateTime();

@@ -12,19 +12,23 @@
 namespace XApi\LrsBundle\Controller;
 
 use DateTime;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Xabbuh\XApi\Model\State;
 use XApi\Repository\Api\StateRepositoryInterface;
 
-final class StatePutController
-{
-    public function __construct(private readonly StateRepositoryInterface $stateRepository) {}
 
-    public function putState(State $state): Response
+/**
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
+ */
+final readonly class StatePutController
+{
+    public function __construct(private StateRepositoryInterface $stateRepository) { }
+
+    public function putState(State $state): JsonResponse
     {
         $this->stateRepository->storeState($state);
 
-        $response = new Response();
+        $response = new JsonResponse();
         $dateTime = new DateTime();
         $response->headers->set('X-Experience-API-Consistent-Through', $dateTime->format('Y-m-d\TH:i:sP'));
 

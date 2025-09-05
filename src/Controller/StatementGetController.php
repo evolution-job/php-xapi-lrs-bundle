@@ -36,16 +36,16 @@ use XApi\Repository\Api\StatementRepositoryInterface;
 final class StatementGetController
 {
     private static array $notAllowed = [
-        'agent'              => true,
-        'verb'               => true,
         'activity'           => true,
+        'agent'              => true,
+        'ascending'          => true,
+        'limit'              => true,
         'registration'       => true,
         'related_activities' => true,
         'related_agents'     => true,
         'since'              => true,
         'until'              => true,
-        'limit'              => true,
-        'ascending'          => true,
+        'verb'               => true,
     ];
 
     public function __construct(
@@ -90,9 +90,7 @@ final class StatementGetController
     }
 
     /**
-     * @param Statement $statement
      * @param bool $includeAttachments true to include the attachments in the response, false otherwise
-     * @return JsonResponse|MultipartResponse
      * @throws UnsupportedStatementVersionException
      */
     protected function buildSingleStatementResponse(Statement $statement, bool $includeAttachments = false): JsonResponse|MultipartResponse
@@ -117,19 +115,18 @@ final class StatementGetController
     /**
      * @param Statement[] $statements
      * @param bool $includeAttachments true to include the attachments in the response, false otherwise
-     * @return JsonResponse|MultipartResponse
      */
     protected function buildMultiStatementsResponse(array $statements, bool $includeAttachments = false): JsonResponse|MultipartResponse
     {
         $json = $this->statementResultSerializer->serializeStatementResult(new StatementResult($statements));
 
-        $response = new JsonResponse($json, 200, [], true);
+        $jsonResponse = new JsonResponse($json, 200, [], true);
 
         if ($includeAttachments) {
-            $response = $this->buildMultipartResponse($response, $statements);
+            return $this->buildMultipartResponse($jsonResponse, $statements);
         }
 
-        return $response;
+        return $jsonResponse;
     }
 
     /**
@@ -150,6 +147,7 @@ final class StatementGetController
 
     /**
      * Validate the parameters.
+     *
      * @throws BadRequestHttpException if the parameters does not comply with the xAPI specification
      */
     private function validate(ParameterBag $parameterBag): void
