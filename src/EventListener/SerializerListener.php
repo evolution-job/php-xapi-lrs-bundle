@@ -6,6 +6,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Xabbuh\XApi\Common\Exception\UnsupportedStatementVersionException;
+use Xabbuh\XApi\Serializer\Exception\DeserializationException;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use Xabbuh\XApi\Serializer\StateSerializerInterface;
 
@@ -37,7 +38,7 @@ readonly class SerializerListener
                     $request->attributes->set('statement', $this->statementSerializer->deserializeStatement($request->getContent() ?? ''));
                     break;
             }
-        } catch (UnsupportedStatementVersionException|InvalidArgumentException $unsupportedStatementVersionException) {
+        } catch (UnsupportedStatementVersionException|InvalidArgumentException|DeserializationException $unsupportedStatementVersionException) {
             throw new BadRequestHttpException(sprintf('The content of the request cannot be deserialized into a valid xAPI %s.', $request->attributes->get('xapi_serializer')), $unsupportedStatementVersionException);
         }
     }
