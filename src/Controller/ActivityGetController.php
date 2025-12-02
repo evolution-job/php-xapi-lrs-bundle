@@ -11,7 +11,6 @@
 
 namespace XApi\LrsBundle\Controller;
 
-use XApi\LrsBundle\Response\XapiJsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -19,6 +18,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\Model\IRI;
 use Xabbuh\XApi\Serializer\ActivitySerializerInterface;
+use XApi\LrsBundle\Response\XapiJsonResponse;
 use XApi\Repository\Api\ActivityRepositoryInterface;
 
 /**
@@ -26,7 +26,6 @@ use XApi\Repository\Api\ActivityRepositoryInterface;
  */
 final readonly class ActivityGetController
 {
-
     public function __construct(
         private ActivityRepositoryInterface $activityRepository,
         private ActivitySerializerInterface $activitySerializer

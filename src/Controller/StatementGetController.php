@@ -13,7 +13,6 @@ namespace XApi\LrsBundle\Controller;
 
 use DateTime;
 use DateTimeInterface;
-use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,17 +37,23 @@ use XApi\Repository\Api\StatementRepositoryInterface;
  */
 final class StatementGetController
 {
-    private static array $notAllowed = [
+    private const int SERVER_LIMIT = 1000;
+
+    protected static array $getParameters = [
         'activity'           => true,
         'agent'              => true,
         'ascending'          => true,
+        'attachments'       => true,
+        'format'            => true,
         'limit'              => true,
         'registration'       => true,
         'related_activities' => true,
         'related_agents'     => true,
         'since'              => true,
+        'statementId'       => true,
         'until'              => true,
         'verb'               => true,
+        'voidedStatementId' => true,
     ];
 
     public function __construct(
@@ -63,18 +68,18 @@ final class StatementGetController
      */
     public function getStatement(Request $request): Response
     {
-        $query = $request->query;
+        $query = new ParameterBag(array_intersect_key($request->query->all(), self::$getParameters));
 
         $this->validate($query);
 
         $includeAttachments = $query->filter('attachments', false, FILTER_VALIDATE_BOOLEAN);
 
         try {
-            if (($statementId = $query->get('statementId')) !== null) {
+            if (null !== ($statementId = $query->get('statementId'))) {
                 // Unique
                 $statement = $this->statementRepository->findStatementById(StatementId::fromString($statementId));
                 $response = $this->buildSingleStatementResponse($statement, $includeAttachments);
-            } elseif (($voidedStatementId = $query->get('voidedStatementId')) !== null) {
+            } elseif (null !== ($voidedStatementId = $query->get('voidedStatementId'))) {
                 // Voided
                 $statement = $this->statementRepository->findVoidedStatementById(StatementId::fromString($voidedStatementId));
                 $response = $this->buildSingleStatementResponse($statement, $includeAttachments);
@@ -92,6 +97,39 @@ final class StatementGetController
         $response->headers->set('X-Experience-API-Consistent-Through', $dateTime->format(DateTimeInterface::ATOM));
 
         return $response;
+    }
+
+    /**
+     * @param Statement[] $statements
+     */
+    protected function buildMultipartResponse(XapiJsonResponse $xApiJsonResponse, array $statements): MultipartResponse
+    {
+        $attachmentsParts = [];
+
+        foreach ($statements as $statement) {
+            foreach ((array)$statement->getAttachments() as $attachment) {
+                $attachmentsParts[] = new AttachmentResponse($attachment);
+            }
+        }
+
+        return new MultipartResponse($xApiJsonResponse, $attachmentsParts);
+    }
+
+    /**
+     * @param Statement[] $statements
+     * @param bool $includeAttachments true to include the attachments in the response, false otherwise
+     */
+    protected function buildMultiStatementsResponse(array $statements, bool $includeAttachments = false): XapiJsonResponse|MultipartResponse
+    {
+        $json = $this->statementResultSerializer->serializeStatementResult(new StatementResult($statements));
+
+        $xApiJsonResponse = new XapiJsonResponse($json, 200, [], true);
+
+        if ($includeAttachments) {
+            return $this->buildMultipartResponse($xApiJsonResponse, $statements);
+        }
+
+        return $xApiJsonResponse;
     }
 
     /**
@@ -117,70 +155,44 @@ final class StatementGetController
         return $response;
     }
 
-    /**
-     * @param Statement[] $statements
-     * @param bool $includeAttachments true to include the attachments in the response, false otherwise
-     */
-    protected function buildMultiStatementsResponse(array $statements, bool $includeAttachments = false): XapiJsonResponse|MultipartResponse
+    protected function createStatementsFilters(ParameterBag $query): StatementsFilter
     {
-        $json = $this->statementResultSerializer->serializeStatementResult(new StatementResult($statements));
+        $limit = $query->getInt('limit');
 
-        $xApiJsonResponse = new XapiJsonResponse($json, 200, [], true);
-
-        if ($includeAttachments) {
-            return $this->buildMultipartResponse($xApiJsonResponse, $statements);
+        if (0 === $limit || self::SERVER_LIMIT < $limit) {
+            $query->set('limit', self::SERVER_LIMIT);
         }
 
-        return $xApiJsonResponse;
+        return $this->statementsFilterFactory->createFromParameterBag($query);
     }
 
     /**
-     * @param Statement[] $statements
-     */
-    protected function buildMultipartResponse(XapiJsonResponse $xApiJsonResponse, array $statements): MultipartResponse
-    {
-        $attachmentsParts = [];
-
-        foreach ($statements as $statement) {
-            foreach ((array)$statement->getAttachments() as $attachment) {
-                $attachmentsParts[] = new AttachmentResponse($attachment);
-            }
-        }
-
-        return new MultipartResponse($xApiJsonResponse, $attachmentsParts);
-    }
-
-    /**
-     * Validate the parameters.
+     * Validate the Query parameters.
      *
      * @throws BadRequestHttpException if the parameters does not comply with the xAPI specification
      */
-    private function validate(ParameterBag $parameterBag): void
+    protected function validate(ParameterBag $query): void
     {
-        $hasStatementId = $parameterBag->has('statementId');
-        $hasVoidedStatementId = $parameterBag->has('voidedStatementId');
+        $hasStatementId = $query->has('statementId');
+        $hasVoidedStatementId = $query->has('voidedStatementId');
 
         if ($hasStatementId && $hasVoidedStatementId) {
             throw new BadRequestHttpException('Request must not have both statementId and voidedStatementId parameters at the same time.');
         }
 
-        if ($hasStatementId || $hasVoidedStatementId) {
-            $badKeys = array_intersect_key($parameterBag->all(), self::$notAllowed);
+        $queryParameters = $query->all();
+        unset(
+            $queryParameters['attachments'],
+            $queryParameters['format'],
+            $queryParameters['statementId'],
+            $queryParameters['voidedStatementId'],
+        );
 
-            if ([] !== $badKeys) {
-                throw new BadRequestHttpException(sprintf('Cannot have "%s" parameters. Only "format" and/or "attachments" are allowed with "statementId" or "voidedStatementId".', implode('", "', array_keys($badKeys))));
-            }
+        if (($hasStatementId || $hasVoidedStatementId) && count($queryParameters)) {
+
+            $badParameters = implode('", "', array_keys($queryParameters));
+
+            throw new BadRequestHttpException(sprintf('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "%s" besides "attachments" or "format".', $badParameters));
         }
-    }
-
-    private function createStatementsFilters(InputBag $query): StatementsFilter
-    {
-        $limit = $query->getInt('limit');
-
-        if ($limit === 0 || $limit > 1000) {
-            $query->set('limit', 1000); // Server limit
-        }
-
-        return $this->statementsFilterFactory->createFromParameterBag($query);
     }
 }

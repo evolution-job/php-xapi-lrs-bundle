@@ -22,6 +22,7 @@ use XApi\LrsBundle\Response\XapiJsonResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
 /**
+ * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
 final readonly class StatementPostController
@@ -56,6 +57,15 @@ final readonly class StatementPostController
         return new XapiJsonResponse($uuids, Response::HTTP_OK);
     }
 
+    private function resolveStatement(Statement $statement): Statement
+    {
+        if (!$statement->getId() instanceof StatementId) {
+            throw new BadRequestHttpException(sprintf('Parameter statementId ("%s") is not a valid UUID.', $statement->getId()?->getValue()));
+        }
+
+        return $statement;
+    }
+
     private function storeStatement(Statement $statement): void
     {
         try {
@@ -67,14 +77,5 @@ final readonly class StatementPostController
         } catch (NotFoundException) {
             $this->statementRepository->storeStatement($statement);
         }
-    }
-
-    private function resolveStatement(Statement $statement): Statement
-    {
-        if (!$statement->getId() instanceof StatementId) {
-            throw new BadRequestHttpException(sprintf('Parameter statementId ("%s") is not a valid UUID.', $statement->getId()?->getValue()));
-        }
-
-        return $statement;
     }
 }

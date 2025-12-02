@@ -78,7 +78,7 @@ class StatementGetControllerSpec extends ObjectBehavior
         $request->query->set('related_agents', false);
 
         $this
-            ->shouldThrow(new BadRequestHttpException('Cannot have "related_agents" parameters. Only "format" and/or "attachments" are allowed with "statementId" or "voidedStatementId".'))
+            ->shouldThrow(new BadRequestHttpException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "related_agents" besides "attachments" or "format".'))
             ->during('getStatement', [$request]);
     }
 
@@ -90,7 +90,7 @@ class StatementGetControllerSpec extends ObjectBehavior
         $request->query->set('related_agents', false);
 
         $this
-            ->shouldThrow(new BadRequestHttpException('Cannot have "related_agents" parameters. Only "format" and/or "attachments" are allowed with "statementId" or "voidedStatementId".'))
+            ->shouldThrow(new BadRequestHttpException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "related_agents" besides "attachments" or "format".'))
             ->during('getStatement', [$request]);
     }
 
@@ -102,7 +102,7 @@ class StatementGetControllerSpec extends ObjectBehavior
         $request->query->set('related_agents', false);
 
         $this
-            ->shouldThrow(new BadRequestHttpException('Cannot have "related_agents" parameters. Only "format" and/or "attachments" are allowed with "statementId" or "voidedStatementId".'))
+            ->shouldThrow(new BadRequestHttpException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "related_agents" besides "attachments" or "format".'))
             ->during('getStatement', [$request]);
     }
 
@@ -113,7 +113,7 @@ class StatementGetControllerSpec extends ObjectBehavior
         $request->query->set('related_agents', false);
 
         $this
-            ->shouldThrow(new BadRequestHttpException('Cannot have "related_agents" parameters. Only "format" and/or "attachments" are allowed with "statementId" or "voidedStatementId".'))
+            ->shouldThrow(new BadRequestHttpException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "related_agents" besides "attachments" or "format".'))
             ->during('getStatement', [$request]);
     }
 
