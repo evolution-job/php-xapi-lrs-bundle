@@ -16,7 +16,7 @@ use Override;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 /**
  * @author Christian Flothmann <christian.flothmann@xabbuh.de>
@@ -31,28 +31,27 @@ final class XApiLrsExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $xmlFileLoader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $yamlFileLoader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
 
-        $xmlFileLoader->load('controller.xml');
-        $xmlFileLoader->load('event_listener.xml');
-        $xmlFileLoader->load('factory.xml');
-        $xmlFileLoader->load('serializer.xml');
+        $yamlFileLoader->load('controller.yaml');
+        $yamlFileLoader->load('event_listener.yaml');
+        $yamlFileLoader->load('factory.yaml');
+        $yamlFileLoader->load('serializer.yaml');
 
         switch ($config['type']) {
             case 'in_memory':
                 break;
             case 'mongodb':
-                $xmlFileLoader->load('doctrine.xml');
-                $xmlFileLoader->load('mongodb.xml');
-
+                $yamlFileLoader->load('doctrine.yaml');
+                
                 $container->setAlias('xapi_lrs.doctrine.object_manager', $config['object_manager_service']);
                 $container->setAlias('xapi_lrs.repository.activity', 'xapi_lrs.repository.activity.doctrine');
                 $container->setAlias('xapi_lrs.repository.state', 'xapi_lrs.repository.state.doctrine');
                 $container->setAlias('xapi_lrs.repository.statement', 'xapi_lrs.repository.statement.doctrine');
                 break;
             case 'orm':
-                $xmlFileLoader->load('doctrine.xml');
-                $xmlFileLoader->load('orm.xml');
+                $yamlFileLoader->load('doctrine.yaml');
+                $yamlFileLoader->load('orm.yaml');
 
                 $container->setAlias('xapi_lrs.doctrine.object_manager', $config['object_manager_service']);
                 $container->setAlias('xapi_lrs.repository.activity', 'xapi_lrs.repository.activity.doctrine');

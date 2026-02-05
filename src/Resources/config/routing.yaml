@@ -1,0 +1,85 @@
+# Activity
+xapi_lrs.activity.get:
+    path: /activities
+    methods: [ GET ]
+    defaults:
+        _controller: 'xapi_lrs.controller.activity.get::getActivity'
+        xapi_lrs.route: true
+
+xapi_lrs.activities.options:
+    path: /activities
+    methods: [ OPTIONS ]
+    defaults:
+        _controller: 'xapi_lrs.controller.activity.options::optionsActivity'
+        xapi_lrs.route: true
+
+# State
+xapi_lrs.state.get:
+    path: /activities/state
+    methods: [ GET ]
+    defaults:
+        _controller: 'xapi_lrs.controller.state.get::getState'
+        xapi_serializer: state
+        xapi_lrs.route: true
+
+xapi_lrs.state.options:
+    path: /activities/state
+    methods: [ OPTIONS ]
+    defaults:
+        _controller: 'xapi_lrs.controller.state.options::optionsState'
+        xapi_lrs.route: true
+
+xapi_lrs.state.post:
+    path: /activities/state
+    methods: [ POST ]
+    defaults:
+        _controller: 'xapi_lrs.controller.state.post::postState'
+        xapi_serializer: state
+        xapi_lrs.route: true
+
+xapi_lrs.state.put:
+    path: /activities/state
+    methods: [ PUT ]
+    defaults:
+        _controller: 'xapi_lrs.controller.state.put::putState'
+        xapi_serializer: state
+        xapi_lrs.route: true
+
+xapi_lrs.state.delete:
+    path: /activities/state
+    methods: [ DELETE ]
+    defaults:
+        _controller: 'xapi_lrs.controller.state.delete::deleteState'
+        xapi_serializer: state
+        xapi_lrs.route: true
+
+# Statement
+xapi_lrs.statement.get:
+    path: /statements
+    methods: [ GET ]
+    defaults:
+        _controller: 'xapi_lrs.controller.statement.get::getStatement'
+        xapi_lrs.route: true
+
+xapi_lrs.statement.options:
+    path: /statements
+    methods: [ OPTIONS ]
+    defaults:
+        _controller: 'xapi_lrs.controller.statement.options::optionsStatement'
+        xapi_lrs.route: true
+
+xapi_lrs.statement.post:
+    path: /statements
+    methods: [ POST ]
+    defaults:
+        _controller: 'xapi_lrs.controller.statement.post::postStatement'
+        xapi_serializer: statement
+        xapi_lrs.route: true
+
+xapi_lrs.statement.put:
+    path: /statements
+    methods: [ PUT ]
+    defaults:
+        _controller: 'xapi_lrs.controller.statement.put::putStatement'
+        xapi_serializer: statement
+        xapi_lrs.route: true

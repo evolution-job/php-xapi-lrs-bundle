@@ -1,0 +1,5 @@
+services:
+    xapi_lrs.factory.statements_filter:
+        class: XApi\LrsBundle\Model\StatementsFilterFactory
+        arguments:
+            - '@xapi_lrs.actor.serializer'

@@ -1,0 +1,50 @@
+services:
+    # State Repository
+    xapi_lrs.doctrine.state.class_metadata:
+        class: Doctrine\ORM\Mapping\ClassMetadata
+        public: false
+        factory: [ '@xapi_lrs.doctrine.object_manager', 'getClassMetadata' ]
+        arguments:
+            - 'XApi\Repository\Doctrine\Mapping\State'
+
+    xapi_lrs.repository.mapped_state:
+        class: XApi\Repository\ORM\StateRepository
+        public: false
+        arguments:
+            - '@xapi_lrs.doctrine.object_manager'
+            - '@xapi_lrs.doctrine.state.class_metadata'
+
+    # Statement Repository
+    xapi_lrs.doctrine.statement.class_metadata:
+        class: Doctrine\ORM\Mapping\ClassMetadata
+        public: false
+        factory: [ '@xapi_lrs.doctrine.object_manager', 'getClassMetadata' ]
+        arguments:
+            - 'XApi\Repository\Doctrine\Mapping\Statement'
+
+    xapi_lrs.repository.mapped_statement:
+        class: XApi\Repository\ORM\StatementRepository
+        public: false
+        arguments:
+            - '@xapi_lrs.doctrine.object_manager'
+            - '@xapi_lrs.doctrine.statement.class_metadata'
+
+    # StatementObject Repository
+    xapi_lrs.doctrine.statementObject.class_metadata:
+        class: Doctrine\ORM\Mapping\ClassMetadata
+        public: false
+        factory: [ '@xapi_lrs.doctrine.object_manager', 'getClassMetadata' ]
+        arguments:
+            - 'XApi\Repository\Doctrine\Mapping\StatementObject'
+
+    xapi_lrs.repository.mapped_statementObject:
+        class: XApi\Repository\ORM\StatementObjectRepository
+        public: false
+        arguments:
+            - '@xapi_lrs.doctrine.object_manager'
+            - '@xapi_lrs.doctrine.statementObject.class_metadata'
+
+    # Quote Strategy for Doctrine ORM
+    xapi_lrs.doctrine.orm.quote.strategy:
+        class: XApi\Repository\ORM\QuoteStrategy
+        public: false

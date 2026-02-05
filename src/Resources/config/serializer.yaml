@@ -1,0 +1,46 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    xapi_lrs.serializer:
+        class: Symfony\Component\Serializer\SerializerInterface
+        factory: [ 'Xabbuh\XApi\Serializer\Symfony\Serializer', 'createSerializer' ]
+
+    xapi_lrs.serializer.factory:
+        class: Xabbuh\XApi\Serializer\Symfony\SerializerFactory
+        arguments:
+            - '@xapi_lrs.serializer'
+
+    xapi_lrs.activity.serializer:
+        class: Xabbuh\XApi\Serializer\ActivitySerializerInterface
+        factory: [ '@xapi_lrs.serializer.factory', 'createActivitySerializer' ]
+
+    xapi_lrs.actor.serializer:
+        class: Xabbuh\XApi\Serializer\ActorSerializerInterface
+        factory: [ '@xapi_lrs.serializer.factory', 'createActorSerializer' ]
+
+    xapi_lrs.document_data.serializer:
+        class: Xabbuh\XApi\Serializer\DocumentDataSerializerInterface
+        factory: [ '@xapi_lrs.serializer.factory', 'createDocumentDataSerializer' ]
+
+    xapi_lrs.state.serializer:
+        class: Xabbuh\XApi\Serializer\StateSerializerInterface
+        factory: [ '@xapi_lrs.serializer.factory', 'createStateSerializer' ]
+
+    xapi_lrs.state.document.serializer:
+        class: Xabbuh\XApi\Serializer\StateDocumentSerializerInterface
+        factory: [ '@xapi_lrs.serializer.factory', 'createStateDocumentSerializer' ]
+
+    xapi_lrs.state.person.serializer:
+        class: Xabbuh\XApi\Serializer\PersonSerializerInterface
+        factory: [ '@xapi_lrs.serializer.factory', 'createPersonSerializer' ]
+
+    xapi_lrs.statement.serializer:
+        class: Xabbuh\XApi\Serializer\StatementSerializerInterface
+        factory: [ '@xapi_lrs.serializer.factory', 'createStatementSerializer' ]
+
+    xapi_lrs.statement_result.serializer:
+        class: Xabbuh\XApi\Serializer\StatementResultSerializerInterface
+        factory: [ '@xapi_lrs.serializer.factory', 'createStatementResultSerializer' ]
