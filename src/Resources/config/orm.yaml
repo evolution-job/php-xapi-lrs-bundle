@@ -43,8 +43,3 @@ services:
         arguments:
             - '@xapi_lrs.doctrine.object_manager'
             - '@xapi_lrs.doctrine.statementObject.class_metadata'
-
-    # Quote Strategy for Doctrine ORM
-    xapi_lrs.doctrine.orm.quote.strategy:
-        class: XApi\Repository\ORM\QuoteStrategy
-        public: false

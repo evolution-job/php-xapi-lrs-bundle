@@ -74,7 +74,7 @@
         "php-xapi/model": "^4.0",
         "php-xapi/repository-api": "^0.6",
         "php-xapi/repository-doctrine": "^0.6",
-        "php-xapi/repository-doctrine-orm": "^0.4",
+        "php-xapi/repository-doctrine-orm": "^0.5",
         "php-xapi/serializer": "^5.0",
         "php-xapi/symfony-serializer": "^6.0",
         "ramsey/uuid": "^4.0",
