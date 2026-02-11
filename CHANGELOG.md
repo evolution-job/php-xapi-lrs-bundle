@@ -1,10 +1,20 @@
 CHANGELOG
 =========
 
+0.6.2
+-----
+
+- fix `VersionListener`: requests with method OPTIONS don't need to include `X-Experience-API-Version` header
+
+0.6.1
+-----
+
+- dropped `xapi_lrs.doctrine.orm.quote.strategy` service
+- dropped support for `xapi/repository-doctrine-orm` < `0.5`
+
 0.6.0
 -----
 
-- dropped QuoteStrategy service
 - dropped support for Symfony < `7.4`
 
 0.5.0
@@ -24,7 +34,7 @@ CHANGELOG
 
 - dropped support for PHP < `8.1`
 - dropped support for Symfony < `5.4`
-- Service `xapi_lrs.doctrine.orm.quote.strategy` updated (QuoteStrategy from xapi/repository-doctrine-orm)
+- added Service `xapi_lrs.doctrine.orm.quote.strategy` updated (`QuoteStrategy` from xapi/repository-doctrine-orm)
 - All dependencies from php-xapi/* are now loaded from forks at `https://github.com/evolution-job/`
 
 0.2.0

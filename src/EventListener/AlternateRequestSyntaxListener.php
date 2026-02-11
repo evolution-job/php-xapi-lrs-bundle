@@ -32,7 +32,7 @@ class AlternateRequestSyntaxListener
             return;
         }
 
-        if (Request::METHOD_POST !== $request->getMethod()) {
+        if (false === $request->isMethod(Request::METHOD_POST)) {
             return;
         }
 

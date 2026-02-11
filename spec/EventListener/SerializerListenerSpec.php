@@ -45,6 +45,7 @@ class SerializerListenerSpec extends ObjectBehavior
         $parameterBag->get('xapi_serializer')->willReturn('statement');
         $parameterBag->set('statement', $statement)->shouldBeCalled();
 
+        $request->isMethod(Request::METHOD_OPTIONS)->willReturn(false);
         $request->getContent()->shouldBeCalled()->willReturn($jsonString);
 
         $this->onKernelRequest($requestEvent);
@@ -55,6 +56,8 @@ class SerializerListenerSpec extends ObjectBehavior
         $statementSerializer->deserializeStatement('')->shouldBeCalled()->willThrow(InvalidArgumentException::class);
 
         $parameterBag->get('xapi_serializer')->willReturn('statement');
+        $request->isMethod(Request::METHOD_OPTIONS)->willReturn(false);
+        $request->getContent()->shouldBeCalled()->willReturn('');
 
         $request->attributes = $parameterBag;
 

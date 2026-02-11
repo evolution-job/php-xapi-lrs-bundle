@@ -11,6 +11,7 @@
 
 namespace XApi\LrsBundle\EventListener;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -33,6 +34,10 @@ class VersionListener
         $request = $requestEvent->getRequest();
 
         if (!$request->attributes->has('xapi_lrs.route')) {
+            return;
+        }
+
+        if ($request->isMethod(Request::METHOD_OPTIONS)) {
             return;
         }
 

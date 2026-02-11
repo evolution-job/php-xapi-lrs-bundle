@@ -50,6 +50,7 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
     {
         $parameterBag->get('method')->shouldNotBeCalled();
         $request->getMethod()->willReturn('GET');
+        $request->isMethod(Request::METHOD_POST)->willReturn(false);
 
         $this->onKernelRequest($requestEvent)->shouldReturn(null);
     }
@@ -58,6 +59,7 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
     {
         $parameterBag->get('method')->shouldNotBeCalled();
         $request->getMethod()->willReturn('PUT');
+        $request->isMethod(Request::METHOD_POST)->willReturn(false);
 
         $this->onKernelRequest($requestEvent)->shouldReturn(null);
     }
@@ -77,6 +79,7 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
     public function it_sets_the_request_method_equals_to_method_query_parameter(RequestEvent $requestEvent, Request $request, ParameterBag $parameterBag): void
     {
         $parameterBag->has('xapi_lrs.route')->shouldBeCalled()->willReturn(true);
+        $request->isMethod(Request::METHOD_POST)->willReturn(true);
 
         $request->attributes = $parameterBag;
 
@@ -106,6 +109,7 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
 
         $request->request = new InputBag($headerList);
         $request->query = new InputBag(['method' => 'GET']);
+        $request->isMethod(Request::METHOD_POST)->willReturn(true);
         $request->setMethod('GET')->shouldBeCalled();
 
         $requestEvent->getRequest()->willReturn($request);
@@ -126,6 +130,7 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
         $request->request = new InputBag(['content' => 'a content']);
         $request->server = $serverBag;
 
+        $request->isMethod(Request::METHOD_POST)->willReturn(true);
         $request->setMethod('POST')->shouldBeCalled();
 
         $request->initialize(

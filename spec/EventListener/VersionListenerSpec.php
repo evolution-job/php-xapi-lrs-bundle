@@ -49,6 +49,8 @@ class VersionListenerSpec extends ObjectBehavior
 
         $request->attributes = $parameterBag;
 
+        $request->isMethod(Request::METHOD_OPTIONS)->willReturn(false);
+
         $this->onKernelRequest($requestEvent)->shouldReturn(null);
 
         $responseEvent = new ResponseEvent(
@@ -61,18 +63,20 @@ class VersionListenerSpec extends ObjectBehavior
         $this->onKernelResponse($responseEvent)->shouldReturn(null);
     }
 
-    public function it_throws_a_BadRequestHttpException_if_no_X_Experience_API_Version_header_is_set(RequestEvent $requestEvent, HeaderBag $headerBag): void
+    public function it_throws_a_BadRequestHttpException_if_no_X_Experience_API_Version_header_is_set(RequestEvent $requestEvent, Request $request, HeaderBag $headerBag): void
     {
         $headerBag->get('X-Experience-API-Version')->shouldBeCalled()->willReturn(null);
+        $request->isMethod(Request::METHOD_OPTIONS)->willReturn(false);
         $this
             ->shouldThrow(new BadRequestHttpException('Missing required "X-Experience-API-Version" header.'))
             ->during('onKernelRequest', [$requestEvent]);
 
     }
 
-    public function it_throws_a_BadRequestHttpException_if_specified_version_is_not_supported(RequestEvent $requestEvent, HeaderBag $headerBag): void
+    public function it_throws_a_BadRequestHttpException_if_specified_version_is_not_supported(RequestEvent $requestEvent, Request $request, HeaderBag $headerBag): void
     {
         $headerBag->get('X-Experience-API-Version')->shouldBeCalled()->willReturn('0.9.5');
+        $request->isMethod(Request::METHOD_OPTIONS)->willReturn(false);
 
         $this
             ->shouldThrow(new BadRequestHttpException('xAPI version "0.9.5" is not supported.'))
@@ -85,16 +89,18 @@ class VersionListenerSpec extends ObjectBehavior
             ->during('onKernelRequest', [$requestEvent]);
     }
 
-    public function it_normalizes_the_X_Experience_API_Version_header(RequestEvent $requestEvent, HeaderBag $headerBag): void
+    public function it_normalizes_the_X_Experience_API_Version_header(RequestEvent $requestEvent, Request $request, HeaderBag $headerBag): void
     {
+        $request->isMethod(Request::METHOD_OPTIONS)->willReturn(false);
         $headerBag->get('X-Experience-API-Version')->shouldBeCalled()->willReturn('1.0');
         $headerBag->set('X-Experience-API-Version', '1.0.0')->shouldBeCalled();
 
         $this->onKernelRequest($requestEvent);
     }
 
-    public function it_returns_null_if_version_is_supported(RequestEvent $requestEvent, HeaderBag $headerBag): void
+    public function it_returns_null_if_version_is_supported(RequestEvent $requestEvent, Request $request, HeaderBag $headerBag): void
     {
+        $request->isMethod(Request::METHOD_OPTIONS)->willReturn(false);
         $headerBag->get('X-Experience-API-Version')->shouldBeCalled()->willReturn('1.0.0');
 
         $this->onKernelRequest($requestEvent)->shouldReturn(null);
