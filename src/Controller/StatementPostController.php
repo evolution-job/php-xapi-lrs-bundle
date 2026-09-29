@@ -35,14 +35,16 @@ final readonly class StatementPostController
 
         $this->storeStatement($statement);
 
-        return new XapiJsonResponse($statement->getId(), Response::HTTP_OK);
+        return new XapiJsonResponse($statement->getId()?->getValue(), Response::HTTP_OK);
     }
 
+    /**
+     * @param Statement[] $statements
+     */
     public function postStatements(array $statements): XapiJsonResponse
     {
         $uuids = [];
 
-        /** @var Statement $statement */
         foreach ($statements as $statement) {
 
             try {

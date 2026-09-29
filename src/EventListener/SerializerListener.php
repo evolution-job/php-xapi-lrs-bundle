@@ -55,12 +55,33 @@ readonly class SerializerListener
 
                 case 'statement':
 
-                    $request->attributes->set('statement', $this->statementSerializer->deserializeStatement($request->getContent() ?? ''));
+                    $content = $request->getContent() ?? '';
+                    $trimmedContent = ltrim($content);
 
+                    if (str_starts_with($trimmedContent, '[')) {
+                        // Collection of Statements
+                        $statements = $this->statementSerializer->deserializeStatements($content);
+                        $request->attributes->set('statements', $statements);
+                        $controller = $request->attributes->get('_controller');
+
+                        if (is_string($controller) && str_ends_with($controller, '::postStatement')) {
+                            $request->attributes->set('_controller', str_replace('::postStatement', '::postStatements', $controller));
+                        }
+
+                    } else {
+                        // Statement Object
+                        $request->attributes->set('statement', $this->statementSerializer->deserializeStatement($content));
+                    }
                     break;
             }
         } catch (UnsupportedStatementVersionException|InvalidArgumentException|DeserializationException|JsonException $unsupportedStatementVersionException) {
-            throw new BadRequestHttpException(sprintf('The content of the request cannot be deserialized into a valid xAPI %s.', $request->attributes->get('xapi_serializer')), $unsupportedStatementVersionException);
+            throw new BadRequestHttpException(
+                sprintf(
+                    'The content of the request cannot be deserialized into a valid xAPI %s.',
+                    $request->attributes->get('xapi_serializer')
+                ),
+                $unsupportedStatementVersionException
+            );
         }
     }
 }
