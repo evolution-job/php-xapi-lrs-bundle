@@ -11,10 +11,8 @@
 
 namespace XApi\LrsBundle\Controller;
 
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use XApi\LrsBundle\Response\XapiJsonResponse;
 
 
 /**
@@ -22,16 +20,14 @@ use XApi\LrsBundle\Response\XapiJsonResponse;
  */
 final class StateOptionsController
 {
-    public function optionsState(Request $request): XapiJsonResponse
+    public function optionsState(): JsonResponse
     {
-        if (!$stateId = $request->query->all()['stateId'] ?? null) {
-            throw new BadRequestHttpException('Required stateId parameter is missing.');
-        }
+        $headers = [
+            'Allow'                        => 'GET, HEAD, POST, PUT, DELETE',
+            'Access-Control-Allow-Methods' => 'GET, HEAD, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Experience-API-Version, X-Experience-API-Consistent-Through',
+        ];
 
-        if (!is_string($stateId)) {
-            throw new BadRequestHttpException('Required stateId parameter is not a string.');
-        }
-
-        return new XapiJsonResponse('', Response::HTTP_NO_CONTENT);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT, $headers);
     }
 }

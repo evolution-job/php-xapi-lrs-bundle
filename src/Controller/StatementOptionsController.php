@@ -11,34 +11,22 @@
 
 namespace XApi\LrsBundle\Controller;
 
-use InvalidArgumentException;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Xabbuh\XApi\Model\StatementId;
-use XApi\LrsBundle\Response\XapiJsonResponse;
 
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
 final class StatementOptionsController
 {
-    public function optionsStatement(Request $request): XapiJsonResponse
+    public function optionsStatement(): JsonResponse
     {
-        if (!$statementId = $request->query->all()['statementId'] ?? null) {
-            throw new BadRequestHttpException('Required statementId parameter is missing.');
-        }
+        $headers = [
+            'Allow'                        => 'GET, HEAD, POST, PUT',
+            'Access-Control-Allow-Methods' => 'GET, HEAD, POST, PUT, OPTIONS',
+            'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Experience-API-Version, X-Experience-API-Consistent-Through',
+        ];
 
-        if (!is_string($statementId)) {
-            throw new BadRequestHttpException('Required statementId parameter is not a string.');
-        }
-
-        try {
-            StatementId::fromString($statementId);
-        } catch (InvalidArgumentException $invalidArgumentException) {
-            throw new BadRequestHttpException(sprintf('Parameter statementId ("%s") is not a valid UUID.', $statementId), $invalidArgumentException);
-        }
-
-        return new XapiJsonResponse('', Response::HTTP_NO_CONTENT);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT, $headers);
     }
 }

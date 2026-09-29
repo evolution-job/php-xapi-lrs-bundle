@@ -90,6 +90,20 @@ class StatementPostControllerTest extends WebTestCase
         $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
     }
 
+    /**
+     * Test Case 4 : Options request
+     */
+    public function testOptionsGlobalStatementsEndpoint(): void
+    {
+        $this->client->request('OPTIONS', '/statements');
+
+        $response = $this->client->getResponse();
+
+        $this->assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode());
+        $this->assertTrue($response->headers->has('Allow'));
+        $this->assertStringContainsString('POST', $response->headers->get('Allow'));
+    }
+
     private function executePostRequest(string $payload): void
     {
         $this->client->request(

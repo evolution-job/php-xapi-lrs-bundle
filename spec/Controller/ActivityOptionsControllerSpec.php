@@ -12,31 +12,40 @@
 namespace spec\XApi\LrsBundle\Controller;
 
 use PhpSpec\ObjectBehavior;
+use Symfony\Component\HttpFoundation\InputBag;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
 class ActivityOptionsControllerSpec extends ObjectBehavior
 {
-    public function it_should_throws_a_BadRequestHttpException_if_an_activityid_is_not_part_of_a_get_request(): void
+    public function it_is_initializable()
     {
-        $request = new Request();
-
-        $this
-            ->shouldThrow(BadRequestHttpException::class)
-            ->during('optionsActivity', [$request]);
+        $this->shouldHaveType('XApi\LrsBundle\Controller\ActivityOptionsController');
     }
 
-    public function it_should_throws_a_BadRequestHttpException_if_an_activityid_is_not_valid_IRI(): void
+    public function it_returns_a_204_response_if_the_activityId_parameter_is_missing(Request $request, ParameterBag $query)
     {
-        $request = new Request();
-        $request->query->set('activityId', []);
+        $request->query = new InputBag([]);
+        $query->get('activityId')->willReturn(null);
 
-        $this
-            ->shouldThrow(BadRequestHttpException::class)
-            ->during('optionsActivity', [$request]);
+        $response = $this->optionsActivity($request);
+
+        $response->shouldHaveType(Response::class);
+        $response->getStatusCode()->shouldReturn(Response::HTTP_NO_CONTENT);
     }
 
+    public function it_returns_a_204_response_if_the_activityId_parameter_is_present(Request $request, ParameterBag $query)
+    {
+        $request->query = new InputBag([]);
+        $query->get('activityId')->willReturn('http://example.com');
+
+        $response = $this->optionsActivity($request);
+
+        $response->shouldHaveType(Response::class);
+        $response->getStatusCode()->shouldReturn(Response::HTTP_NO_CONTENT);
+    }
 }

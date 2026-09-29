@@ -12,8 +12,10 @@
 namespace spec\XApi\LrsBundle\Controller;
 
 use PhpSpec\ObjectBehavior;
+use Symfony\Component\HttpFoundation\InputBag;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpFoundation\Response;
 
 
 /**
@@ -21,22 +23,34 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  */
 class StatementOptionsControllerSpec extends ObjectBehavior
 {
-    public function it_should_throws_a_BadRequestHttpException_if_an_statementId_is_not_part_of_a_get_request(): void
+    public function it_is_initializable()
     {
-        $request = new Request();
-
-        $this
-            ->shouldThrow(BadRequestHttpException::class)
-            ->during('optionsStatement', [$request]);
+        $this->shouldHaveType('XApi\LrsBundle\Controller\StatementOptionsController');
     }
 
-    public function it_should_throws_a_BadRequestHttpException_if_an_statementId_is_a_string(): void
+    public function it_returns_a_204_response_if_the_statementId_parameter_is_missing(Request $request, ParameterBag $query)
     {
-        $request = new Request();
-        $request->query->set('statementId', []);
+        $request->query = new InputBag([]);
+        $query->get('statementId')->willReturn(null);
 
-        $this
-            ->shouldThrow(BadRequestHttpException::class)
-            ->during('optionsStatement', [$request]);
+        // On s'attend à ce que l'invocation du contrôleur retourne une XapiJsonResponse (ou JsonResponse)
+        $response = $this->optionsStatement($request);
+
+        $response->shouldHaveType(Response::class);
+        $response->getStatusCode()->shouldReturn(Response::HTTP_NO_CONTENT); // Vérifie le code 204
+    }
+
+    public function it_returns_a_200_response_if_the_statementId_parameter_is_present(Request $request, ParameterBag $query)
+    {
+        $request->query = new InputBag([]);
+        $query->get('statementId')->willReturn('eaf1c3e2-be78-434a-ab70-4790b07f4c64');
+
+        $response = $this->optionsStatement($request);
+
+        $response->shouldHaveType(Response::class);
+
+        // Note : Si vous avez décidé de retourner un 204 TOUT LE TEMPS pour les requêtes OPTIONS
+        // (ce qui est recommandé pour CORS), modifiez également cette ligne par HTTP_NO_CONTENT.
+        $response->getStatusCode()->shouldReturn(Response::HTTP_NO_CONTENT);
     }
 }

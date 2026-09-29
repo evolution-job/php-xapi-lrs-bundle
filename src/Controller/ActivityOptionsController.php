@@ -11,34 +11,23 @@
 
 namespace XApi\LrsBundle\Controller;
 
-use Exception;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Xabbuh\XApi\Model\IRI;
-use XApi\LrsBundle\Response\XapiJsonResponse;
 
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
 final class ActivityOptionsController
 {
-    public function optionsActivity(Request $request): XapiJsonResponse
+    public function optionsActivity(Request $request): JsonResponse
     {
-        if (!$activityId = $request->query->all()['activityId'] ?? null) {
-            throw new BadRequestHttpException('Required activityId parameter is missing.');
-        }
+        $headers = [
+            'Allow'                        => 'GET, HEAD',
+            'Access-Control-Allow-Methods' => 'GET, HEAD, OPTIONS',
+            'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Experience-API-Version, X-Experience-API-Consistent-Through',
+        ];
 
-        if (!is_string($activityId)) {
-            throw new BadRequestHttpException('Required activityId parameter is not a string.');
-        }
-
-        try {
-            IRI::fromString($activityId);
-        } catch (Exception $exception) {
-            throw new BadRequestHttpException(sprintf('Parameter activityId %s is not a valid IRI.', json_encode($activityId, JSON_THROW_ON_ERROR)), $exception);
-        }
-
-        return new XapiJsonResponse('', Response::HTTP_NO_CONTENT);
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT, $headers);
     }
 }
