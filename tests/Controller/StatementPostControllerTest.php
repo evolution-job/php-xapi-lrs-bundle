@@ -27,7 +27,6 @@ class StatementPostControllerTest extends WebTestCase
      */
     public function testPostSingleMinimalStatement(): void
     {
-        // Récupération d'un JSON valide de statement minimal issu du vendor
         $jsonPayload = StatementJsonFixtures::getMinimalStatement();
 
         $this->executePostRequest($jsonPayload);
@@ -44,7 +43,6 @@ class StatementPostControllerTest extends WebTestCase
      */
     public function testPostSingleTypicalStatement(): void
     {
-        // Récupération d'un JSON de statement classique / typique
         $jsonPayload = StatementJsonFixtures::getTypicalStatement();
 
         $this->executePostRequest($jsonPayload);
@@ -61,7 +59,6 @@ class StatementPostControllerTest extends WebTestCase
      */
     public function testPostCollectionOfStatements(): void
     {
-        // Récupération d'une collection JSON de statements valide issue du vendor
         $jsonPayload = StatementJsonFixtures::getStatementCollection();
 
         $this->executePostRequest($jsonPayload);
@@ -82,7 +79,7 @@ class StatementPostControllerTest extends WebTestCase
      */
     public function testPostMalformedJsonShouldReturnBadRequest(): void
     {
-        $invalidPayload = '[{"id": "eaf1c3e2-be78-434a-ab70-4790b07f4c64"'; // Manque la fin du tableau
+        $invalidPayload = '[{"id": "eaf1c3e2-be78-434a-ab70-4790b07f4c64"';
 
         $this->executePostRequest($invalidPayload);
         $response = $this->client->getResponse();
