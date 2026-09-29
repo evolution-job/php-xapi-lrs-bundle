@@ -31,7 +31,7 @@ final class XApiLrsExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $yamlFileLoader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $yamlFileLoader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
 
         $yamlFileLoader->load('controller.yaml');
         $yamlFileLoader->load('event_listener.yaml');
@@ -43,7 +43,7 @@ final class XApiLrsExtension extends Extension
                 break;
             case 'mongodb':
                 $yamlFileLoader->load('doctrine.yaml');
-                
+
                 $container->setAlias('xapi_lrs.doctrine.object_manager', $config['object_manager_service']);
                 $container->setAlias('xapi_lrs.repository.activity', 'xapi_lrs.repository.activity.doctrine');
                 $container->setAlias('xapi_lrs.repository.state', 'xapi_lrs.repository.state.doctrine');

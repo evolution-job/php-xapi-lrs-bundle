@@ -12,8 +12,8 @@
 namespace XApi\LrsBundle\Controller;
 
 use DateTime;
-use XApi\LrsBundle\Response\XapiJsonResponse;
 use Xabbuh\XApi\Model\State;
+use XApi\LrsBundle\Response\XapiJsonResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
 
 

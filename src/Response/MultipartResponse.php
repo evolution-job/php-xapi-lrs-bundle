@@ -94,13 +94,13 @@ class MultipartResponse extends JsonResponse
     {
         $content = '';
         foreach ($this->parts as $part) {
-            $content .= sprintf('--%s', $this->boundary) . "\r\n";
-            $content .= $part->headers . "\r\n";
+            $content .= sprintf('--%s', $this->boundary)."\r\n";
+            $content .= $part->headers."\r\n";
             $content .= $part->getContent();
             $content .= "\r\n";
         }
 
-        $content .= sprintf('--%s--', $this->boundary) . "\r\n";
+        $content .= sprintf('--%s--', $this->boundary)."\r\n";
 
         echo $content;
 
@@ -137,7 +137,7 @@ class MultipartResponse extends JsonResponse
             // Not using application/javascript for compatibility reasons with older browsers.
             $this->headers->set('Content-Type', 'text/javascript');
 
-            return $this->setContent(\sprintf('/**/%s(%s);', $this->callback, $this->data));
+            return $this->setContent(sprintf('/**/%s(%s);', $this->callback, $this->data));
         }
 
         // Only set the header when there is none or when it equals 'text/javascript' (from a previous update with callback)

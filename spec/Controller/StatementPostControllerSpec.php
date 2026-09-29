@@ -81,7 +81,7 @@ class StatementPostControllerSpec extends ObjectBehavior
     {
         $statements = [];
         $uuids = [];
-        foreach(StatementFixtures::getStatementCollection() as $statement) {
+        foreach (StatementFixtures::getStatementCollection() as $statement) {
             $statements[] = $statement;
             $uuids[] = $statement->getId()->getValue();
             $statementRepository->findStatementById($statement->getId())->willThrow(new NotFoundException(''));

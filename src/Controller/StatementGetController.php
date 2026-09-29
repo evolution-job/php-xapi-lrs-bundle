@@ -68,35 +68,38 @@ final class StatementGetController
      */
     public function getStatement(Request $request): Response
     {
-        $query = new ParameterBag(array_intersect_key($request->query->all(), self::$getParameters));
+        $parameters = array_intersect_key($request->query->all(), self::$getParameters);
+        $query = new ParameterBag($parameters);
 
         $this->validate($query);
 
         $includeAttachments = $query->filter('attachments', false, FILTER_VALIDATE_BOOLEAN);
 
         try {
-            if (null !== ($statementId = $query->get('statementId'))) {
+            $statementId = $query->get('statementId');
+            if (null !== $statementId) {
                 // Unique
                 $statement = $this->statementRepository->findStatementById(StatementId::fromString($statementId));
-                $response = $this->buildSingleStatementResponse($statement, $includeAttachments);
-            } elseif (null !== ($voidedStatementId = $query->get('voidedStatementId'))) {
+
+                return $this->buildSingleStatementResponse($statement, $includeAttachments);
+            }
+
+            $voidedStatementId = $query->get('voidedStatementId');
+            if (null !== $voidedStatementId) {
                 // Voided
                 $statement = $this->statementRepository->findVoidedStatementById(StatementId::fromString($voidedStatementId));
-                $response = $this->buildSingleStatementResponse($statement, $includeAttachments);
 
-            } else {
-                // Multiple
-                $statements = $this->statementRepository->findStatementsBy($this->createStatementsFilters($query));
-                $response = $this->buildMultiStatementsResponse($statements, $includeAttachments);
+                return $this->buildSingleStatementResponse($statement, $includeAttachments);
             }
+
+            // Multiple
+            $statements = $this->statementRepository->findStatementsBy($this->createStatementsFilters($query));
+
+            return $this->buildMultiStatementsResponse($statements, $includeAttachments);
+
         } catch (NotFoundException|UnsupportedStatementVersionException) {
-            $response = $this->buildMultiStatementsResponse([]);
+            return $this->buildMultiStatementsResponse([]);
         }
-
-        $dateTime = new DateTime();
-        $response->headers->set('X-Experience-API-Consistent-Through', $dateTime->format(DateTimeInterface::ATOM));
-
-        return $response;
     }
 
     /**
@@ -129,6 +132,9 @@ final class StatementGetController
             return $this->buildMultipartResponse($xApiJsonResponse, $statements);
         }
 
+        $dateTime = new DateTime();
+        $xApiJsonResponse->headers->set('X-Experience-API-Consistent-Through', $dateTime->format(DateTimeInterface::ATOM));
+
         return $xApiJsonResponse;
     }
 
@@ -151,6 +157,8 @@ final class StatementGetController
         }
 
         $response->setLastModified($statement->getStored());
+        $dateTime = new DateTime();
+        $response->headers->set('X-Experience-API-Consistent-Through', $dateTime->format(DateTimeInterface::ATOM));
 
         return $response;
     }
