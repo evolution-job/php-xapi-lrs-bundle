@@ -91,7 +91,8 @@
         "rector/rector": "^2.0",
         "roave/security-advisories": "dev-latest",
         "symfony/phpunit-bridge": "^7.4",
-        "symfony/var-exporter": "^7.4"
+        "symfony/var-exporter": "^7.4",
+        "symfony/browser-kit": "^7.4"
     },
     "autoload": {
         "psr-4": {
@@ -100,7 +101,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "spec\\XApi\\LrsBundle\\": "spec/"
+            "spec\\XApi\\LrsBundle\\": "spec/",
+            "XApi\\LrsBundle\\Tests\\": "tests/"
         }
     },
     "extra": {

@@ -1,0 +1,107 @@
+<?php
+
+namespace XApi\LrsBundle\Tests\Controller;
+
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Response;
+use XApi\Fixtures\Json\StatementJsonFixtures;
+use XApi\LrsBundle\Tests\App\TestingKernel;
+
+class StatementPostControllerTest extends WebTestCase
+{
+    private KernelBrowser $client;
+
+    protected static function getKernelClass(): string
+    {
+        return TestingKernel::class;
+    }
+
+    protected function setUp(): void
+    {
+        $this->client = static::createClient();
+    }
+
+    /**
+     * Test Case 1 : Conform minimal unique Statement
+     */
+    public function testPostSingleMinimalStatement(): void
+    {
+        // Récupération d'un JSON valide de statement minimal issu du vendor
+        $jsonPayload = StatementJsonFixtures::getMinimalStatement();
+
+        $this->executePostRequest($jsonPayload);
+        $response = $this->client->getResponse();
+
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertJson($response->getContent());
+        $responseData = json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('12345678-1234-5678-8234-567812345678', $responseData);
+    }
+
+    /**
+     * Test Case 2 : Conform maximal unique Statement
+     */
+    public function testPostSingleTypicalStatement(): void
+    {
+        // Récupération d'un JSON de statement classique / typique
+        $jsonPayload = StatementJsonFixtures::getTypicalStatement();
+
+        $this->executePostRequest($jsonPayload);
+        $response = $this->client->getResponse();
+
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertJson($response->getContent());
+        $responseData = json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertSame('12345678-1234-5678-8234-567812345678', $responseData);
+    }
+
+    /**
+     * Test Case 3 : Collection of Statements
+     */
+    public function testPostCollectionOfStatements(): void
+    {
+        // Récupération d'une collection JSON de statements valide issue du vendor
+        $jsonPayload = StatementJsonFixtures::getStatementCollection();
+
+        $this->executePostRequest($jsonPayload);
+        $response = $this->client->getResponse();
+
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertJson($response->getContent());
+
+        $responseData = json_decode($response->getContent(), true);
+        $this->assertIsArray($responseData);
+
+        $this->assertContains('12345678-1234-5678-8234-567812345678', $responseData);
+        $this->assertContains('12345678-1234-5678-8234-567812345679', $responseData);
+    }
+
+    /**
+     * Test Case 4 : Bad JSON
+     */
+    public function testPostMalformedJsonShouldReturnBadRequest(): void
+    {
+        $invalidPayload = '[{"id": "eaf1c3e2-be78-434a-ab70-4790b07f4c64"'; // Manque la fin du tableau
+
+        $this->executePostRequest($invalidPayload);
+        $response = $this->client->getResponse();
+
+        $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+    }
+
+    private function executePostRequest(string $payload): void
+    {
+        $this->client->request(
+            'POST',
+            '/statements',
+            [],
+            [],
+            [
+                'CONTENT_TYPE'                  => 'application/json',
+                'HTTP_X-Experience-API-Version' => '1.0.2',
+            ],
+            $payload
+        );
+    }
+}
