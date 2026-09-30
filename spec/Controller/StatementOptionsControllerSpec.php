@@ -33,7 +33,7 @@ class StatementOptionsControllerSpec extends ObjectBehavior
         $request->query = new InputBag([]);
         $query->get('statementId')->willReturn(null);
 
-        $response = $this->optionsStatement($request);
+        $response = $this->optionsStatements($request);
 
         $response->shouldHaveType(Response::class);
         $response->getStatusCode()->shouldReturn(Response::HTTP_NO_CONTENT); // Vérifie le code 204
@@ -44,7 +44,7 @@ class StatementOptionsControllerSpec extends ObjectBehavior
         $request->query = new InputBag([]);
         $query->get('statementId')->willReturn('eaf1c3e2-be78-434a-ab70-4790b07f4c64');
 
-        $response = $this->optionsStatement($request);
+        $response = $this->optionsStatements($request);
 
         $response->shouldHaveType(Response::class);
 

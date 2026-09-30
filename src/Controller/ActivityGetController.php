@@ -31,7 +31,7 @@ final readonly class ActivityGetController
         private ActivitySerializerInterface $activitySerializer
     ) {}
 
-    public function getActivity(Request $request): XapiJsonResponse
+    public function getActivities(Request $request): XapiJsonResponse
     {
         if (!$activityId = $request->query->all()['activityId'] ?? null) {
             throw new BadRequestHttpException('Required activityId parameter is missing.');

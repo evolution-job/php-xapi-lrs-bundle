@@ -36,7 +36,7 @@ class StatementPutControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(BadRequestHttpException::class)
-            ->during('putStatement', [$request, $statement]);
+            ->during('putStatements', [$request, $statement]);
     }
 
     public function it_throws_a_BadRequestHttpException_if_the_given_statement_id_as_part_of_a_put_request_is_not_a_valid_uuid(StatementRepositoryInterface $statementRepository): void
@@ -49,7 +49,7 @@ class StatementPutControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(BadRequestHttpException::class)
-            ->during('putStatement', [$request, $statement]);
+            ->during('putStatements', [$request, $statement]);
     }
 
     public function it_stores_a_statement_and_returns_a_204_response_if_the_statement_did_not_exist_before(StatementRepositoryInterface $statementRepository): void
@@ -63,7 +63,7 @@ class StatementPutControllerSpec extends ObjectBehavior
 
         $this->beConstructedWith($statementRepository);
 
-        $response = $this->putStatement($request, $statement);
+        $response = $this->putStatements($request, $statement);
 
         $response->shouldHaveType(Response::class);
         $response->getStatusCode()->shouldReturn(Response::HTTP_NO_CONTENT);
@@ -80,7 +80,7 @@ class StatementPutControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(ConflictHttpException::class)
-            ->during('putStatement', [$request, $statement]);
+            ->during('putStatements', [$request, $statement]);
     }
 
     public function it_uses_id_parameter_in_put_request_if_statement_id_is_null(StatementRepositoryInterface $statementRepository): void
@@ -96,7 +96,7 @@ class StatementPutControllerSpec extends ObjectBehavior
         $this->beConstructedWith($statementRepository);
 
         $statement = $statement->withId(null);
-        $this->putStatement($request, $statement);
+        $this->putStatements($request, $statement);
     }
 
     public function it_does_not_override_an_existing_statement(StatementRepositoryInterface $statementRepository): void
@@ -110,7 +110,7 @@ class StatementPutControllerSpec extends ObjectBehavior
 
         $this->beConstructedWith($statementRepository);
 
-        $this->putStatement($request, $statement);
+        $this->putStatements($request, $statement);
     }
 
     public function it_throws_a_ConflictHttpException_if_an_existing_statement_with_the_same_id_is_not_equal_during_a_put_request(StatementRepositoryInterface $statementRepository): void
@@ -126,6 +126,6 @@ class StatementPutControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(ConflictHttpException::class)
-            ->during('putStatement', [$request, $statement]);
+            ->during('putStatements', [$request, $statement]);
     }
 }

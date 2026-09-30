@@ -39,7 +39,7 @@ class ActivityGetControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(BadRequestHttpException::class)
-            ->during('getActivity', [$request]);
+            ->during('getActivities', [$request]);
     }
 
     public function it_should_throws_a_NotFoundHttpException_if_no_activity_matches_activityid(ActivityRepositoryInterface $activityRepository): void
@@ -53,7 +53,7 @@ class ActivityGetControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(NotFoundHttpException::class)
-            ->during('getActivity', [$request]);
+            ->during('getActivities', [$request]);
     }
 
     public function it_should_returns_a_XapiJsonResponse(ActivityRepositoryInterface $activityRepository, ActivitySerializerInterface $activitySerializer): void
@@ -67,6 +67,6 @@ class ActivityGetControllerSpec extends ObjectBehavior
         $activityRepository->findActivityById(IRI::fromString($activityId))->shouldBeCalled()->willReturn($activity);
         $activitySerializer->serializeActivity($activity)->shouldBeCalled()->willReturn(ActivityJsonFixtures::getTypicalActivity());
 
-        $this->getActivity($request)->shouldReturnAnInstanceOf(XapiJsonResponse::class);
+        $this->getActivities($request)->shouldReturnAnInstanceOf(XapiJsonResponse::class);
     }
 }

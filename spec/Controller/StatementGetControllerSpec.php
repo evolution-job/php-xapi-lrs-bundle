@@ -66,7 +66,7 @@ class StatementGetControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(BadRequestHttpException::class)
-            ->during('getStatement', [$request]);
+            ->during('getStatements', [$request]);
     }
 
     public function it_throws_a_BadRequestHttpException_if_the_request_has_statement_id_and_format_and_attachements_and_any_other_parameters(): void
@@ -79,7 +79,7 @@ class StatementGetControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(new BadRequestHttpException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "related_agents" besides "attachments" or "format".'))
-            ->during('getStatement', [$request]);
+            ->during('getStatements', [$request]);
     }
 
     public function it_throws_a_BadRequestHttpException_if_the_request_has_voided_statement_id_and_format_and_any_other_parameters_except_attachments(): void
@@ -91,7 +91,7 @@ class StatementGetControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(new BadRequestHttpException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "related_agents" besides "attachments" or "format".'))
-            ->during('getStatement', [$request]);
+            ->during('getStatements', [$request]);
     }
 
     public function it_throws_a_BadRequestHttpException_if_the_request_has_statement_id_and_attachments_and_any_other_parameters_except_format(): void
@@ -103,7 +103,7 @@ class StatementGetControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(new BadRequestHttpException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "related_agents" besides "attachments" or "format".'))
-            ->during('getStatement', [$request]);
+            ->during('getStatements', [$request]);
     }
 
     public function it_throws_a_BadRequestHttpException_if_the_request_has_voided_statement_id_and_any_other_parameters_except_format_and_attachments(): void
@@ -114,7 +114,7 @@ class StatementGetControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(new BadRequestHttpException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "related_agents" besides "attachments" or "format".'))
-            ->during('getStatement', [$request]);
+            ->during('getStatements', [$request]);
     }
 
     public function it_sets_a_X_Experience_API_Consistent_Through_header_to_the_response(): void
@@ -122,7 +122,7 @@ class StatementGetControllerSpec extends ObjectBehavior
         $request = new Request();
         $request->query->set('statementId', StatementFixtures::DEFAULT_STATEMENT_ID);
 
-        $response = $this->getStatement($request);
+        $response = $this->getStatements($request);
 
         /** @var ResponseHeaderBag $headers */
         $headers = $response->headers;
@@ -135,7 +135,7 @@ class StatementGetControllerSpec extends ObjectBehavior
         $request = new Request();
         $request->query->set('statementId', StatementFixtures::DEFAULT_STATEMENT_ID);
 
-        $response = $this->getStatement($request);
+        $response = $this->getStatements($request);
 
         /** @var ResponseHeaderBag $headers */
         $headers = $response->headers;
@@ -145,7 +145,7 @@ class StatementGetControllerSpec extends ObjectBehavior
         $request = new Request();
         $request->query->set('voidedStatementId', StatementFixtures::DEFAULT_STATEMENT_ID);
 
-        $response = $this->getStatement($request);
+        $response = $this->getStatements($request);
 
         /** @var ResponseHeaderBag $headers */
         $headers = $response->headers;
@@ -158,18 +158,18 @@ class StatementGetControllerSpec extends ObjectBehavior
         $request = new Request();
         $request->query->set('attachments', true);
 
-        $this->getStatement($request)->shouldReturnAnInstanceOf(MultipartResponse::class);
+        $this->getStatements($request)->shouldReturnAnInstanceOf(MultipartResponse::class);
     }
 
     public function it_returns_a_XapiJsonResponse_if_attachments_parameter_is_false_or_not_set(): void
     {
         $request = new Request();
 
-        $this->getStatement($request)->shouldReturnAnInstanceOf(XapiJsonResponse::class);
+        $this->getStatements($request)->shouldReturnAnInstanceOf(XapiJsonResponse::class);
 
         $request->query->set('attachments', false);
 
-        $this->getStatement($request)->shouldReturnAnInstanceOf(XapiJsonResponse::class);
+        $this->getStatements($request)->shouldReturnAnInstanceOf(XapiJsonResponse::class);
     }
 
     public function it_should_fetch_a_statement(StatementRepositoryInterface $statementRepository): void
@@ -179,7 +179,7 @@ class StatementGetControllerSpec extends ObjectBehavior
 
         $statementRepository->findStatementById(StatementId::fromString(StatementFixtures::DEFAULT_STATEMENT_ID))->shouldBeCalled();
 
-        $this->getStatement($request);
+        $this->getStatements($request);
     }
 
     public function it_should_fetch_a_voided_statement_id(StatementRepositoryInterface $statementRepository): void
@@ -189,7 +189,7 @@ class StatementGetControllerSpec extends ObjectBehavior
 
         $statementRepository->findVoidedStatementById(StatementId::fromString(StatementFixtures::DEFAULT_STATEMENT_ID))->shouldBeCalled();
 
-        $this->getStatement($request);
+        $this->getStatements($request);
     }
 
     public function it_should_filter_all_statements_if_no_statement_id_or_voided_statement_id_is_provided(StatementRepositoryInterface $statementRepository): void
@@ -198,7 +198,7 @@ class StatementGetControllerSpec extends ObjectBehavior
 
         $statementRepository->findStatementsBy(Argument::type(StatementsFilter::class))->shouldBeCalled();
 
-        $this->getStatement($request);
+        $this->getStatements($request);
     }
 
     public function it_should_build_an_empty_statement_result_response_if_no_statement_is_found(StatementRepositoryInterface $statementRepository, StatementResultSerializerInterface $statementResultSerializer): void
@@ -210,6 +210,6 @@ class StatementGetControllerSpec extends ObjectBehavior
 
         $statementResultSerializer->serializeStatementResult(new StatementResult([]))->shouldBeCalled()->willReturn(StatementResultJsonFixtures::getStatementResult());
 
-        $this->getStatement($request);
+        $this->getStatements($request);
     }
 }

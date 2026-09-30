@@ -64,7 +64,7 @@ final class StatementGetController
     /**
      * @throws BadRequestHttpException if the query parameters does not comply with xAPI specification
      */
-    public function getStatement(Request $request): XapiJsonResponse|MultipartResponse
+    public function getStatements(Request $request): XapiJsonResponse|MultipartResponse
     {
         $parameters = array_intersect_key($request->query->all(), self::$getParameters);
         $query = new ParameterBag($parameters);

@@ -33,7 +33,7 @@ class StatementPostControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(BadRequestHttpException::class)
-            ->during('postStatement', [$statement]);
+            ->during('postStatements', [$statement]);
     }
 
     public function it_stores_a_statement_and_returns_a_204_response_if_the_statement_did_not_exist_before(StatementRepositoryInterface $statementRepository): void
@@ -45,7 +45,7 @@ class StatementPostControllerSpec extends ObjectBehavior
 
         $this->beConstructedWith($statementRepository);
 
-        $response = $this->postStatement($statement);
+        $response = $this->postStatements($statement);
 
         $response->shouldHaveType(Response::class);
         $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
@@ -60,7 +60,7 @@ class StatementPostControllerSpec extends ObjectBehavior
 
         $this->beConstructedWith($statementRepository);
 
-        $this->postStatement($statement);
+        $this->postStatements($statement);
     }
 
     public function it_throws_a_ConflictHttpException_if_an_existing_statement_with_the_same_id_is_not_equal_during_a_post_request(StatementRepositoryInterface $statementRepository): void
@@ -74,7 +74,7 @@ class StatementPostControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(ConflictHttpException::class)
-            ->during('postStatement', [$statement]);
+            ->during('postStatements', [$statement]);
     }
 
     public function it_stores_statements_and_returns_a_204_response_if_the_statement_did_not_exist_before(StatementRepositoryInterface $statementRepository): void
@@ -90,7 +90,7 @@ class StatementPostControllerSpec extends ObjectBehavior
 
         $this->beConstructedWith($statementRepository);
 
-        $response = $this->postStatements($statements);
+        $response = $this->postStatementss($statements);
 
         $response->shouldHaveType(XapiJsonResponse::class);
         $response->getStatusCode()->shouldReturn(Response::HTTP_OK);

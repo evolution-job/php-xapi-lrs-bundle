@@ -32,7 +32,7 @@ class ActivityOptionsControllerSpec extends ObjectBehavior
         $request->query = new InputBag([]);
         $query->get('activityId')->willReturn(null);
 
-        $response = $this->optionsActivity($request);
+        $response = $this->optionsActivities($request);
 
         $response->shouldHaveType(Response::class);
         $response->getStatusCode()->shouldReturn(Response::HTTP_NO_CONTENT);
@@ -43,7 +43,7 @@ class ActivityOptionsControllerSpec extends ObjectBehavior
         $request->query = new InputBag([]);
         $query->get('activityId')->willReturn('http://example.com');
 
-        $response = $this->optionsActivity($request);
+        $response = $this->optionsActivities($request);
 
         $response->shouldHaveType(Response::class);
         $response->getStatusCode()->shouldReturn(Response::HTTP_NO_CONTENT);

@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 final class ActivityOptionsController
 {
-    public function optionsActivity(Request $request): JsonResponse
+    public function optionsActivities(Request $request): JsonResponse
     {
         $headers = [
             'Allow'                        => 'GET, HEAD',

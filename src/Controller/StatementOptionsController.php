@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 final class StatementOptionsController
 {
-    public function optionsStatement(): JsonResponse
+    public function optionsStatements(): JsonResponse
     {
         $headers = [
             'Allow'                        => 'GET, HEAD, POST, PUT',

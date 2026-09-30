@@ -3,14 +3,14 @@ xapi_lrs.activity.get:
     path: /activities
     methods: [ GET ]
     defaults:
-        _controller: 'xapi_lrs.controller.activity.get::getActivity'
+        _controller: 'xapi_lrs.controller.activity.get::getActivities'
         xapi_lrs.route: true
 
 xapi_lrs.activities.options:
     path: /activities
     methods: [ OPTIONS ]
     defaults:
-        _controller: 'xapi_lrs.controller.activity.options::optionsActivity'
+        _controller: 'xapi_lrs.controller.activity.options::optionsActivities'
         xapi_lrs.route: true
 
 # State
@@ -58,21 +58,21 @@ xapi_lrs.statement.get:
     path: /statements
     methods: [ GET ]
     defaults:
-        _controller: 'xapi_lrs.controller.statement.get::getStatement'
+        _controller: 'xapi_lrs.controller.statement.get::getStatements'
         xapi_lrs.route: true
 
 xapi_lrs.statement.options:
     path: /statements
     methods: [ OPTIONS ]
     defaults:
-        _controller: 'xapi_lrs.controller.statement.options::optionsStatement'
+        _controller: 'xapi_lrs.controller.statement.options::optionsStatements'
         xapi_lrs.route: true
 
 xapi_lrs.statement.post:
     path: /statements
     methods: [ POST ]
     defaults:
-        _controller: 'xapi_lrs.controller.statement.post::postStatement'
+        _controller: 'xapi_lrs.controller.statement.post::postStatements'
         xapi_serializer: statement
         xapi_lrs.route: true
 
@@ -80,6 +80,6 @@ xapi_lrs.statement.put:
     path: /statements
     methods: [ PUT ]
     defaults:
-        _controller: 'xapi_lrs.controller.statement.put::putStatement'
+        _controller: 'xapi_lrs.controller.statement.put::putStatements'
         xapi_serializer: statement
         xapi_lrs.route: true

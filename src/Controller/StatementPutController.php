@@ -30,7 +30,7 @@ final readonly class StatementPutController
 {
     public function __construct(private StatementRepositoryInterface $statementRepository) { }
 
-    public function putStatement(Request $request, Statement $statement): XapiJsonResponse
+    public function putStatements(Request $request, Statement $statement): XapiJsonResponse
     {
         if (null === $id = $request->query->all()['statementId'] ?? null) {
             throw new BadRequestHttpException('Required statementId parameter is missing.');

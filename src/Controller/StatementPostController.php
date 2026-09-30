@@ -29,7 +29,7 @@ final readonly class StatementPostController
 {
     public function __construct(private StatementRepositoryInterface $statementRepository) { }
 
-    public function postStatement(Statement $statement): XapiJsonResponse
+    public function postStatements(Statement $statement): XapiJsonResponse
     {
         $statement = $this->resolveStatement($statement);
 
@@ -41,7 +41,7 @@ final readonly class StatementPostController
     /**
      * @param Statement[] $statements
      */
-    public function postStatements(array $statements): XapiJsonResponse
+    public function postStatementss(array $statements): XapiJsonResponse
     {
         $uuids = [];
 
