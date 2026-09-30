@@ -11,7 +11,6 @@
 
 namespace XApi\LrsBundle\Controller;
 
-use DateTime;
 use Xabbuh\XApi\Model\State;
 use XApi\LrsBundle\Response\XapiJsonResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
@@ -28,10 +27,6 @@ final readonly class StatePutController
     {
         $this->stateRepository->storeState($state);
 
-        $response = new XapiJsonResponse();
-        $dateTime = new DateTime();
-        $response->headers->set('X-Experience-API-Consistent-Through', $dateTime->format('Y-m-d\TH:i:sP'));
-
-        return $response;
+        return new XapiJsonResponse();
     }
 }

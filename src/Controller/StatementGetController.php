@@ -11,7 +11,6 @@
 
 namespace XApi\LrsBundle\Controller;
 
-use DateTime;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,7 +23,7 @@ use Xabbuh\XApi\Model\StatementResult;
 use Xabbuh\XApi\Model\StatementsFilter;
 use Xabbuh\XApi\Serializer\StatementResultSerializerInterface;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
-use XApi\LrsBundle\EventListener\VersionListener;
+use XApi\LrsBundle\App\XapiVersion;
 use XApi\LrsBundle\Model\StatementsFilterFactory;
 use XApi\LrsBundle\Response\AttachmentResponse;
 use XApi\LrsBundle\Response\MultipartResponse;
@@ -42,17 +41,17 @@ final class StatementGetController
         'activity'           => true,
         'agent'              => true,
         'ascending'          => true,
-        'attachments'       => true,
-        'format'            => true,
+        'attachments'        => true,
+        'format'             => true,
         'limit'              => true,
         'registration'       => true,
         'related_activities' => true,
         'related_agents'     => true,
         'since'              => true,
-        'statementId'       => true,
+        'statementId'        => true,
         'until'              => true,
         'verb'               => true,
-        'voidedStatementId' => true,
+        'voidedStatementId'  => true,
     ];
 
     public function __construct(
@@ -60,12 +59,12 @@ final class StatementGetController
         private readonly StatementSerializerInterface $statementSerializer,
         private readonly StatementResultSerializerInterface $statementResultSerializer,
         private readonly StatementsFilterFactory $statementsFilterFactory
-    ) {}
+    ) { }
 
     /**
      * @throws BadRequestHttpException if the query parameters does not comply with xAPI specification
      */
-    public function getStatement(Request $request): Response
+    public function getStatement(Request $request): XapiJsonResponse|MultipartResponse
     {
         $parameters = array_intersect_key($request->query->all(), self::$getParameters);
         $query = new ParameterBag($parameters);
@@ -131,9 +130,6 @@ final class StatementGetController
             return $this->buildMultipartResponse($xApiJsonResponse, $statements);
         }
 
-        $dateTime = new DateTime();
-        $xApiJsonResponse->headers->set('X-Experience-API-Consistent-Through', $dateTime->format('Y-m-d\TH:i:s.v\Z'));
-
         return $xApiJsonResponse;
     }
 
@@ -144,7 +140,7 @@ final class StatementGetController
     protected function buildSingleStatementResponse(Statement $statement, bool $includeAttachments = false): XapiJsonResponse|MultipartResponse
     {
         if (null === $statement->getVersion()) {
-            $statement = $statement->withVersion(VersionListener::XAPI_VERSION_1_0_0);
+            $statement = $statement->withVersion(XapiVersion::V1_0_3);
         }
 
         $json = $this->statementSerializer->serializeStatement($statement);
@@ -156,8 +152,6 @@ final class StatementGetController
         }
 
         $response->setLastModified($statement->getStored());
-        $dateTime = new DateTime();
-        $response->headers->set('X-Experience-API-Consistent-Through', $dateTime->format('Y-m-d\TH:i:s.v\Z'));
 
         return $response;
     }

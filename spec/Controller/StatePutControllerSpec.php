@@ -36,6 +36,6 @@ class StatePutControllerSpec extends ObjectBehavior
         $dateTime = new DateTime();
         $response->shouldHaveType(XapiJsonResponse::class);
         $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
-        $response->headers->get('X-Experience-API-Consistent-Through')->shouldReturn($dateTime->format('Y-m-d\TH:i:sP'));
+        $response->headers->get('X-Experience-API-Consistent-Through')->shouldReturn($dateTime->format('Y-m-d\TH:i:s.v\Z'));
     }
 }

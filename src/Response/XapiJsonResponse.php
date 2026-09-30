@@ -14,6 +14,8 @@ namespace XApi\LrsBundle\Response;
 use DateTimeImmutable;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use XApi\LrsBundle\App\XapiHeader;
+use XApi\LrsBundle\App\XapiVersion;
 
 
 /**
@@ -23,9 +25,11 @@ class XapiJsonResponse extends JsonResponse
 {
     public function __construct(mixed $data = null, int $status = Response::HTTP_OK, array $headers = [], bool $json = false)
     {
-        Parent::__construct($data, $status, $headers, $json);
+        $headers[XapiHeader::VERSION] = XapiVersion::V1_0_3;
 
-        $now = new DateTimeImmutable()->format('Y-m-d\TH:i:s.v\Z');
-        $this->headers->set('X-Experience-API-Consistent-Through', $now);
+        $now = new DateTimeImmutable()->format(XapiHeader::DATE_FORMAT);
+        $headers[XapiHeader::CONSISTENT_THROUGH_HEADER] = $now;
+
+        Parent::__construct($data, $status, $headers, $json);
     }
 }
