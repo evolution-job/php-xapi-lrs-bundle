@@ -1,22 +1,39 @@
 services:
+    xapi_lrs.request_matcher:
+        class: XApi\LrsBundle\EventListener\XapiRequestMatcher
+
     xapi_lrs.event_listener.alternate_request_syntax:
         class: XApi\LrsBundle\EventListener\AlternateRequestSyntaxListener
+        arguments:
+            - '@xapi_lrs.request_matcher'
         tags:
-            - { name: 'kernel.event_listener', event: 'kernel.request', priority: -1 }
+            - { name: 'kernel.event_listener', event: 'kernel.request', method: 'onKernelRequest', priority: -1 }
 
     xapi_lrs.event_listener.exception:
         class: XApi\LrsBundle\EventListener\ExceptionListener
+        arguments:
+            - '@xapi_lrs.request_matcher'
+        tags:
+            - { name: 'kernel.event_listener', event: 'kernel.exception', method: 'onKernelException', priority: 50 }
 
     xapi_lrs.event_listener.serializer:
         class: XApi\LrsBundle\EventListener\SerializerListener
         arguments:
             - '@xapi_lrs.statement.serializer'
             - '@xapi_lrs.state.serializer'
+            - '@xapi_lrs.request_matcher'
         tags:
-            - { name: 'kernel.event_listener', event: 'kernel.request', priority: -3 }
+            - { name: 'kernel.event_listener', event: 'kernel.request', method: 'onKernelRequest', priority: -3 }
+
+    xapi_lrs.event_listener.tunneling:
+        class: XApi\LrsBundle\EventListener\TunnelingListener
+        tags:
+            - { name: 'kernel.event_listener', event: 'kernel.request', method: 'onKernelRequest', priority: 35 } # before Routing
 
     xapi_lrs.event_listener.version:
         class: XApi\LrsBundle\EventListener\VersionListener
+        arguments:
+            - '@xapi_lrs.request_matcher'
         tags:
-            - { name: 'kernel.event_listener', event: 'kernel.request', priority: -2 }
-            - { name: 'kernel.event_listener', event: 'kernel.response' }
+            - { name: 'kernel.event_listener', event: 'kernel.request', method: 'onKernelRequest', priority: -2 }
+            - { name: 'kernel.event_listener', event: 'kernel.response', method: 'onKernelResponse' }

@@ -52,7 +52,7 @@ final readonly class StatementPutController
             $this->statementRepository->storeStatement($statement);
         }
 
-        return new XapiJsonResponse('', Response::HTTP_OK);
+        return new XapiJsonResponse(status: Response::HTTP_NO_CONTENT);
     }
 
     private function resolveStatement(string $id, Statement $statement): Statement

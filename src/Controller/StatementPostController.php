@@ -35,7 +35,7 @@ final readonly class StatementPostController
 
         $this->storeStatement($statement);
 
-        return new XapiJsonResponse($statement->getId()?->getValue(), Response::HTTP_OK);
+        return new XapiJsonResponse([$statement->getId()?->getValue()], Response::HTTP_OK);
     }
 
     /**

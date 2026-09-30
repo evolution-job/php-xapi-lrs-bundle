@@ -12,7 +12,6 @@
 namespace XApi\LrsBundle\Controller;
 
 use DateTime;
-use DateTimeInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -126,14 +125,14 @@ final class StatementGetController
     {
         $json = $this->statementResultSerializer->serializeStatementResult(new StatementResult($statements));
 
-        $xApiJsonResponse = new XapiJsonResponse($json, 200, [], true);
+        $xApiJsonResponse = new XapiJsonResponse($json, Response::HTTP_OK, json: true);
 
         if ($includeAttachments) {
             return $this->buildMultipartResponse($xApiJsonResponse, $statements);
         }
 
         $dateTime = new DateTime();
-        $xApiJsonResponse->headers->set('X-Experience-API-Consistent-Through', $dateTime->format(DateTimeInterface::ATOM));
+        $xApiJsonResponse->headers->set('X-Experience-API-Consistent-Through', $dateTime->format('Y-m-d\TH:i:s.v\Z'));
 
         return $xApiJsonResponse;
     }
@@ -150,7 +149,7 @@ final class StatementGetController
 
         $json = $this->statementSerializer->serializeStatement($statement);
 
-        $response = new XapiJsonResponse($json, 200, [], true);
+        $response = new XapiJsonResponse($json, Response::HTTP_OK, json: true);
 
         if ($includeAttachments) {
             $response = $this->buildMultipartResponse($response, [$statement]);
@@ -158,7 +157,7 @@ final class StatementGetController
 
         $response->setLastModified($statement->getStored());
         $dateTime = new DateTime();
-        $response->headers->set('X-Experience-API-Consistent-Through', $dateTime->format(DateTimeInterface::ATOM));
+        $response->headers->set('X-Experience-API-Consistent-Through', $dateTime->format('Y-m-d\TH:i:s.v\Z'));
 
         return $response;
     }

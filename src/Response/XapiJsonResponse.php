@@ -11,8 +11,9 @@
 
 namespace XApi\LrsBundle\Response;
 
-use DateTime;
+use DateTimeImmutable;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 
 /**
@@ -20,11 +21,11 @@ use Symfony\Component\HttpFoundation\JsonResponse;
  */
 class XapiJsonResponse extends JsonResponse
 {
-    public function __construct(mixed $data = null, int $status = 200, array $headers = [], bool $json = false)
+    public function __construct(mixed $data = null, int $status = Response::HTTP_OK, array $headers = [], bool $json = false)
     {
         Parent::__construct($data, $status, $headers, $json);
 
-        $dateTime = new DateTime();
-        $this->headers->set('X-Experience-API-Consistent-Through', $dateTime->format('Y-m-d\TH:i:sP'));
+        $now = new DateTimeImmutable()->format('Y-m-d\TH:i:s.v\Z');
+        $this->headers->set('X-Experience-API-Consistent-Through', $now);
     }
 }

@@ -13,10 +13,10 @@
     </php>
 
     <testsuites>
-        <testsuite name="PHP-Xapi Lrs Bundle Tests Suite">
+        <testsuite name="PHP-xAPI Lrs Bundle Tests Suite">
             <directory>tests/Controller</directory>
         </testsuite>
-        <testsuite name="PHP-Xapi Tests Suite">
+        <testsuite name="PHP-xAPI Tests Suite">
             <directory>vendor/php-xapi/*/tests</directory>
         </testsuite>
     </testsuites>

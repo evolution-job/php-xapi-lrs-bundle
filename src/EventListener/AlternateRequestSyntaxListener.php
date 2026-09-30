@@ -14,23 +14,22 @@ namespace XApi\LrsBundle\EventListener;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use XApi\LrsBundle\App\XapiHeader;
 
 /**
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
  */
-class AlternateRequestSyntaxListener
+final readonly class AlternateRequestSyntaxListener
 {
+    public function __construct(private XapiRequestMatcher $xapiRequestMatcher) { }
+
     public function onKernelRequest(RequestEvent $requestEvent): void
     {
-        if (!$requestEvent->isMainRequest()) {
+        if (false === $this->xapiRequestMatcher->matches($requestEvent)) {
             return;
         }
 
         $request = $requestEvent->getRequest();
-
-        if (!$request->attributes->has('xapi_lrs.route')) {
-            return;
-        }
 
         if (false === $request->isMethod(Request::METHOD_POST)) {
             return;
@@ -66,7 +65,7 @@ class AlternateRequestSyntaxListener
         }
 
         foreach ($request->request as $key => $value) {
-            if (in_array($key, ['Authorization', VersionListener::XAPI_HEADER, 'Content-Type', 'Content-Length', 'If-Match', 'If-None-Match'], true)) {
+            if (in_array($key, ['Authorization', XapiHeader::VERSION, 'Content-Type', 'Content-Length', 'If-Match', 'If-None-Match'], true)) {
                 $request->headers->set($key, $value);
             } else {
                 $request->query->set($key, $value);

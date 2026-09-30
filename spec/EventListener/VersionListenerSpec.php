@@ -12,18 +12,23 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use XApi\LrsBundle\EventListener\XapiRequestMatcher;
 
 class VersionListenerSpec extends ObjectBehavior
 {
     public function let(RequestEvent $requestEvent, Request $request, ParameterBag $parameterBag, HeaderBag $headerBag): void
     {
         $parameterBag->has('xapi_lrs.route')->willReturn(true);
+        $parameterBag->get('_route', '')->willReturn('xapi_lrs.route');
 
         $request->attributes = $parameterBag;
         $request->headers = $headerBag;
 
         $requestEvent->isMainRequest()->willReturn(true);
         $requestEvent->getRequest()->willReturn($request);
+
+        $xapiRequestMatcher = new XapiRequestMatcher();
+        $this->beConstructedWith($xapiRequestMatcher);
     }
 
     public function it_returns_null_if_requests_are_not_main(HttpKernelInterface $kernel, RequestEvent $requestEvent, Request $request, Response $response): void

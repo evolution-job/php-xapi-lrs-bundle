@@ -15,22 +15,23 @@ use Xabbuh\XApi\Serializer\StateSerializerInterface;
 /**
  * @author Christian Flothmann <christian.flothmann@xabbuh.de>
  */
-readonly class SerializerListener
+final readonly class SerializerListener
 {
     public function __construct(
         private StatementSerializerInterface $statementSerializer,
-        private StateSerializerInterface $stateSerializer
+        private StateSerializerInterface $stateSerializer,
+        private XapiRequestMatcher $xapiRequestMatcher
     ) { }
 
     public function onKernelRequest(RequestEvent $requestEvent): void
     {
-        $request = $requestEvent->getRequest();
-
-        if (!$request->attributes->has('xapi_lrs.route')) {
+        if (false === $this->xapiRequestMatcher->matches($requestEvent)) {
             return;
         }
 
-        if ($request->isMethod(Request::METHOD_OPTIONS)) {
+        $request = $requestEvent->getRequest();
+
+        if (true === $request->isMethod(Request::METHOD_OPTIONS)) {
             return;
         }
 
@@ -75,6 +76,7 @@ readonly class SerializerListener
                     break;
             }
         } catch (UnsupportedStatementVersionException|InvalidArgumentException|DeserializationException|JsonException $unsupportedStatementVersionException) {
+
             throw new BadRequestHttpException(
                 sprintf(
                     'The content of the request cannot be deserialized into a valid xAPI %s.',

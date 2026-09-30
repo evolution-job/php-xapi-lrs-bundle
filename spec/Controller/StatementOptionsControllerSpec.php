@@ -33,7 +33,6 @@ class StatementOptionsControllerSpec extends ObjectBehavior
         $request->query = new InputBag([]);
         $query->get('statementId')->willReturn(null);
 
-        // On s'attend à ce que l'invocation du contrôleur retourne une XapiJsonResponse (ou JsonResponse)
         $response = $this->optionsStatement($request);
 
         $response->shouldHaveType(Response::class);
@@ -49,8 +48,6 @@ class StatementOptionsControllerSpec extends ObjectBehavior
 
         $response->shouldHaveType(Response::class);
 
-        // Note : Si vous avez décidé de retourner un 204 TOUT LE TEMPS pour les requêtes OPTIONS
-        // (ce qui est recommandé pour CORS), modifiez également cette ligne par HTTP_NO_CONTENT.
         $response->getStatusCode()->shouldReturn(Response::HTTP_NO_CONTENT);
     }
 }

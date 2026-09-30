@@ -12,18 +12,21 @@ use Xabbuh\XApi\DataFixtures\StatementFixtures;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use Xabbuh\XApi\Serializer\StateSerializerInterface;
 use XApi\Fixtures\Json\StatementJsonFixtures;
+use XApi\LrsBundle\EventListener\XapiRequestMatcher;
 
 class SerializerListenerSpec extends ObjectBehavior
 {
     public function let(StatementSerializerInterface $statementSerializer, StateSerializerInterface $stateSerializer, RequestEvent $requestEvent, Request $request, ParameterBag $parameterBag): void
     {
         $parameterBag->has('xapi_lrs.route')->willReturn(true);
-
+        $parameterBag->get('_route', '')->willReturn('xapi_lrs.route');
         $request->attributes = $parameterBag;
 
         $requestEvent->getRequest()->willReturn($request);
+        $requestEvent->isMainRequest()->willReturn(true);
 
-        $this->beConstructedWith($statementSerializer, $stateSerializer);
+        $xapiRequestMatcher = new XapiRequestMatcher();
+        $this->beConstructedWith($statementSerializer, $stateSerializer, $xapiRequestMatcher);
     }
 
     public function it_returns_null_if_request_has_no_attribute_xapi_lrs_route(RequestEvent $requestEvent, ParameterBag $parameterBag): void

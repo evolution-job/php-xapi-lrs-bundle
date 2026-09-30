@@ -66,7 +66,7 @@ class StatementPutControllerSpec extends ObjectBehavior
         $response = $this->putStatement($request, $statement);
 
         $response->shouldHaveType(Response::class);
-        $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
+        $response->getStatusCode()->shouldReturn(Response::HTTP_NO_CONTENT);
     }
 
     public function it_throws_a_ConflictHttpException_if_the_id_parameter_and_the_statement_id_do_not_match_during_a_put_request(StatementRepositoryInterface $statementRepository): void

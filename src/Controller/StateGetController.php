@@ -34,7 +34,7 @@ final readonly class StateGetController
 
         if ($state->getStateId() !== null) {
 
-            return new XapiJsonResponse('', Response::HTTP_NOT_FOUND);
+            return new XapiJsonResponse(status: Response::HTTP_NOT_FOUND);
         }
 
         // List of available States
@@ -42,7 +42,7 @@ final readonly class StateGetController
 
         if (!$states) {
 
-            return new XapiJsonResponse('', Response::HTTP_NOT_FOUND);
+            return new XapiJsonResponse(status: Response::HTTP_NOT_FOUND);
         }
 
         $stateIds = [];

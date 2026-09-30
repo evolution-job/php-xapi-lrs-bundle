@@ -32,6 +32,6 @@ final readonly class StateDeleteController
             $this->stateRepository->removeState($state);
         }
 
-        return new XapiJsonResponse('', Response::HTTP_NO_CONTENT);
+        return new XapiJsonResponse(status: Response::HTTP_NO_CONTENT);
     }
 }

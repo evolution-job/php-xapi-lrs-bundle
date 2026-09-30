@@ -15,39 +15,36 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use XApi\LrsBundle\App\XapiHeader;
+use XApi\LrsBundle\App\XapiVersion;
 
 /**
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
-class VersionListener
+final readonly class VersionListener
 {
-    public const string XAPI_HEADER = 'X-Experience-API-Version';
-    public const string XAPI_VERSION_1_0_0 = '1.0.0';
-    public const string XAPI_VERSION_1_0_3 = '1.0.3';
+    public function __construct(private XapiRequestMatcher $xapiRequestMatcher) { }
 
     public function onKernelRequest(RequestEvent $requestEvent): void
     {
-        if (!$requestEvent->isMainRequest()) {
+        if (false === $this->xapiRequestMatcher->matches($requestEvent)) {
             return;
         }
 
         $request = $requestEvent->getRequest();
 
-        if (!$request->attributes->has('xapi_lrs.route')) {
+        if (true === $request->isMethod(Request::METHOD_OPTIONS)) {
             return;
         }
 
-        if ($request->isMethod(Request::METHOD_OPTIONS)) {
-            return;
-        }
-
-        if (null === $version = $request->headers->get(self::XAPI_HEADER)) {
-            throw new BadRequestHttpException('Missing required "X-Experience-API-Version" header.');
+        if (null === $version = $request->headers->get(XapiHeader::VERSION)) {
+            throw new BadRequestHttpException(sprintf('Missing required "%s" header.', XapiHeader::VERSION));
         }
 
         if (preg_match('/^1\.0(?:\.\d+)?$/', (string)$version)) {
             if ('1.0' === $version) {
-                $request->headers->set(self::XAPI_HEADER, self::XAPI_VERSION_1_0_0);
+                $request->headers->set(XapiHeader::VERSION, XapiVersion::V1_0_0);
             }
 
             return;
@@ -58,18 +55,14 @@ class VersionListener
 
     public function onKernelResponse(ResponseEvent $responseEvent): void
     {
-        if (!$responseEvent->isMainRequest()) {
-            return;
-        }
-
-        if (!$responseEvent->getRequest()->attributes->has('xapi_lrs.route')) {
+        if (false === $this->xapiRequestMatcher->matches($responseEvent)) {
             return;
         }
 
         $headers = $responseEvent->getResponse()->headers;
 
-        if (!$headers->has(self::XAPI_HEADER)) {
-            $headers->set(self::XAPI_HEADER, self::XAPI_VERSION_1_0_3);
+        if (false === $headers->has(XapiHeader::VERSION)) {
+            $headers->set(XapiHeader::VERSION, XapiVersion::V1_0_3);
         }
     }
 }

@@ -11,14 +11,16 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ServerBag;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use XApi\LrsBundle\EventListener\XapiRequestMatcher;
 
 class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
 {
-    public function let(RequestEvent $requestEvent, Request $request, ParameterBag $attributes, HeaderBag $headerBag): void
+    public function let(RequestEvent $requestEvent, Request $request, HeaderBag $headerBag): void
     {
-        $attributes->has('xapi_lrs.route')->willReturn(true);
-
-        $request->attributes = $attributes;
+        $request->attributes = new ParameterBag([
+            'xapi_lrs.route' => true,
+            '_route'         => 'xapi_lrs.my.route',
+        ]);
         $request->headers = $headerBag;
         $request->query = new InputBag(['method' => 'POST']);
         $request->request = new InputBag();
@@ -26,6 +28,9 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
 
         $requestEvent->isMainRequest()->willReturn(true);
         $requestEvent->getRequest()->willReturn($request);
+
+        $xapiRequestMatcher = new XapiRequestMatcher();
+        $this->beConstructedWith($xapiRequestMatcher);
     }
 
     public function it_returns_null_if_request_is_not_main(RequestEvent $requestEvent): void
@@ -49,8 +54,8 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
     public function it_returns_null_if_request_method_is_get(RequestEvent $requestEvent, Request $request, ParameterBag $parameterBag): void
     {
         $parameterBag->get('method')->shouldNotBeCalled();
-        $request->getMethod()->willReturn('GET');
-        $request->isMethod(Request::METHOD_POST)->willReturn(false);
+
+        $request->isMethod('POST')->willReturn(false);
 
         $this->onKernelRequest($requestEvent)->shouldReturn(null);
     }
@@ -76,12 +81,9 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
         $this->onKernelRequest($requestEvent)->shouldThrow(BadRequestHttpException::class);
     }
 
-    public function it_sets_the_request_method_equals_to_method_query_parameter(RequestEvent $requestEvent, Request $request, ParameterBag $parameterBag): void
+    public function it_sets_the_request_method_equals_to_method_query_parameter(RequestEvent $requestEvent, Request $request): void
     {
-        $parameterBag->has('xapi_lrs.route')->shouldBeCalled()->willReturn(true);
         $request->isMethod(Request::METHOD_POST)->willReturn(true);
-
-        $request->attributes = $parameterBag;
 
         $query = new InputBag(['method' => 'POST']);
         $request->setMethod('POST')->shouldBeCalled();
@@ -117,13 +119,11 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
         $this->onKernelRequest($requestEvent);
     }
 
-    public function it_sets_content_from_post_parameters(RequestEvent $requestEvent, Request $request, ParameterBag $attributes, FileBag $fileBag, ServerBag $serverBag): void
+    public function it_sets_content_from_post_parameters(RequestEvent $requestEvent, Request $request, FileBag $fileBag, ServerBag $serverBag): void
     {
-        $attributes->all()->shouldBeCalled()->willReturn([]);
         $fileBag->all()->shouldBeCalled()->willReturn([]);
         $serverBag->all()->shouldBeCalled()->willReturn([]);
 
-        $request->attributes = $attributes;
         $request->cookies = new InputBag();
         $request->files = $fileBag;
         $request->query = new InputBag(['method' => 'POST']);
@@ -136,7 +136,7 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
         $request->initialize(
             [],
             [],
-            [],
+            ['xapi_lrs.route' => true, '_route' => 'xapi_lrs.my.route'],
             [],
             [],
             [],

@@ -23,7 +23,7 @@ class StatementPostControllerTest extends WebTestCase
     }
 
     /**
-     * Test Case 1 : Conform minimal unique Statement
+     * Test Case : Conform minimal unique Statement
      */
     public function testPostSingleMinimalStatement(): void
     {
@@ -35,11 +35,14 @@ class StatementPostControllerTest extends WebTestCase
         $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
         $this->assertJson($response->getContent());
         $responseData = json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertSame('12345678-1234-5678-8234-567812345678', $responseData);
+
+        $this->assertIsArray($responseData);
+        $this->assertContains('12345678-1234-5678-8234-567812345678', $responseData);
+        $this->assertNotContains('12345678-1234-5678-8234-567812345679', $responseData);
     }
 
     /**
-     * Test Case 2 : Conform maximal unique Statement
+     * Test Case : Conform maximal unique Statement
      */
     public function testPostSingleTypicalStatement(): void
     {
@@ -51,11 +54,14 @@ class StatementPostControllerTest extends WebTestCase
         $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
         $this->assertJson($response->getContent());
         $responseData = json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertSame('12345678-1234-5678-8234-567812345678', $responseData);
+
+        $this->assertIsArray($responseData);
+        $this->assertContains('12345678-1234-5678-8234-567812345678', $responseData);
+        $this->assertNotContains('12345678-1234-5678-8234-567812345679', $responseData);
     }
 
     /**
-     * Test Case 3 : Collection of Statements
+     * Test Case : Collection of Statements
      */
     public function testPostCollectionOfStatements(): void
     {
@@ -75,20 +81,26 @@ class StatementPostControllerTest extends WebTestCase
     }
 
     /**
-     * Test Case 4 : Bad JSON
+     * Test Case : Bad JSON
      */
     public function testPostMalformedJsonShouldReturnBadRequest(): void
     {
         $invalidPayload = '[{"id": "eaf1c3e2-be78-434a-ab70-4790b07f4c64"';
 
+        $this->client->catchExceptions(true);
         $this->executePostRequest($invalidPayload);
         $response = $this->client->getResponse();
 
         $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+
+        $this->assertStringContainsString(
+            'The content of the request cannot be deserialized into a valid xAPI statement.',
+            $response->getContent()
+        );
     }
 
     /**
-     * Test Case 4 : Options request
+     * Test Case : OPTIONS request
      */
     public function testOptionsGlobalStatementsEndpoint(): void
     {
@@ -99,6 +111,32 @@ class StatementPostControllerTest extends WebTestCase
         $this->assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode());
         $this->assertTrue($response->headers->has('Allow'));
         $this->assertStringContainsString('POST', $response->headers->get('Allow'));
+    }
+
+    /**
+     * Test case 6 : validation POST Method Tunneling xAPI (POST -> PUT)
+     */
+    public function testPostRequestWithPutTunneling(): void
+    {
+        $jsonPayload = StatementJsonFixtures::getMinimalStatement();
+        $statementId = '12345678-1234-5678-8234-567812345678';
+
+        // xAPI specs required a statementId for PUT
+        $this->client->request(
+            'POST',
+            '/statements?method=PUT&statementId='.$statementId,
+            [],
+            [],
+            [
+                'CONTENT_TYPE'                  => 'application/json',
+                'HTTP_X-Experience-API-Version' => '1.0.3',
+            ],
+            $jsonPayload
+        );
+
+        $response = $this->client->getResponse();
+
+        $this->assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode());
     }
 
     private function executePostRequest(string $payload): void
