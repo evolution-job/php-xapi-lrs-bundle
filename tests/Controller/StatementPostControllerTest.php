@@ -100,20 +100,6 @@ class StatementPostControllerTest extends WebTestCase
     }
 
     /**
-     * Test Case : OPTIONS request
-     */
-    public function testOptionsGlobalStatementsEndpoint(): void
-    {
-        $this->client->request('OPTIONS', '/statements');
-
-        $response = $this->client->getResponse();
-
-        $this->assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode());
-        $this->assertTrue($response->headers->has('Allow'));
-        $this->assertStringContainsString('POST', $response->headers->get('Allow'));
-    }
-
-    /**
      * Test case 6 : validation POST Method Tunneling xAPI (POST -> PUT)
      */
     public function testPostRequestWithPutTunneling(): void

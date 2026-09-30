@@ -102,7 +102,7 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
             'Content-Type'             => 'Content-Type',
             'Content-Length'           => 'Content-Length',
             'If-Match'                 => 'If-Match',
-            'If-None-Match' => 'If-None-Match',
+            'If-None-Match'            => 'If-None-Match',
         ];
 
         foreach ($headerList as $key => $value) {

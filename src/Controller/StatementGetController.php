@@ -15,8 +15,10 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Routing\Router;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\Common\Exception\UnsupportedStatementVersionException;
+use Xabbuh\XApi\Model\IRL;
 use Xabbuh\XApi\Model\Statement;
 use Xabbuh\XApi\Model\StatementId;
 use Xabbuh\XApi\Model\StatementResult;
@@ -55,6 +57,7 @@ final class StatementGetController
     ];
 
     public function __construct(
+        private readonly Router $router,
         private readonly StatementRepositoryInterface $statementRepository,
         private readonly StatementSerializerInterface $statementSerializer,
         private readonly StatementResultSerializerInterface $statementResultSerializer,
@@ -72,6 +75,7 @@ final class StatementGetController
         $this->validate($query);
 
         $includeAttachments = $query->filter('attachments', false, FILTER_VALIDATE_BOOLEAN);
+        $statementsFilter = $this->createStatementsFilters($query);
 
         try {
             $statementId = $query->get('statementId');
@@ -91,12 +95,12 @@ final class StatementGetController
             }
 
             // Multiple
-            $statements = $this->statementRepository->findStatementsBy($this->createStatementsFilters($query));
+            $statements = $this->statementRepository->findStatementsBy($statementsFilter);
 
-            return $this->buildMultiStatementsResponse($statements, $includeAttachments);
+            return $this->buildMultiStatementsResponse($statementsFilter, $statements, $includeAttachments);
 
         } catch (NotFoundException|UnsupportedStatementVersionException) {
-            return $this->buildMultiStatementsResponse([]);
+            return $this->buildMultiStatementsResponse($statementsFilter, []);
         }
     }
 
@@ -120,9 +124,12 @@ final class StatementGetController
      * @param Statement[] $statements
      * @param bool $includeAttachments true to include the attachments in the response, false otherwise
      */
-    protected function buildMultiStatementsResponse(array $statements, bool $includeAttachments = false): XapiJsonResponse|MultipartResponse
+    protected function buildMultiStatementsResponse(StatementsFilter $statementsFilter, array $statements, bool $includeAttachments = false): XapiJsonResponse|MultipartResponse
     {
-        $json = $this->statementResultSerializer->serializeStatementResult(new StatementResult($statements));
+        $route = $this->router->generate('xapi_lrs.statement.get', $statementsFilter->getFilter());
+        $more =  IRL::fromString($route);
+        $statementResult = new StatementResult($statements, $more);
+        $json = $this->statementResultSerializer->serializeStatementResult($statementResult);
 
         $xApiJsonResponse = new XapiJsonResponse($json, Response::HTTP_OK, json: true);
 

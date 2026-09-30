@@ -51,6 +51,7 @@ services:
     xapi_lrs.controller.statement.get:
         class: XApi\LrsBundle\Controller\StatementGetController
         arguments:
+            - '@router'
             - '@xapi_lrs.repository.statement'
             - '@xapi_lrs.statement.serializer'
             - '@xapi_lrs.statement_result.serializer'
