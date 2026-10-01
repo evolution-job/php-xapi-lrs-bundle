@@ -7,9 +7,7 @@ use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use XApi\LrsBundle\EventListener\XapiRequestMatcher;
@@ -28,7 +26,7 @@ class VersionListenerSpec extends ObjectBehavior
         $requestEvent->getRequest()->willReturn($request);
 
         $xapiRequestMatcher = new XapiRequestMatcher();
-        $this->beConstructedWith($xapiRequestMatcher);
+        $this->beConstructedWith($xapiRequestMatcher, ['https://learning.repository.example.com']);
     }
 
     public function it_returns_null_if_requests_are_not_main(HttpKernelInterface $kernel, RequestEvent $requestEvent, Request $request, Response $response): void
@@ -37,15 +35,6 @@ class VersionListenerSpec extends ObjectBehavior
         $requestEvent->getRequest()->shouldNotBeCalled();
 
         $this->onKernelRequest($requestEvent)->shouldReturn(null);
-
-        $responseEvent = new ResponseEvent(
-            $kernel->getWrappedObject(),
-            $request->getWrappedObject(),
-            HttpKernelInterface::SUB_REQUEST,
-            $response->getWrappedObject()
-        );
-
-        $this->onKernelResponse($responseEvent)->shouldReturn(null);
     }
 
     public function it_returns_null_if_not_xapi_route(HttpKernelInterface $kernel, RequestEvent $requestEvent, Request $request, ParameterBag $parameterBag, Response $response): void
@@ -57,15 +46,6 @@ class VersionListenerSpec extends ObjectBehavior
         $request->isMethod(Request::METHOD_OPTIONS)->willReturn(false);
 
         $this->onKernelRequest($requestEvent)->shouldReturn(null);
-
-        $responseEvent = new ResponseEvent(
-            $kernel->getWrappedObject(),
-            $request->getWrappedObject(),
-            HttpKernelInterface::MAIN_REQUEST,
-            $response->getWrappedObject()
-        );
-
-        $this->onKernelResponse($responseEvent)->shouldReturn(null);
     }
 
     public function it_throws_a_BadRequestHttpException_if_no_X_Experience_API_Version_header_is_set(RequestEvent $requestEvent, Request $request, HeaderBag $headerBag): void
@@ -75,7 +55,6 @@ class VersionListenerSpec extends ObjectBehavior
         $this
             ->shouldThrow(new BadRequestHttpException('Missing required "X-Experience-API-Version" header.'))
             ->during('onKernelRequest', [$requestEvent]);
-
     }
 
     public function it_throws_a_BadRequestHttpException_if_specified_version_is_not_supported(RequestEvent $requestEvent, Request $request, HeaderBag $headerBag): void
@@ -109,21 +88,5 @@ class VersionListenerSpec extends ObjectBehavior
         $headerBag->get('X-Experience-API-Version')->shouldBeCalled()->willReturn('1.0.0');
 
         $this->onKernelRequest($requestEvent)->shouldReturn(null);
-    }
-
-    public function it_sets_a_X_Experience_API_Version_header_in_response(HttpKernelInterface $kernel, Request $request, Response $response, ResponseHeaderBag $responseHeaderBag): void
-    {
-        $responseHeaderBag->has('X-Experience-API-Version')->shouldBeCalled()->willReturn(false);
-        $responseHeaderBag->set('X-Experience-API-Version', '1.0.3')->shouldBeCalled();
-        $response->headers = $responseHeaderBag;
-
-        $responseEvent = new ResponseEvent(
-            $kernel->getWrappedObject(),
-            $request->getWrappedObject(),
-            HttpKernelInterface::MAIN_REQUEST,
-            $response->getWrappedObject()
-        );
-
-        $this->onKernelResponse($responseEvent)->shouldReturn(null);
     }
 }

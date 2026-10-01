@@ -26,9 +26,24 @@ class StatementOptionsControllerTest extends WebTestCase
      */
     public function testOptionsGlobalStatementsEndpoint(): void
     {
-        $this->client->request('OPTIONS', '/statements');
+        $host = 'https://learning.repository.example.com';
+        $this->client->request('OPTIONS', '/statements', [], [],  [
+            'HTTP_Origin'                   => $host,
+        ]);
 
         $response = $this->client->getResponse();
+
+        // Headers
+        $this->assertSame($host, $response->headers->get('Access-Control-Allow-Origin'));
+        $this->assertSame('1.0.3', $response->headers->get('X-Experience-API-Version'));
+        $this->assertSame('ETag, Last-Modified, X-Experience-API-Version, X-Experience-API-Consistent-Through', $response->headers->get('Access-Control-Expose-Headers'));
+        $this->assertSame('Origin', $response->headers->get('Vary'));
+        $this->assertSame('true', $response->headers->get('Access-Control-Allow-Credentials'));
+        $this->assertSame(sprintf('frame-ancestors %s', $host), $response->headers->get('Content-Security-Policy'));
+        $this->assertSame('GET, POST, PUT, DELETE, HEAD, OPTIONS', $response->headers->get('Allow'));
+        $this->assertSame('Accept, Authorization, Content-Type, If-Match, If-None-Match, X-Experience-API-Version', $response->headers->get('Access-Control-Allow-Headers'));
+        $this->assertSame('GET, POST, PUT, DELETE, HEAD, OPTIONS', $response->headers->get('Access-Control-Allow-Methods'));
+        $this->assertSame('86400', $response->headers->get('Access-Control-Max-Age'));
 
         $this->assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode());
         $this->assertTrue($response->headers->has('Allow'));

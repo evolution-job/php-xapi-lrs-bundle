@@ -13,7 +13,6 @@ namespace XApi\LrsBundle\EventListener;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use XApi\LrsBundle\App\XapiHeader;
 use XApi\LrsBundle\App\XapiVersion;
@@ -28,13 +27,13 @@ final readonly class VersionListener
 
     public function onKernelRequest(RequestEvent $requestEvent): void
     {
-        if (false === $this->xapiRequestMatcher->matches($requestEvent)) {
+        if (!$this->xapiRequestMatcher->matches($requestEvent)) {
             return;
         }
 
         $request = $requestEvent->getRequest();
 
-        if (true === $request->isMethod(Request::METHOD_OPTIONS)) {
+        if ($request->isMethod(Request::METHOD_OPTIONS)) {
             return;
         }
 
@@ -51,18 +50,5 @@ final readonly class VersionListener
         }
 
         throw new BadRequestHttpException(sprintf('xAPI version "%s" is not supported.', $version));
-    }
-
-    public function onKernelResponse(ResponseEvent $responseEvent): void
-    {
-        if (false === $this->xapiRequestMatcher->matches($responseEvent)) {
-            return;
-        }
-
-        $headers = $responseEvent->getResponse()->headers;
-
-        if (false === $headers->has(XapiHeader::VERSION)) {
-            $headers->set(XapiHeader::VERSION, XapiVersion::V1_0_3);
-        }
     }
 }
