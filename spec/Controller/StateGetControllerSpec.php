@@ -12,6 +12,7 @@
 namespace spec\XApi\LrsBundle\Controller;
 
 use PhpSpec\ObjectBehavior;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\DataFixtures\StateFixtures;
 use XApi\LrsBundle\Response\XapiJsonResponse;
@@ -22,29 +23,31 @@ use XApi\Repository\Api\StateRepositoryInterface;
  */
 class StateGetControllerSpec extends ObjectBehavior
 {
-    public function it_returns_data_and_http_status_code_ok_when_state_found(StateRepositoryInterface $stateRepository): void
+    public function it_returns_data_and_http_status_code_ok_when_state_found(StateRepositoryInterface $stateRepository, Request $request): void
     {
         $state = StateFixtures::getTypicalState();
 
         $stateRepository->findState($state)->willReturn($state);
+        $request->isMethod(Request::METHOD_HEAD)->willReturn(false);
 
         $this->beConstructedWith($stateRepository);
 
-        $response = $this->getState($state);
+        $response = $this->getState($request, $state);
         $response->shouldReturnAnInstanceOf(XapiJsonResponse::class);
 
         $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
     }
 
-    public function it_returns_empty_json_response_with_http_status_code_not_found_when_not_exists(StateRepositoryInterface $stateRepository): void
+    public function it_returns_empty_json_response_with_http_status_code_not_found_when_not_exists(StateRepositoryInterface $stateRepository, Request $request): void
     {
         $state = StateFixtures::getMinimalState();
 
         $stateRepository->findState($state)->willReturn(null);
+        $request->isMethod(Request::METHOD_HEAD)->willReturn(false);
 
         $this->beConstructedWith($stateRepository);
 
-        $response = $this->getState($state);
+        $response = $this->getState($request, $state);
         $response->shouldReturnAnInstanceOf(XapiJsonResponse::class);
 
         $response->getStatusCode()->shouldReturn(Response::HTTP_NOT_FOUND);

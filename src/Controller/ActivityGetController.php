@@ -44,7 +44,13 @@ final readonly class ActivityGetController
         try {
             $activity = $this->activityRepository->findActivityById(IRI::fromString($activityId));
 
-            return new XapiJsonResponse($this->activitySerializer->serializeActivity($activity), Response::HTTP_OK, [], true);
+            return new XapiJsonResponse(
+                $this->activitySerializer->serializeActivity($activity),
+                Response::HTTP_OK,
+                [],
+                true,
+                $request->isMethod(Request::METHOD_HEAD)
+            );
 
         } catch (NotFoundException $notFoundException) {
             throw new NotFoundHttpException(sprintf('No activity matching the following id "%s" has been found.', $activityId), $notFoundException);

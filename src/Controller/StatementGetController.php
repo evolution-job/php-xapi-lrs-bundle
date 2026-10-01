@@ -83,7 +83,7 @@ final class StatementGetController
                 // Unique
                 $statement = $this->statementRepository->findStatementById(StatementId::fromString($statementId));
 
-                return $this->buildSingleStatementResponse($statement, $includeAttachments);
+                return $this->buildSingleStatementResponse($request, $statement, $includeAttachments);
             }
 
             $voidedStatementId = $query->get('voidedStatementId');
@@ -91,16 +91,16 @@ final class StatementGetController
                 // Voided
                 $statement = $this->statementRepository->findVoidedStatementById(StatementId::fromString($voidedStatementId));
 
-                return $this->buildSingleStatementResponse($statement, $includeAttachments);
+                return $this->buildSingleStatementResponse($request, $statement, $includeAttachments);
             }
 
             // Multiple
             $statements = $this->statementRepository->findStatementsBy($statementsFilter);
 
-            return $this->buildMultiStatementsResponse($statementsFilter, $statements, $includeAttachments);
+            return $this->buildMultiStatementsResponse($request, $statementsFilter, $statements, $includeAttachments);
 
         } catch (NotFoundException|UnsupportedStatementVersionException) {
-            return $this->buildMultiStatementsResponse($statementsFilter, []);
+            return $this->buildMultiStatementsResponse($request, $statementsFilter, []);
         }
     }
 
@@ -124,14 +124,19 @@ final class StatementGetController
      * @param Statement[] $statements
      * @param bool $includeAttachments true to include the attachments in the response, false otherwise
      */
-    protected function buildMultiStatementsResponse(StatementsFilter $statementsFilter, array $statements, bool $includeAttachments = false): XapiJsonResponse|MultipartResponse
-    {
+    protected function buildMultiStatementsResponse(
+        Request $request,
+        StatementsFilter $statementsFilter,
+        array $statements,
+        bool $includeAttachments = false
+    ): XapiJsonResponse|MultipartResponse {
+
         $route = $this->router->generate('xapi_lrs.statement.get', $statementsFilter->getFilter());
         $more =  IRL::fromString($route);
         $statementResult = new StatementResult($statements, $more);
         $json = $this->statementResultSerializer->serializeStatementResult($statementResult);
 
-        $xApiJsonResponse = new XapiJsonResponse($json, Response::HTTP_OK, json: true);
+        $xApiJsonResponse = new XapiJsonResponse($json, Response::HTTP_OK, json: true, isHeadRequest: $request->isMethod(Request::METHOD_HEAD));
 
         if ($includeAttachments) {
             return $this->buildMultipartResponse($xApiJsonResponse, $statements);
@@ -144,7 +149,7 @@ final class StatementGetController
      * @param bool $includeAttachments true to include the attachments in the response, false otherwise
      * @throws UnsupportedStatementVersionException
      */
-    protected function buildSingleStatementResponse(Statement $statement, bool $includeAttachments = false): XapiJsonResponse|MultipartResponse
+    protected function buildSingleStatementResponse(Request $request, Statement $statement, bool $includeAttachments = false): XapiJsonResponse|MultipartResponse
     {
         if (null === $statement->getVersion()) {
             $statement = $statement->withVersion(XapiVersion::V1_0_3);
@@ -152,7 +157,7 @@ final class StatementGetController
 
         $json = $this->statementSerializer->serializeStatement($statement);
 
-        $response = new XapiJsonResponse($json, Response::HTTP_OK, json: true);
+        $response = new XapiJsonResponse($json, Response::HTTP_OK, json: true, isHeadRequest: $request->isMethod(Request::METHOD_HEAD));
 
         if ($includeAttachments) {
             $response = $this->buildMultipartResponse($response, [$statement]);

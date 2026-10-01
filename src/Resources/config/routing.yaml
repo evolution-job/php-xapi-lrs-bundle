@@ -1,7 +1,7 @@
 # Activity
 xapi_lrs.activity.get:
     path: /activities
-    methods: [ GET ]
+    methods: [ GET, HEAD ]
     defaults:
         _controller: 'xapi_lrs.controller.activity.get::getActivities'
         xapi_lrs.route: true
@@ -16,7 +16,7 @@ xapi_lrs.activities.options:
 # State
 xapi_lrs.state.get:
     path: /activities/state
-    methods: [ GET ]
+    methods: [ GET, HEAD ]
     defaults:
         _controller: 'xapi_lrs.controller.state.get::getState'
         xapi_serializer: state
@@ -56,7 +56,7 @@ xapi_lrs.state.delete:
 # Statement
 xapi_lrs.statement.get:
     path: /statements
-    methods: [ GET ]
+    methods: [ GET, HEAD ]
     defaults:
         _controller: 'xapi_lrs.controller.statement.get::getStatements'
         xapi_lrs.route: true

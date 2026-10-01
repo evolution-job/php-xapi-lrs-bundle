@@ -11,6 +11,7 @@
 
 namespace XApi\LrsBundle\Controller;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Model\State;
 use XApi\LrsBundle\Response\XapiJsonResponse;
@@ -23,13 +24,15 @@ final readonly class StateGetController
 {
     public function __construct(private StateRepositoryInterface $stateRepository) { }
 
-    public function getState(State $state): XapiJsonResponse
+    public function getState(Request $request, State $state): XapiJsonResponse
     {
         $foundState = $this->stateRepository->findState($state);
 
+        $isHeadRequest = $request->isMethod(Request::METHOD_HEAD);
+
         if ($foundState instanceof State) {
 
-            return new XapiJsonResponse($foundState->getData(), Response::HTTP_OK);
+            return new XapiJsonResponse($foundState->getData(), Response::HTTP_OK, isHeadRequest: $isHeadRequest);
         }
 
         if ($state->getStateId() !== null) {
@@ -50,6 +53,6 @@ final readonly class StateGetController
             $stateIds[] = $foundState->getStateId();
         }
 
-        return new XapiJsonResponse(array_unique($stateIds), Response::HTTP_NOT_FOUND);
+        return new XapiJsonResponse(array_unique($stateIds), Response::HTTP_OK);
     }
 }

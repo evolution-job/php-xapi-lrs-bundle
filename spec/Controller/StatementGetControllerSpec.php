@@ -238,6 +238,7 @@ class StatementGetControllerSpec extends ObjectBehavior
         StatementsFilterFactory $statementFilterFactory,
     ) {
         $request->query = new InputBag([]);
+        $request->isMethod(Request::METHOD_HEAD)->willReturn(false);
         $statementFilterFactory->createFromParameterBag($request->query)->willReturn($filter);
 
         $statementRepository->findStatementsBy($filter)->willReturn(StatementFixtures::getStatementCollection());
