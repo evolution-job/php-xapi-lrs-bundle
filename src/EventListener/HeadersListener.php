@@ -21,8 +21,6 @@ use XApi\LrsBundle\App\XapiVersion;
  */
 final readonly class HeadersListener
 {
-    private const string ALLOWED_METHODS = 'GET, POST, PUT, DELETE, HEAD, OPTIONS';
-
     /**
      * @param string[] $allowedOrigins
      */
@@ -39,7 +37,7 @@ final readonly class HeadersListener
 
         $headersToAdd = [
             'Access-Control-Allow-Credentials' => 'true',
-            'Access-Control-Expose-Headers'    => 'ETag, Last-Modified, X-Experience-API-Version, X-Experience-API-Consistent-Through',
+            'Access-Control-Expose-Headers'    => XapiHeader::EXPOSE_HEADERS,
         ];
 
         // HOST
@@ -53,9 +51,9 @@ final readonly class HeadersListener
         // OPTIONS
         if ($request->isMethod(Request::METHOD_OPTIONS)) {
             $headersToAdd = array_merge($headersToAdd, [
-                'Allow'                        => self::ALLOWED_METHODS,
-                'Access-Control-Allow-Headers' => 'Accept, Authorization, Content-Type, If-Match, If-None-Match, X-Experience-API-Version',
-                'Access-Control-Allow-Methods' => self::ALLOWED_METHODS,
+                'Allow'                        => XapiHeader::ALLOWED_METHODS,
+                'Access-Control-Allow-Headers' => implode(', ', XapiHeader::ALLOWED),
+                'Access-Control-Allow-Methods' => XapiHeader::ALLOWED_METHODS,
                 'Access-Control-Max-Age'       => '86400',
             ]);
         }

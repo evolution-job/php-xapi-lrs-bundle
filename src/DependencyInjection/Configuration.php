@@ -38,11 +38,11 @@ final class Configuration implements ConfigurationInterface
                     ->validate()
                     ->always(function (array $values): array {
                         foreach ($values as $origin) {
-                            if (false === filter_var($origin, FILTER_VALIDATE_URL)) {
+                            if (!filter_var($origin, FILTER_VALIDATE_URL)) {
                                 throw new InvalidArgumentException(sprintf('Invalid domain "%s".', $origin));
                             }
                             $domain = parse_url($origin, PHP_URL_HOST);
-                            if (false === filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
+                            if (!filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
                                 throw new InvalidArgumentException(sprintf('Invalid domain "%s".', $origin));
                             }
                         }

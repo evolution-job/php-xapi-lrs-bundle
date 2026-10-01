@@ -19,7 +19,7 @@ final readonly class ExceptionListener
 
     public function onKernelException(ExceptionEvent $exceptionEvent): void
     {
-        if (false === $this->xapiRequestMatcher->matches($exceptionEvent)) {
+        if (!$this->xapiRequestMatcher->matches($exceptionEvent)) {
             return;
         }
 
@@ -38,7 +38,7 @@ final readonly class ExceptionListener
         ]);
 
         // Add X-Experience-API-Version
-        if (false === $response->headers->has(XapiHeader::VERSION)) {
+        if (!$response->headers->has(XapiHeader::VERSION)) {
             $response->headers->set(XapiHeader::VERSION, XapiVersion::V1_0_3);
         }
 

@@ -25,13 +25,13 @@ final readonly class SerializerListener
 
     public function onKernelRequest(RequestEvent $requestEvent): void
     {
-        if (false === $this->xapiRequestMatcher->matches($requestEvent)) {
+        if (!$this->xapiRequestMatcher->matches($requestEvent)) {
             return;
         }
 
         $request = $requestEvent->getRequest();
 
-        if (true === $request->isMethod(Request::METHOD_OPTIONS)) {
+        if ($request->isMethod(Request::METHOD_OPTIONS)) {
             return;
         }
 
