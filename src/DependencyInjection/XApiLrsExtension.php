@@ -38,6 +38,8 @@ final class XApiLrsExtension extends Extension
         $yamlFileLoader->load('factory.yaml');
         $yamlFileLoader->load('serializer.yaml');
 
+        $container->setParameter('xapi_lrs_allowed_origins', $config['allowed_origins']);
+
         switch ($config['type']) {
             case 'in_memory':
                 break;

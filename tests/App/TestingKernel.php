@@ -76,6 +76,7 @@ class TestingKernel extends Kernel
             $container->loadFromExtension('xapi_lrs', [
                 'type'                   => 'in_memory',
                 'object_manager_service' => 'doctrine.orm.entity_manager',
+                'allowed_origins'        => ['https://lrs.example.com', 'https://learning.repository.example.com'],
             ]);
 
             $container->register('xapi_lrs.repository.state', FakeStateRepository::class)->setPublic(true);
