@@ -11,11 +11,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ServerBag;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Routing\Router;
+use XApi\Fixtures\Json\StatementJsonFixtures;
 use XApi\LrsBundle\EventListener\XapiRequestMatcher;
 
 class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
 {
-    public function let(RequestEvent $requestEvent, Request $request, HeaderBag $headerBag): void
+    public function let(Router $router, RequestEvent $requestEvent, Request $request, HeaderBag $headerBag): void
     {
         $request->attributes = new ParameterBag([
             'xapi_lrs.route' => true,
@@ -29,8 +31,10 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
         $requestEvent->isMainRequest()->willReturn(true);
         $requestEvent->getRequest()->willReturn($request);
 
+        $router->matchRequest($request)->willReturn(['xapi_lrs.route' => true]);
+
         $xapiRequestMatcher = new XapiRequestMatcher();
-        $this->beConstructedWith($xapiRequestMatcher);
+        $this->beConstructedWith($router, $xapiRequestMatcher);
     }
 
     public function it_returns_null_if_request_is_not_main(RequestEvent $requestEvent): void
@@ -43,7 +47,9 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
 
     public function it_returns_null_if_request_has_no_attribute_xapi_lrs_route(RequestEvent $requestEvent, Request $request, ParameterBag $parameterBag): void
     {
-        $parameterBag->has('xapi_lrs.route')->shouldBeCalled()->willReturn(false);
+        $parameterBag->has('xapi_lrs.route')->shouldNotBeCalled();
+
+        $request->isMethod('POST')->willReturn(false);
 
         $request->attributes = $parameterBag;
         $requestEvent->getRequest()->willReturn($request);
@@ -84,6 +90,7 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
     public function it_sets_the_request_method_equals_to_method_query_parameter(RequestEvent $requestEvent, Request $request): void
     {
         $request->isMethod(Request::METHOD_POST)->willReturn(true);
+        $request->getContent()->willReturn(null);
 
         $query = new InputBag(['method' => 'POST']);
         $request->setMethod('POST')->shouldBeCalled();
@@ -100,7 +107,6 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
             'Authorization'            => 'Authorization',
             'X-Experience-API-Version' => 'X-Experience-API-Version',
             'Content-Type'             => 'Content-Type',
-            'Content-Length'           => 'Content-Length',
             'If-Match'                 => 'If-Match',
             'If-None-Match'            => 'If-None-Match',
         ];
@@ -113,6 +119,7 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
         $request->query = new InputBag(['method' => 'GET']);
         $request->isMethod(Request::METHOD_POST)->willReturn(true);
         $request->setMethod('GET')->shouldBeCalled();
+        $request->getContent()->willReturn(null);
 
         $requestEvent->getRequest()->willReturn($request);
 
@@ -121,13 +128,14 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
 
     public function it_sets_content_from_post_parameters(RequestEvent $requestEvent, Request $request, FileBag $fileBag, ServerBag $serverBag): void
     {
+        $fileBag->count()->shouldBeCalled()->willReturn(0);
         $fileBag->all()->shouldBeCalled()->willReturn([]);
         $serverBag->all()->shouldBeCalled()->willReturn([]);
 
         $request->cookies = new InputBag();
         $request->files = $fileBag;
         $request->query = new InputBag(['method' => 'POST']);
-        $request->request = new InputBag(['content' => 'a content']);
+        $request->request = new InputBag(['content' => StatementJsonFixtures::getMinimalStatement()]);
         $request->server = $serverBag;
 
         $request->isMethod(Request::METHOD_POST)->willReturn(true);
@@ -140,7 +148,7 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
             [],
             [],
             [],
-            'a content'
+            StatementJsonFixtures::getMinimalStatement()
         )->shouldBeCalled();
 
         $requestEvent->getRequest()->willReturn($request);

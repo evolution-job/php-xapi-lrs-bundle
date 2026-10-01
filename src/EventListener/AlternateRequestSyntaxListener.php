@@ -12,49 +12,76 @@
 namespace XApi\LrsBundle\EventListener;
 
 use InvalidArgumentException;
+use JsonException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Routing\RouterInterface;
+use Throwable;
+use XApi\LrsBundle\App\XapiAttribute;
 use XApi\LrsBundle\App\XapiHeader;
+use XApi\LrsBundle\Exception\XapiRequestHttpException;
 
 /**
+ * Handles xAPI Alternate Request Syntax (POST Tunneling) for ALL methods (GET, PUT, DELETE, etc.)
+ * Must be executed BEFORE the Symfony Routing Listener.
+ *
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
 final readonly class AlternateRequestSyntaxListener
 {
-    public function __construct(private XapiRequestMatcher $xapiRequestMatcher) { }
+    public function __construct(private RouterInterface $router) { }
 
     public function onKernelRequest(RequestEvent $requestEvent): void
     {
-        if (false === $this->xapiRequestMatcher->matches($requestEvent)) {
+        if (!$requestEvent->isMainRequest()) {
             return;
         }
 
         $request = $requestEvent->getRequest();
-
-        if (false === $request->isMethod(Request::METHOD_POST)) {
+        if (!$request->isMethod(Request::METHOD_POST)) {
             return;
         }
 
-        try {
-            $method = $request->query->getString('method');
-        } catch (InvalidArgumentException) {
+        $method = $this->matchMethod($request);
+        if (null === $method) {
             return;
         }
 
-        if (!$method) {
+        if (!$this->isXapiRoute($request)) {
             return;
         }
 
-        if ($request->query->count() > 1) {
-            throw new BadRequestHttpException('Including other query parameters than "method" is not allowed. You have to send them as POST parameters inside the request body.');
+        if (!in_array($method, [Request::METHOD_GET, Request::METHOD_PUT, Request::METHOD_DELETE, Request::METHOD_POST], true)) {
+            throw new XapiRequestHttpException(sprintf('The tunneled method "%s" is not supported by xAPI alternate request syntax.', $method));
+        }
+
+        // STRICT CONFORMANCE: "The Learning Record Provider MUST NOT include any
+        // other query string parameters on the request [than method]"
+        $unexpectedParameters = array_diff(
+            array_keys($request->query->all()),
+            ['method']
+        );
+
+        if ([] !== $unexpectedParameters) {
+            throw new XapiRequestHttpException(
+                'Including other query parameters than "method" in the URL is not allowed. You must send them inside the request body.'
+            );
         }
 
         $request->setMethod($method);
         $request->query->remove('method');
 
-        if (null !== $content = $request->request->get('content')) {
+        $tunneledContentType = $request->request->get('Content-Type');
+        $content = $request->request->get('content');
+
+        if (is_string($content)) {
             $request->request->remove('content');
+
+            if ($request->files->count() > 0) {
+                $content = $this->rebuildAttachments($content, $request);
+            }
 
             $request->initialize(
                 $request->query->all(),
@@ -67,6 +94,8 @@ final readonly class AlternateRequestSyntaxListener
             );
         }
 
+        $statementIdFromForm = $request->request->get('statementId');
+
         foreach ($request->request as $key => $value) {
             if (in_array($key, XapiHeader::ALLOWED, true)) {
                 $request->headers->set($key, $value);
@@ -76,5 +105,121 @@ final readonly class AlternateRequestSyntaxListener
 
             $request->request->remove($key);
         }
+
+        if ($tunneledContentType) {
+            $request->headers->set('Content-Type', $tunneledContentType);
+        }
+
+        // Specific Validation for PUT Statements
+        if ($method === Request::METHOD_PUT && str_ends_with($request->getPathInfo(), '/statements')) {
+            $this->validateStatementPutRequest($request, $statementIdFromForm);
+        }
+    }
+
+    /**
+     * Search for a file uploaded whose SHA-256 hash matches the hash declared in the Statement.
+     */
+    private function findMatchingFileUrl(array $files, string $targetSha2): ?string
+    {
+        foreach ($files as $file) {
+            if ($file instanceof UploadedFile && $file->isValid()) {
+                $fileContent = file_get_contents($file->getPathname());
+
+                // Conformance xAPI: check hash SHA-2
+                if (hash('sha256', $fileContent) === $targetSha2) {
+                    return $file->getPathname();
+                }
+            }
+        }
+        return null;
+    }
+
+    private function isXapiRoute(Request $request): bool
+    {
+        try {
+            $parameters = $this->router->matchRequest($request);
+        } catch (Throwable) {
+            return false;
+        }
+
+        return $parameters[XapiAttribute::LRS_ROUTE] ?? false;
+    }
+
+    private function matchMethod(Request $request): ?string
+    {
+        try {
+            $method = $request->query->getString('method');
+        } catch (InvalidArgumentException) {
+            return null;
+        }
+
+        if (!$method) {
+            return null;
+        }
+
+        return strtoupper(trim($method));
+    }
+
+    private function validateStatementPutRequest(Request $request, ?string $idFromForm): void
+    {
+        try {
+            $content = $request->getContent();
+            if (!is_string($content) || $content === '') {
+                throw new XapiRequestHttpException('Missing JSON request payload.');
+            }
+            $payload = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            throw new XapiRequestHttpException('Invalid JSON request payload.');
+        }
+
+        $idBody = $payload['id'] ?? null;
+        if ($idBody === null) {
+            throw new XapiRequestHttpException('Statement id must be present in the JSON body for PUT requests.');
+        }
+
+        if ($idFromForm === null) {
+            throw new XapiRequestHttpException('The "statementId" parameter is required in the body for alternative PUT requests.');
+        }
+
+        if ($idFromForm !== $idBody) {
+            throw new XapiRequestHttpException('The "statementId" parameter must match the statement id inside the JSON body.');
+        }
+    }
+
+    private function rebuildAttachments(string $content, Request $request): string
+    {
+        // Rebuild Attachments for PHP-XAPI-MODEL
+        try {
+            $statementData = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+            $isBatch = !isset($statementData['actor']) && isset($statementData);
+            $statements = $isBatch ? $statementData : [$statementData];
+
+            foreach ($statements as &$statement) {
+
+                if (!isset($statement['attachments']) || !is_array($statement['attachments'])) {
+                    continue;
+                }
+
+                foreach ($statement['attachments'] as &$attachment) {
+                    if (!empty($attachment['fileUrl'])) {
+                        continue;
+                    }
+
+                    $fileContent = $this->findMatchingFileUrl($request->files->all(), $attachment['sha2'] ?? '');
+
+                    if ($fileContent !== null) {
+                        $attachment['fileUrl'] = $fileContent;
+                    }
+                }
+            }
+            unset($statement, $attachment);
+
+            $content = json_encode($isBatch ? $statements : $statements[0], JSON_THROW_ON_ERROR);
+
+        } catch (JsonException) {
+            throw new XapiRequestHttpException('Invalid JSON payload while processing attachments.');
+        }
+
+        return $content;
     }
 }

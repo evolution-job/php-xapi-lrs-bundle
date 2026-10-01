@@ -5,12 +5,12 @@ namespace XApi\LrsBundle\EventListener;
 use JsonException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
 use Xabbuh\XApi\Common\Exception\UnsupportedStatementVersionException;
 use Xabbuh\XApi\Serializer\Exception\DeserializationException;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use Xabbuh\XApi\Serializer\StateSerializerInterface;
+use XApi\LrsBundle\Exception\XapiRequestHttpException;
 
 /**
  * @author Christian Flothmann <christian.flothmann@xabbuh.de>
@@ -77,7 +77,7 @@ final readonly class SerializerListener
             }
         } catch (UnsupportedStatementVersionException|InvalidArgumentException|DeserializationException|JsonException $unsupportedStatementVersionException) {
 
-            throw new BadRequestHttpException(
+            throw new XapiRequestHttpException(
                 sprintf(
                     'The content of the request cannot be deserialized into a valid xAPI %s.',
                     $request->attributes->get('xapi_serializer')

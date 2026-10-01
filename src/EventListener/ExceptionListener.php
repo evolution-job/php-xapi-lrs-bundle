@@ -7,6 +7,7 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use XApi\LrsBundle\App\XapiHeader;
 use XApi\LrsBundle\App\XapiVersion;
+use XApi\LrsBundle\Exception\XapiRequestHttpException;
 
 /**
  * Converts Experience API specific domain exceptions into proper HTTP responses.
@@ -19,11 +20,13 @@ final readonly class ExceptionListener
 
     public function onKernelException(ExceptionEvent $exceptionEvent): void
     {
-        if (!$this->xapiRequestMatcher->matches($exceptionEvent)) {
+        $exception = $exceptionEvent->getThrowable();
+
+        if (!$exception instanceof XapiRequestHttpException
+            && !$this->xapiRequestMatcher->matches($exceptionEvent)
+        ) {
             return;
         }
-
-        $exception = $exceptionEvent->getThrowable();
 
         $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
         $message = 'Internal Server Error';
