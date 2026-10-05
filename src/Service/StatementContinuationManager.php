@@ -44,6 +44,8 @@ final readonly class StatementContinuationManager
             return $parameters;
         }
 
+        // A continuation link is opaque to clients and must be followed on its own;
+        // reject extra query parameters rather than silently changing the saved query.
         if (1 !== count($parameters) || !is_string($parameters['moreId']) || !preg_match('/\A[a-f0-9]{64}\z/', $parameters['moreId'])) {
             throw new BadRequestException('The moreId parameter must be a valid statement continuation token and used by itself.');
         }
@@ -65,6 +67,9 @@ final readonly class StatementContinuationManager
      */
     public function createMoreUrl(array $queryParameters, int $limit, int $offset): IRL
     {
+        // Keep the full next-page query server-side so the xAPI "more" URL stays
+        // opaque while preserving every filter from the original request.
+        // https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md
         $nextParameters = array_merge($queryParameters, [
             'limit' => $limit,
             'offset' => $offset + $limit,

@@ -156,6 +156,8 @@ final readonly class StatementGetQueryValidator
         $filterQuery = clone $parameterBag;
         $filterQuery->set('limit', $limit);
 
+        // The repository filter is used to find candidates; exact inclusive-until
+        // semantics (including fractions of a second) are applied by the controller.
         if ($until instanceof DateTimeImmutable && $this->hasNonZeroFraction($parameterBag->get('until'))) {
             $filterQuery->set('until', $until->modify('+1 second')->format('c'));
         }

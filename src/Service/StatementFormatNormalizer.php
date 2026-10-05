@@ -56,6 +56,9 @@ final readonly class StatementFormatNormalizer
             return json_encode($data, JSON_THROW_ON_ERROR);
         }
 
+        // Canonical format overlays stored Activity and Verb definitions on the
+        // returned statements; exact format above deliberately keeps statement data unchanged.
+        // https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md
         $activities = [];
         $verbs = [];
 

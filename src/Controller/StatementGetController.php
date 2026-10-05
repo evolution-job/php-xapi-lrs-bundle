@@ -96,6 +96,8 @@ final readonly class StatementGetController
             return $this->buildSingleStatementResponse($request, $statement, $includeAttachments, $format);
         }
 
+        // Timestamp filtering happens after the repository query. Fetch additional
+        // candidates as needed so filtered-out boundary rows do not truncate a page.
         $requiredCount = $offset + $limit + 1;
         $fetchLimit = $requiredCount;
         do {
@@ -119,6 +121,9 @@ final readonly class StatementGetController
         $hasMore = count($statements) > $offset + $limit;
         $statements = array_slice($statements, $offset, $limit);
 
+        // xAPI clients follow the returned "more" URL verbatim to retrieve the
+        // next page; the continuation manager keeps its query state behind a token.
+        // https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md
         $more = $hasMore ? $this->statementContinuationManager->createMoreUrl($parameterBag->all(), $limit, $offset) : null;
 
         return $this->buildMultiStatementsResponse($request, $statements, $includeAttachments, $more, $format);
@@ -204,6 +209,9 @@ final readonly class StatementGetController
             return $statements;
         }
 
+        // Statement retrieval uses an exclusive "since" and inclusive "until"
+        // boundary. Apply them to stored timestamps here, including sub-second precision.
+        // https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md
         return array_values(
             array_filter(
                 $statements,

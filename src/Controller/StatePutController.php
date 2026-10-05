@@ -34,6 +34,9 @@ final readonly class StatePutController
         $ifMatch = $request->headers->get('If-Match');
         $ifNoneMatch = $request->headers->get('If-None-Match');
 
+        // State writes are unconditional unless the client supplies an HTTP
+        // precondition; this preserves the xAPI State resource's optional concurrency headers.
+        // https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md
         if (null !== $ifMatch || null !== $ifNoneMatch) {
             $existingState = $this->stateRepository->findState($state);
             $etag = $existingState instanceof State
@@ -59,6 +62,7 @@ final readonly class StatePutController
             return false;
         }
 
+        // If-Match uses strong comparison; weak tags never satisfy this comparison.
         $etag = substr($etag, 1, -1);
         return array_any($this->entityTags($header), fn(string $entityTag): bool => '*' === $entityTag || $etag === $entityTag);
     }
@@ -69,6 +73,7 @@ final readonly class StatePutController
             return false;
         }
 
+        // If-None-Match uses weak comparison, unlike If-Match above.
         $etag = substr($etag, 1, -1);
 
         foreach ($this->entityTags($header) as $entityTag) {

@@ -65,6 +65,9 @@ final readonly class StatePostController
             throw new BadRequestException('The posted document must be a JSON object.');
         }
 
+        // xAPI State POST merges at the top level: posted keys replace existing
+        // values, while omitted existing keys remain. Nested values are replaced whole.
+        // https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md
         $mergedData = array_replace($existingData, $postedData);
 
         return new State(

@@ -173,6 +173,8 @@ class StatementGetPaginationTest extends TestCase
         $router->method('generate')->willReturnCallback(static fn(string $route, array $parameters): string => '/statements?moreId='.$parameters['moreId']);
 
         $repository = $this->createMock(StatementRepositoryInterface::class);
+        // Keep returning the full candidate set: the controller must reapply the
+        // exclusive since boundary before slicing both pages and determining "more".
         $repository->expects($this->exactly(3))
             ->method('findStatementsBy')
             ->willReturn($statements);

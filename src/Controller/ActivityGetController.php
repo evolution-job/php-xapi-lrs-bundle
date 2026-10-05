@@ -66,6 +66,9 @@ final readonly class ActivityGetController
             $activity = null;
         }
 
+        // An unknown Activity ID is still a valid resource lookup: return the
+        // minimal Activity containing that ID rather than a 404.
+        // https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md
         $activity ??= new Activity($iri);
 
         return new JsonResponse(

@@ -30,6 +30,9 @@ final readonly class MultipartStatementParser
         $attachments = [];
         $attachmentMetadata = [];
 
+        // In xAPI multipart/mixed requests, the JSON statement is first; later
+        // parts carry attachment bytes referenced by that statement's SHA-2 hashes.
+        // https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md
         foreach ($parts as $part) {
             [$headers, $body] = $this->parsePart($part);
             if (null === $headers) {
@@ -137,6 +140,8 @@ final readonly class MultipartStatementParser
             throw new BadRequestException('Multipart attachment parts must declare Content-Transfer-Encoding: binary.');
         }
 
+        // The digest identifies the attachment and also verifies the unmodified
+        // binary part body. Its hexadecimal length distinguishes the supported SHA-2 algorithms.
         $sha2 = strtolower(trim($headers['x-experience-api-hash'] ?? ''));
         $algorithm = match (strlen($sha2)) {
             64 => 'sha256',
@@ -223,6 +228,8 @@ final readonly class MultipartStatementParser
      */
     private function collectAttachmentMetadata(array $statement, array &$metadata): void
     {
+        // Attachments can occur on a top-level Statement or recursively inside
+        // its SubStatement object, so collect both before validating MIME parts.
         foreach ($statement['attachments'] ?? [] as $attachment) {
             if (
                 is_array($attachment)
