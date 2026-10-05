@@ -13,6 +13,7 @@ namespace spec\XApi\LrsBundle\Controller;
 
 use DateTime;
 use PhpSpec\ObjectBehavior;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\DataFixtures\StateFixtures;
 use XApi\LrsBundle\Response\JsonResponse;
@@ -27,11 +28,12 @@ class StatePostControllerSpec extends ObjectBehavior
     {
         $state = StateFixtures::getTypicalState();
 
+        $stateRepositoryInterface->findState($state)->willReturn(null);
         $stateRepositoryInterface->storeState($state)->shouldBeCalled();
 
         $this->beConstructedWith($stateRepositoryInterface);
 
-        $response = $this->postState($state);
+        $response = $this->postState($state, new Request());
 
         $dateTime = new DateTime();
         $response->shouldHaveType(JsonResponse::class);

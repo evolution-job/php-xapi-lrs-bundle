@@ -24,11 +24,16 @@ services:
         tags:
             - { name: 'kernel.event_listener', event: 'kernel.response', method: 'onKernelResponse' }
 
-    xapi_lrs.event_listener.serializer:
-        class: XApi\LrsBundle\EventListener\SerializerListener
+    xapi_lrs.request_deserializer:
+        class: XApi\LrsBundle\EventListener\XapiRequestDeserializer
         arguments:
             - '@xapi_lrs.statement.serializer'
             - '@xapi_lrs.state.serializer'
+
+    xapi_lrs.event_listener.serializer:
+        class: XApi\LrsBundle\EventListener\SerializerListener
+        arguments:
+            - '@xapi_lrs.request_deserializer'
             - '@xapi_lrs.request_matcher'
         tags:
             - { name: 'kernel.event_listener', event: 'kernel.request', method: 'onKernelRequest', priority: -2 }

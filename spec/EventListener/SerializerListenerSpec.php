@@ -11,6 +11,7 @@ use Xabbuh\XApi\DataFixtures\StatementFixtures;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use Xabbuh\XApi\Serializer\StateSerializerInterface;
 use XApi\Fixtures\Json\StatementJsonFixtures;
+use XApi\LrsBundle\EventListener\XapiRequestDeserializer;
 use XApi\LrsBundle\EventListener\XapiRequestMatcher;
 use XApi\LrsBundle\Exception\BadRequestHttpException;
 
@@ -30,7 +31,8 @@ class SerializerListenerSpec extends ObjectBehavior
         $requestEvent->isMainRequest()->willReturn(true);
 
         $xapiRequestMatcher = new XapiRequestMatcher();
-        $this->beConstructedWith($statementSerializer, $stateSerializer, $xapiRequestMatcher);
+        $requestDeserializer = new XapiRequestDeserializer($statementSerializer->getWrappedObject(), $stateSerializer->getWrappedObject());
+        $this->beConstructedWith($requestDeserializer, $xapiRequestMatcher);
     }
 
     public function it_returns_null_if_request_has_no_attribute_xapi_lrs_route(RequestEvent $requestEvent, ParameterBag $parameterBag): void

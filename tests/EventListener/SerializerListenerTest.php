@@ -12,6 +12,7 @@ use Xabbuh\XApi\Model\Statement;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use Xabbuh\XApi\Serializer\StateSerializerInterface;
 use XApi\LrsBundle\EventListener\SerializerListener;
+use XApi\LrsBundle\EventListener\XapiRequestDeserializer;
 use XApi\LrsBundle\EventListener\XapiRequestMatcher;
 use XApi\LrsBundle\Exception\BadRequestHttpException;
 
@@ -30,8 +31,7 @@ class SerializerListenerTest extends TestCase
         $this->stateSerializer = $this->createMock(StateSerializerInterface::class);
 
         $this->listener = new SerializerListener(
-            $this->statementSerializer,
-            $this->stateSerializer,
+            new XapiRequestDeserializer($this->statementSerializer, $this->stateSerializer),
             new XapiRequestMatcher()
         );
     }
@@ -81,6 +81,7 @@ class SerializerListenerTest extends TestCase
         $request = new Request([], [], [
             'xapi_lrs.route' => true,
             '_route' => 'xapi_lrs.statement.post',
+            '_controller' => 'xapi_lrs.controller.statement.post::postStatement',
             'xapi_serializer' => 'statement',
         ], [], [], [], $jsonContent);
         $event = new RequestEvent($this->createMock(HttpKernelInterface::class), $request, HttpKernelInterface::MAIN_REQUEST);
@@ -90,6 +91,10 @@ class SerializerListenerTest extends TestCase
         $this->assertTrue($request->attributes->has('statements'));
         $this->assertFalse($request->attributes->has('statement'));
         $this->assertSame($statementsArray, $request->attributes->get('statements'));
+        $this->assertSame(
+            'xapi_lrs.controller.statement.post::postStatements',
+            $request->attributes->get('_controller')
+        );
     }
 
     public function testOnKernelRequestAllowsMissingStateIdForGetAndDelete(): void
@@ -131,6 +136,22 @@ class SerializerListenerTest extends TestCase
         }
     }
 
+    public function testOnKernelRequestPreservesNonJsonStateDocumentBody(): void
+    {
+        $state = StateFixtures::getMinimalState();
+        $this->stateSerializer
+            ->expects($this->once())
+            ->method('deserializeState')
+            ->willReturn($state);
+
+        $request = $this->createStateRequest(Request::METHOD_POST, 'plain document', 'text/plain');
+        $event = new RequestEvent($this->createMock(HttpKernelInterface::class), $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $this->listener->onKernelRequest($event);
+
+        $this->assertSame('plain document', $request->attributes->get('state')->getData());
+    }
+
     private function stateWithoutId(): State
     {
         $state = StateFixtures::getMinimalState();
@@ -138,7 +159,7 @@ class SerializerListenerTest extends TestCase
         return new State($state->getActivity(), $state->getAgent(), null);
     }
 
-    private function createStateRequest(string $method): Request
+    private function createStateRequest(string $method, string $content = '', string $contentType = ''): Request
     {
         $route = match ($method) {
             Request::METHOD_POST => 'xapi_lrs.state.post',
@@ -160,7 +181,8 @@ class SerializerListenerTest extends TestCase
             ],
             [],
             [],
-            ['REQUEST_METHOD' => $method]
+            ['REQUEST_METHOD' => $method, 'CONTENT_TYPE' => $contentType],
+            $content
         );
     }
 }

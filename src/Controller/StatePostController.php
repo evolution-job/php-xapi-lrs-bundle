@@ -11,8 +11,12 @@
 
 namespace XApi\LrsBundle\Controller;
 
+use JsonException;
+use stdClass;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Model\State;
+use XApi\LrsBundle\Exception\BadRequestHttpException;
 use XApi\LrsBundle\Response\JsonResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
 
@@ -23,10 +27,51 @@ final readonly class StatePostController
 {
     public function __construct(private StateRepositoryInterface $stateRepository) { }
 
-    public function postState(State $state): JsonResponse
+    public function postState(State $state, Request $request): JsonResponse
     {
+        $existingState = $this->stateRepository->findState($state);
+
+        if ($existingState instanceof State) {
+            $state = $this->mergeJsonDocument($existingState, $state, $request);
+        }
+
         $this->stateRepository->storeState($state);
 
         return new JsonResponse(status: Response::HTTP_NO_CONTENT);
+    }
+
+    private function mergeJsonDocument(State $existingState, State $postedState, Request $request): State
+    {
+        $contentType = strtolower(trim(explode(';', $request->headers->get('Content-Type', ''), 2)[0]));
+        $existingData = $existingState->getData();
+
+        if (
+            'application/json' !== $contentType
+            || !is_array($existingData)
+            || ([] !== $existingData && array_is_list($existingData))
+        ) {
+            throw new BadRequestHttpException('POST can only merge an existing JSON object using application/json.');
+        }
+
+        try {
+            $postedObject = json_decode($request->getContent(), false, 512, JSON_THROW_ON_ERROR);
+            $postedData = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $exception) {
+            throw new BadRequestHttpException('The posted document is not valid JSON.', $exception);
+        }
+
+        if (!$postedObject instanceof stdClass) {
+            throw new BadRequestHttpException('The posted document must be a JSON object.');
+        }
+
+        $mergedData = array_replace($existingData, $postedData);
+
+        return new State(
+            $postedState->getActivity(),
+            $postedState->getAgent(),
+            $postedState->getStateId(),
+            $postedState->getRegistrationId(),
+            $mergedData
+        );
     }
 }
