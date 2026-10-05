@@ -5,8 +5,6 @@ declare(strict_types=1);
 /*
  * This file is part of the xAPI package.
  *
- * (c) Christian Flothmann <christian.flothmann@xabbuh.de>
- *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
@@ -61,14 +59,7 @@ final readonly class StatePutController
         }
 
         $etag = substr($etag, 1, -1);
-
-        foreach ($this->entityTags($header) as $entityTag) {
-            if ('*' === $entityTag || $etag === $entityTag) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->entityTags($header), fn(string $entityTag): bool => '*' === $entityTag || $etag === $entityTag);
     }
 
     private function matchesIfNoneMatch(string $header, ?string $etag): bool
