@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Xabbuh\XApi\Common\Exception\BadRequestException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\ActivityFixtures;
+use Xabbuh\XApi\Model\Activity;
 use Xabbuh\XApi\Model\IRI;
 use Xabbuh\XApi\Serializer\ActivitySerializerInterface;
 use XApi\Fixtures\Json\ActivityJsonFixtures;
@@ -60,18 +61,18 @@ class ActivityGetControllerSpec extends ObjectBehavior
             ->during('getActivities', [$request]);
     }
 
-    public function it_should_throws_a_NotFoundException_if_no_activity_matches_activityid(ActivityRepositoryInterface $activityRepository): void
+    public function it_should_returns_an_activity_object_if_no_activity_matches_activityid(ActivityRepositoryInterface $activityRepository, ActivitySerializerInterface $activitySerializer): void
     {
         $activityId = 'http://tincanapi.com/conformancetest/activityid';
+        $activity = new Activity(IRI::fromString($activityId));
 
         $request = new Request();
         $request->query->set('activityId', $activityId);
 
         $activityRepository->findActivityById(IRI::fromString($activityId))->shouldBeCalled()->willThrow(new NotFoundException(''));
+        $activitySerializer->serializeActivity($activity)->shouldBeCalled()->willReturn(ActivityJsonFixtures::getTypicalActivity());
 
-        $this
-            ->shouldThrow(NotFoundException::class)
-            ->during('getActivities', [$request]);
+        $this->getActivities($request)->shouldReturnAnInstanceOf(JsonResponse::class);
     }
 
     public function it_should_returns_a_JsonXapiResponse(ActivityRepositoryInterface $activityRepository, ActivitySerializerInterface $activitySerializer): void

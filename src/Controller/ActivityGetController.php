@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Common\Exception\BadRequestException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
+use Xabbuh\XApi\Model\Activity;
 use Xabbuh\XApi\Model\IRI;
 use Xabbuh\XApi\Serializer\ActivitySerializerInterface;
 use XApi\LrsBundle\App\IriValidator;
@@ -55,19 +56,22 @@ final readonly class ActivityGetController
             throw new BadRequestException(sprintf('Parameter activityId ("%s") is not a valid IRI.', $activityId));
         }
 
+        $iri = IRI::fromString($activityId);
+
         try {
-            $activity = $this->activityRepository->findActivityById(IRI::fromString($activityId));
-
-            return new JsonResponse(
-                $this->activitySerializer->serializeActivity($activity),
-                Response::HTTP_OK,
-                [],
-                true,
-                $request->isMethod(Request::METHOD_HEAD)
-            );
-
+            $activity = $this->activityRepository->findActivityById($iri);
         } catch (NotFoundException) {
-            throw new NotFoundException(sprintf('No activity matching the following id "%s" has been found.', $activityId));
+            $activity = null;
         }
+
+        $activity ??= new Activity($iri);
+
+        return new JsonResponse(
+            $this->activitySerializer->serializeActivity($activity),
+            Response::HTTP_OK,
+            [],
+            true,
+            $request->isMethod(Request::METHOD_HEAD)
+        );
     }
 }

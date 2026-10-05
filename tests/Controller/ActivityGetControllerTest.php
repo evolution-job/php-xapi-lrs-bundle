@@ -12,8 +12,8 @@ namespace XApi\LrsBundle\Tests\Controller;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Xabbuh\XApi\Common\Exception\BadRequestException;
-use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\ActivityFixtures;
+use Xabbuh\XApi\Model\Activity;
 use Xabbuh\XApi\Model\IRI;
 use Xabbuh\XApi\Serializer\ActivitySerializerInterface;
 use XApi\LrsBundle\Controller\ActivityGetController;
@@ -89,15 +89,24 @@ class ActivityGetControllerTest extends TestCase
         }
     }
 
-    public function testGetActivityStillReturnsNotFoundForUnknownActivity(): void
+    public function testGetUnknownActivityReturnsActivityWithRequestedId(): void
     {
+        $activityId = 'https://example.org/activity';
         $repository = $this->createMock(ActivityRepositoryInterface::class);
         $repository->expects($this->once())
             ->method('findActivityById')
-            ->willThrowException(new NotFoundException('Not found'));
-        $controller = new ActivityGetController($repository, $this->createStub(ActivitySerializerInterface::class));
+            ->with(self::callback(static fn (IRI $iri): bool => $iri->getValue() === $activityId))
+            ->willReturn(null);
+        $serializer = $this->createMock(ActivitySerializerInterface::class);
+        $serializer->expects($this->once())
+            ->method('serializeActivity')
+            ->with(self::callback(static fn (Activity $activity): bool => $activity->getId()->getValue() === $activityId))
+            ->willReturn('{"id":"https://example.org/activity"}');
 
-        $this->expectException(NotFoundException::class);
-        $controller->getActivities(new Request(['activityId' => 'https://example.org/activity']));
+        $response = new ActivityGetController($repository, $serializer)
+            ->getActivities(new Request(['activityId' => $activityId]));
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('{"id":"https://example.org/activity"}', $response->getContent());
     }
 }
