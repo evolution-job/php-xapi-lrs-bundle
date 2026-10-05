@@ -48,6 +48,25 @@ class StateGetControllerTest extends TestCase
         self::assertSame('', $response->getContent());
     }
 
+    public function testSingleDocumentResponseUsesStoredContentType(): void
+    {
+        $stateFixture = StateFixtures::getMinimalState();
+        $state = new State(
+            $stateFixture->getActivity(),
+            $stateFixture->getAgent(),
+            'resume',
+            data: 'plain document',
+            contentType: 'text/plain; charset=utf-8'
+        );
+        $repository = $this->createMock(StateRepositoryInterface::class);
+        $repository->expects(self::once())->method('findState')->with($state)->willReturn($state);
+
+        $response = (new StateGetController($repository))->getState(new Request(), $state);
+
+        self::assertSame('plain document', $response->getContent());
+        self::assertSame('text/plain; charset=utf-8', $response->headers->get('Content-Type'));
+    }
+
     public function testStateListRejectsInvalidSinceTimestamp(): void
     {
         $stateFixture = StateFixtures::getMinimalState();

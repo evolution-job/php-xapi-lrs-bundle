@@ -44,9 +44,11 @@ final readonly class StatePostController
     {
         $contentType = strtolower(trim(explode(';', $request->headers->get('Content-Type', ''), 2)[0]));
         $existingData = $existingState->getData();
+        $existingContentType = $existingState->getContentType();
 
         if (
             'application/json' !== $contentType
+            || (null !== $existingContentType && 'application/json' !== strtolower(trim(explode(';', $existingContentType, 2)[0])))
             || !is_array($existingData)
             || ([] !== $existingData && array_is_list($existingData))
         ) {
@@ -71,7 +73,8 @@ final readonly class StatePostController
             $postedState->getAgent(),
             $postedState->getStateId(),
             $postedState->getRegistrationId(),
-            $mergedData
+            $mergedData,
+            $postedState->getContentType()
         );
     }
 }

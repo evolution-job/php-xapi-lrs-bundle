@@ -16,14 +16,20 @@ final class StateDocumentResponse extends Response
     /**
      * @throws JsonException
      */
-    public function __construct(mixed $data, int $status = Response::HTTP_OK, array $headers = [], bool $isHeadRequest = false)
+    public function __construct(
+        mixed $data,
+        int $status = Response::HTTP_OK,
+        array $headers = [],
+        bool $isHeadRequest = false,
+        ?string $contentType = null
+    )
     {
         if (is_string($data)) {
             $content = $data;
-            $contentType = 'application/octet-stream';
+            $contentType ??= 'application/octet-stream';
         } else {
             $content = null === $data ? '' : json_encode($data, JSON_THROW_ON_ERROR);
-            $contentType = 'application/json';
+            $contentType ??= 'application/json';
         }
 
         $headers[XapiHeader::VERSION] = XapiVersion::V1_0_3;

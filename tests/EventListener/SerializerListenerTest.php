@@ -150,6 +150,27 @@ class SerializerListenerTest extends TestCase
         $this->listener->onKernelRequest($event);
 
         $this->assertSame('plain document', $request->attributes->get('state')->getData());
+        $this->assertSame('text/plain', $request->attributes->get('state')->getContentType());
+    }
+
+    public function testOnKernelRequestPreservesJsonStateDocumentContentType(): void
+    {
+        $state = StateFixtures::getMinimalState();
+        $this->stateSerializer
+            ->expects($this->once())
+            ->method('deserializeState')
+            ->willReturn($state);
+
+        $request = $this->createStateRequest(
+            Request::METHOD_POST,
+            '{"progress": 1}',
+            'application/json; charset=utf-8'
+        );
+        $event = new RequestEvent($this->createMock(HttpKernelInterface::class), $request, HttpKernelInterface::MAIN_REQUEST);
+
+        $this->listener->onKernelRequest($event);
+
+        self::assertSame('application/json; charset=utf-8', $request->attributes->get('state')->getContentType());
     }
 
     private function stateWithoutId(): State

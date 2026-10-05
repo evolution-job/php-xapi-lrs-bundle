@@ -11,6 +11,7 @@
 
 namespace XApi\LrsBundle\Controller;
 
+use JsonException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Model\State;
@@ -26,6 +27,9 @@ final readonly class StateGetController
 {
     public function __construct(private StateRepositoryInterface $stateRepository) { }
 
+    /**
+     * @throws JsonException
+     */
     public function getState(Request $request, State $state): JsonResponse|StateDocumentResponse
     {
         $isHeadRequest = $request->isMethod(Request::METHOD_HEAD);
@@ -34,7 +38,12 @@ final readonly class StateGetController
             $foundState = $this->stateRepository->findState($state);
 
             if ($foundState instanceof State) {
-                return new StateDocumentResponse($foundState->getData(), Response::HTTP_OK, isHeadRequest: $isHeadRequest);
+                return new StateDocumentResponse(
+                    $foundState->getData(),
+                    Response::HTTP_OK,
+                    isHeadRequest: $isHeadRequest,
+                    contentType: $foundState->getContentType()
+                );
             }
 
             return new JsonResponse(status: Response::HTTP_NOT_FOUND);

@@ -37,17 +37,21 @@ final readonly class XapiRequestDeserializer
                 $request->getContent() ?? ''
             );
 
-            if (
-                in_array($request->getMethod(), [Request::METHOD_POST, Request::METHOD_PUT], true)
-                && 'application/json' !== $this->getContentType($request)
-            ) {
-                $state = new State(
-                    $state->getActivity(),
-                    $state->getAgent(),
-                    $state->getStateId(),
-                    $state->getRegistrationId(),
-                    $request->getContent()
-                );
+            if (in_array($request->getMethod(), [Request::METHOD_POST, Request::METHOD_PUT], true)) {
+                $contentType = $this->getContentType($request);
+
+                if ('application/json' !== $this->getMediaType($contentType)) {
+                    $state = new State(
+                        $state->getActivity(),
+                        $state->getAgent(),
+                        $state->getStateId(),
+                        $state->getRegistrationId(),
+                        $request->getContent(),
+                        $contentType
+                    );
+                } else {
+                    $state = $state->withContentType($contentType);
+                }
             }
 
             if (
@@ -61,6 +65,18 @@ final readonly class XapiRequestDeserializer
         } catch (UnsupportedStatementVersionException|InvalidArgumentException|DeserializationException|JsonException $exception) {
             throw $this->createBadRequestException('state', $exception);
         }
+    }
+
+    private function getContentType(Request $request): ?string
+    {
+        $contentType = $request->headers->get('Content-Type');
+
+        return null === $contentType ? null : trim($contentType);
+    }
+
+    private function getMediaType(?string $contentType): string
+    {
+        return strtolower(trim(explode(';', $contentType ?? '', 2)[0]));
     }
 
     /**
@@ -79,11 +95,6 @@ final readonly class XapiRequestDeserializer
         } catch (UnsupportedStatementVersionException|InvalidArgumentException|DeserializationException|JsonException $exception) {
             throw $this->createBadRequestException('statement', $exception);
         }
-    }
-
-    private function getContentType(Request $request): string
-    {
-        return strtolower(trim(explode(';', $request->headers->get('Content-Type', ''), 2)[0]));
     }
 
     private function createBadRequestException(string $type, \Throwable $exception): BadRequestHttpException

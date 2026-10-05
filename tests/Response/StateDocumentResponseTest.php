@@ -11,13 +11,13 @@ use XApi\LrsBundle\Response\StateDocumentResponse;
  */
 class StateDocumentResponseTest extends TestCase
 {
-    public function testRawDocumentBodyIsPreservedAndUsesSha1Etag(): void
+    public function testRawDocumentBodyAndOriginalContentTypeArePreservedWithSha1Etag(): void
     {
         $body = "\x00raw document\nwith bytes";
-        $response = new StateDocumentResponse($body);
+        $response = new StateDocumentResponse($body, contentType: 'text/plain; charset=utf-8');
 
         self::assertSame($body, $response->getContent());
-        self::assertSame('application/octet-stream', $response->headers->get('Content-Type'));
+        self::assertSame('text/plain; charset=utf-8', $response->headers->get('Content-Type'));
         self::assertSame('"'.sha1($body).'"', $response->headers->get('ETag'));
     }
 

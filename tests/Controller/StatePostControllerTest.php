@@ -27,14 +27,16 @@ class StatePostControllerTest extends TestCase
                 'progress' => 0.5,
                 'bookmark' => ['page' => 10, 'section' => 'old'],
                 'retained' => true,
-            ]
+            ],
+            'application/json'
         );
         $postedState = new State(
             $state->getActivity(),
             $state->getAgent(),
             $state->getStateId(),
             $state->getRegistrationId(),
-            ['progress' => 0.75, 'bookmark' => ['page' => 15], 'new' => 'value']
+            ['progress' => 0.75, 'bookmark' => ['page' => 15], 'new' => 'value'],
+            'application/json'
         );
 
         $repository = $this->createMock(StateRepositoryInterface::class);
@@ -50,7 +52,8 @@ class StatePostControllerTest extends TestCase
                     'bookmark' => ['page' => 15],
                     'retained' => true,
                     'new' => 'value',
-                ] === $storedState->getData();
+                ] === $storedState->getData()
+                    && 'application/json' === $storedState->getContentType();
             }));
 
         $request = new Request(server: ['CONTENT_TYPE' => 'application/json; charset=utf-8'], content: '{"progress":0.75,"bookmark":{"page":15},"new":"value"}');
@@ -63,7 +66,7 @@ class StatePostControllerTest extends TestCase
     {
         $state = StateFixtures::getTypicalState();
         $repository = $this->createMock(StateRepositoryInterface::class);
-        $repository->expects($this->once())->method('findState')->willReturn($state);
+        $repository->expects($this->once())->method('findState')->willReturn($state->withContentType('text/plain'));
         $repository->expects($this->never())->method('storeState');
 
         $request = new Request(server: ['CONTENT_TYPE' => 'text/plain'], content: 'replacement');
