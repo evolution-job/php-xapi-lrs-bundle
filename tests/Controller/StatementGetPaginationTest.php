@@ -9,6 +9,7 @@
 
 namespace XApi\LrsBundle\Tests\Controller;
 
+use DateTime;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,6 +21,7 @@ use Xabbuh\XApi\DataFixtures\StatementFixtures;
 use Xabbuh\XApi\Model\Activity;
 use Xabbuh\XApi\Model\IRI;
 use Xabbuh\XApi\Model\LanguageMap;
+use Xabbuh\XApi\Model\StatementId;
 use Xabbuh\XApi\Model\StatementReference;
 use Xabbuh\XApi\Model\StatementResult;
 use Xabbuh\XApi\Model\Verb;
@@ -28,6 +30,7 @@ use Xabbuh\XApi\Serializer\ActorSerializerInterface;
 use Xabbuh\XApi\Serializer\Exception\ActorDeserializationException;
 use Xabbuh\XApi\Serializer\StatementResultSerializerInterface;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
+use XApi\LrsBundle\App\XapiVersion;
 use XApi\LrsBundle\Controller\StatementGetController;
 use XApi\LrsBundle\Model\StatementsFilterFactory;
 use XApi\LrsBundle\Service\StatementContinuationManager;
@@ -42,6 +45,66 @@ use XApi\Repository\Api\VerbRepositoryInterface;
  */
 class StatementGetPaginationTest extends TestCase
 {
+    public function testSingleStatementRetrievalUsesStatementIdAndSetsLastModified(): void
+    {
+        $statement = StatementFixtures::getMinimalStatement()
+            ->withStored(new DateTime('2024-01-01T12:00:00Z'));
+        $repository = $this->createMock(StatementRepositoryInterface::class);
+        $repository->expects($this->once())
+            ->method('findStatementById')
+            ->with(self::callback(static fn (StatementId $id): bool => $id->equals($statement->getId())))
+            ->willReturn($statement);
+        $statementSerializer = $this->createMock(StatementSerializerInterface::class);
+        $statementSerializer->expects($this->once())
+            ->method('serializeStatement')
+            ->with($statement->withVersion(XapiVersion::V1_0_3))
+            ->willReturn('{"id":"12345678-1234-5678-8234-567812345678"}');
+
+        $controller = $this->createController(
+            $repository,
+            $this->createStub(StatementResultSerializerInterface::class),
+            $statementSerializer,
+            new StatementsFilterFactory($this->createStub(ActorSerializerInterface::class))
+        );
+
+        $response = $controller->getStatements(Request::create(
+            '/statements?statementId='.$statement->getId()->getValue()
+        ));
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('{"id":"12345678-1234-5678-8234-567812345678"}', $response->getContent());
+        self::assertNotNull($response->headers->get('Last-Modified'));
+    }
+
+    public function testVoidedStatementRetrievalUsesVoidedStatementRepositoryLookup(): void
+    {
+        $statement = StatementFixtures::getVoidingStatement('12345678-1234-5678-8234-567812345679');
+        $repository = $this->createMock(StatementRepositoryInterface::class);
+        $repository->expects($this->once())
+            ->method('findVoidedStatementById')
+            ->with(self::callback(static fn (StatementId $id): bool => $id->equals($statement->getId())))
+            ->willReturn($statement);
+        $statementSerializer = $this->createMock(StatementSerializerInterface::class);
+        $statementSerializer->expects($this->once())
+            ->method('serializeStatement')
+            ->with($statement->withVersion(XapiVersion::V1_0_3))
+            ->willReturn('{"id":"12345678-1234-5678-8234-567812345679"}');
+
+        $controller = $this->createController(
+            $repository,
+            $this->createStub(StatementResultSerializerInterface::class),
+            $statementSerializer,
+            new StatementsFilterFactory($this->createStub(ActorSerializerInterface::class))
+        );
+
+        $response = $controller->getStatements(Request::create(
+            '/statements?voidedStatementId='.$statement->getId()->getValue()
+        ));
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('{"id":"12345678-1234-5678-8234-567812345679"}', $response->getContent());
+    }
+
     public function testMalformedFilterValuesAreRejectedAsBadRequests(): void
     {
         $invalidParameters = [
@@ -98,11 +161,11 @@ class StatementGetPaginationTest extends TestCase
         $since = '2024-01-01T12:00:00.500Z';
         $statements = [
             StatementFixtures::getMinimalStatement('12345678-1234-5678-8234-567812345678')
-                ->withStored(new \DateTime('2024-01-01T12:00:00.500Z')),
+                ->withStored(new DateTime('2024-01-01T12:00:00.500Z')),
             StatementFixtures::getMinimalStatement('12345678-1234-5678-8234-567812345679')
-                ->withStored(new \DateTime('2024-01-01T12:00:00.501Z')),
+                ->withStored(new DateTime('2024-01-01T12:00:00.501Z')),
             StatementFixtures::getMinimalStatement('12345678-1234-5678-8234-567812345680')
-                ->withStored(new \DateTime('2024-01-01T12:00:00.600Z')),
+                ->withStored(new DateTime('2024-01-01T12:00:00.600Z')),
         ];
 
         $cache = new ArrayAdapter();
@@ -150,13 +213,13 @@ class StatementGetPaginationTest extends TestCase
     public function testStatementReferencePropagationIsDelegatedToRepository(): void
     {
         $target = StatementFixtures::getMinimalStatement('12345678-1234-5678-8234-567812345678')
-            ->withStored(new \DateTime('2024-01-01T00:00:00Z'));
+            ->withStored(new DateTime('2024-01-01T00:00:00Z'));
         $middle = StatementFixtures::getMinimalStatement('12345678-1234-5678-8234-567812345679')
             ->withObject(new StatementReference($target->getId()))
-            ->withStored(new \DateTime('2024-01-02T00:00:00Z'));
+            ->withStored(new DateTime('2024-01-02T00:00:00Z'));
         $outer = StatementFixtures::getMinimalStatement('12345678-1234-5678-8234-567812345680')
             ->withObject(new StatementReference($middle->getId()))
-            ->withStored(new \DateTime('2024-01-03T00:00:00Z'));
+            ->withStored(new DateTime('2024-01-03T00:00:00Z'));
 
         $repository = $this->createMock(StatementRepositoryInterface::class);
         $repository->expects($this->once())
