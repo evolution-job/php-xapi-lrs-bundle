@@ -66,8 +66,8 @@ final readonly class SerializerListener
                         $request->attributes->set('statements', $statements);
                         $controller = $request->attributes->get('_controller');
 
-                        if (is_string($controller) && str_ends_with($controller, '::postStatements')) {
-                            $request->attributes->set('_controller', str_replace('::postStatements', '::postStatementss', $controller));
+                        if (is_string($controller) && str_ends_with($controller, '::postStatement')) {
+                            $request->attributes->set('_controller', str_replace('::postStatement', '::postStatements', $controller));
                         }
 
                     } else {

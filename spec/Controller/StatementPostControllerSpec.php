@@ -12,10 +12,10 @@
 namespace spec\XApi\LrsBundle\Controller;
 
 use PhpSpec\ObjectBehavior;
+use Prophecy\Argument;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\StatementFixtures;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
 use XApi\LrsBundle\Exception\ConflictHttpException;
 use XApi\LrsBundle\Response\JsonXapiResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
@@ -25,15 +25,20 @@ use XApi\Repository\Api\StatementRepositoryInterface;
  */
 class StatementPostControllerSpec extends ObjectBehavior
 {
-    public function it_throws_a_BadRequestHttpException_if_a_statement_id_is_not_part_of_a_post_request(StatementRepositoryInterface $statementRepository): void
+    public function it_assigns_an_id_if_the_statement_does_not_have_one(StatementRepositoryInterface $statementRepository): void
     {
         $statement = StatementFixtures::getTypicalStatement()->withId(null);
 
+        $statementRepository->findStatementById(Argument::type(\Xabbuh\XApi\Model\StatementId::class))->willThrow(new NotFoundException(''));
+        $statementRepository->storeStatement(Argument::that(static fn($storedStatement): bool => null !== $storedStatement->getId()))
+            ->will(static fn($arguments) => $arguments[0]->getId());
+
         $this->beConstructedWith($statementRepository);
 
-        $this
-            ->shouldThrow(BadRequestHttpException::class)
-            ->during('postStatements', [$statement]);
+        $response = $this->postStatements($statement);
+
+        $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
+        $response->getContent()->shouldMatch('/^\["[0-9a-f-]{36}"\]$/');
     }
 
     public function it_stores_a_statement_and_returns_a_204_response_if_the_statement_did_not_exist_before(StatementRepositoryInterface $statementRepository): void
@@ -85,7 +90,12 @@ class StatementPostControllerSpec extends ObjectBehavior
             $statements[] = $statement;
             $uuids[] = $statement->getId()->getValue();
             $statementRepository->findStatementById($statement->getId())->willThrow(new NotFoundException(''));
-            $statementRepository->storeStatement($statement)->shouldBeCalled()->willReturn($statement->getId());
+        }
+
+        foreach ($statements as $index => $statement) {
+            $statementRepository->storeStatement($statement, $index === count($statements) - 1)
+                ->shouldBeCalled()
+                ->willReturn($statement->getId());
         }
 
         $this->beConstructedWith($statementRepository);

@@ -45,6 +45,20 @@ class StatementPostControllerTest extends WebTestCase
         $this->assertNotContains('12345678-1234-5678-8234-567812345679', $responseData);
     }
 
+    public function testPostSingleStatementWithoutIdReturnsLrsAssignedUuid(): void
+    {
+        $statement = json_decode(StatementJsonFixtures::getMinimalStatement(), true, 512, JSON_THROW_ON_ERROR);
+        unset($statement['id']);
+
+        $this->executePostRequest(json_encode($statement, JSON_THROW_ON_ERROR));
+        $response = $this->client->getResponse();
+
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+        $ids = json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertCount(1, $ids);
+        $this->assertMatchesRegularExpression('/\A[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\z/', $ids[0]);
+    }
+
     /**
      * Conform maximal unique Statement
      */

@@ -58,7 +58,7 @@ xapi_lrs.statement.get:
     path: /statements
     methods: [ GET, HEAD ]
     defaults:
-        _controller: 'xapi_lrs.controller.statement.get::getStatements'
+        _controller: 'xapi_lrs.controller.statement.get::getStatement'
         xapi_lrs.route: true
 
 xapi_lrs.statement.options:

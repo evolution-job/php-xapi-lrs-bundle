@@ -11,11 +11,11 @@
 
 namespace XApi\LrsBundle\Controller;
 
-use Exception;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\Model\Statement;
 use Xabbuh\XApi\Model\StatementId;
+use Xabbuh\XApi\Model\Uuid;
 use XApi\LrsBundle\Exception\BadRequestHttpException;
 use XApi\LrsBundle\Exception\ConflictHttpException;
 use XApi\LrsBundle\Response\JsonXapiResponse;
@@ -29,11 +29,13 @@ final readonly class StatementPostController
 {
     public function __construct(private StatementRepositoryInterface $statementRepository) { }
 
-    public function postStatements(Statement $statement): JsonXapiResponse
+    public function postStatement(Statement $statement): JsonXapiResponse
     {
         $statement = $this->resolveStatement($statement);
 
-        $this->storeStatement($statement);
+        if ($this->shouldStoreStatement($statement)) {
+            $this->statementRepository->storeStatement($statement);
+        }
 
         return new JsonXapiResponse([$statement->getId()?->getValue()], Response::HTTP_OK);
     }
@@ -41,34 +43,51 @@ final readonly class StatementPostController
     /**
      * @param Statement[] $statements
      */
-    public function postStatementss(array $statements): JsonXapiResponse
+    public function postStatements(array $statements): JsonXapiResponse
     {
-        $uuids = [];
+        $resolvedStatements = [];
+        $statementIds = [];
 
         foreach ($statements as $statement) {
+            $statement = $this->resolveStatement($statement);
+            $statementId = $statement->getId()->getValue();
 
-            try {
-                $statement = $this->resolveStatement($statement);
-                $this->storeStatement($statement);
-                $uuids[] = $statement->getId()?->getValue();
-            } catch (Exception) {
-                // Ignore...
+            if (isset($statementIds[$statementId])) {
+                throw new BadRequestHttpException(sprintf('The statement batch contains duplicate statement id "%s".', $statementId));
+            }
+
+            $statementIds[$statementId] = true;
+            $resolvedStatements[] = $statement;
+        }
+
+        $statementsToStore = [];
+        foreach ($resolvedStatements as $statement) {
+            if ($this->shouldStoreStatement($statement)) {
+                $statementsToStore[] = $statement;
             }
         }
+
+        $lastIndex = count($statementsToStore) - 1;
+        foreach ($statementsToStore as $index => $statement) {
+            $this->statementRepository->storeStatement($statement, $index === $lastIndex);
+        }
+
+        $uuids = array_map(
+            static fn (Statement $statement): string => $statement->getId()->getValue(),
+            $resolvedStatements
+        );
 
         return new JsonXapiResponse($uuids, Response::HTTP_OK);
     }
 
     private function resolveStatement(Statement $statement): Statement
     {
-        if (!$statement->getId() instanceof StatementId) {
-            throw new BadRequestHttpException(sprintf('Parameter statementId ("%s") is not a valid UUID.', $statement->getId()?->getValue()));
-        }
-
-        return $statement;
+        return $statement->getId() instanceof StatementId
+            ? $statement
+            : $statement->withId(StatementId::fromUuid(Uuid::uuid4()));
     }
 
-    private function storeStatement(Statement $statement): void
+    private function shouldStoreStatement(Statement $statement): bool
     {
         try {
             $existingStatement = $this->statementRepository->findStatementById($statement->getId());
@@ -77,7 +96,9 @@ final readonly class StatementPostController
                 throw new ConflictHttpException('The new statement is not equal to an existing statement with the same id.');
             }
         } catch (NotFoundException) {
-            $this->statementRepository->storeStatement($statement);
+            return true;
         }
+
+        return false;
     }
 }
