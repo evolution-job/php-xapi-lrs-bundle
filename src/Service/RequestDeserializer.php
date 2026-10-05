@@ -132,10 +132,20 @@ final readonly class RequestDeserializer
     private function isMultipartRequest(Request $request): bool
     {
         $contentType = $this->getContentType($request);
+        if (null === $contentType) {
+            return false;
+        }
 
-        return null !== $contentType
-            && str_starts_with(strtolower($contentType), 'multipart/')
-            && preg_match('/(?:^|;)\s*boundary\s*=/i', $contentType) === 1;
+        $mediaType = $this->getMediaType($contentType);
+        if (!str_starts_with($mediaType, 'multipart/')) {
+            return false;
+        }
+
+        if ('multipart/mixed' !== $mediaType) {
+            throw new BadRequestException('Statement attachment uploads must use multipart/mixed.');
+        }
+
+        return preg_match('/(?:^|;)\s*boundary\s*=/i', $contentType) === 1;
     }
 
     /**
