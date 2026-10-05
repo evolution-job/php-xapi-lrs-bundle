@@ -48,14 +48,33 @@ services:
             - { name: 'controller.service_arguments' }
 
     # Statement
+    xapi_lrs.statement.format_normalizer:
+        class: XApi\LrsBundle\Service\StatementFormatNormalizer
+        arguments:
+            - '@xapi_lrs.repository.activity'
+            - '@xapi_lrs.repository.verb'
+            - '@xapi_lrs.activity.serializer'
+
+    xapi_lrs.statement.query_validator:
+        class: XApi\LrsBundle\Service\StatementGetQueryValidator
+        arguments:
+            - '@xapi_lrs.factory.statements_filter'
+
+    xapi_lrs.statement.continuation_manager:
+        class: XApi\LrsBundle\Service\StatementContinuationManager
+        arguments:
+            - '@cache.app'
+            - '@router'
+
     xapi_lrs.controller.statement.get:
         class: XApi\LrsBundle\Controller\StatementGetController
         arguments:
-            - '@router'
             - '@xapi_lrs.repository.statement'
-            - '@xapi_lrs.statement.serializer'
             - '@xapi_lrs.statement_result.serializer'
-            - '@xapi_lrs.factory.statements_filter'
+            - '@xapi_lrs.statement.serializer'
+            - '@xapi_lrs.statement.format_normalizer'
+            - '@xapi_lrs.statement.query_validator'
+            - '@xapi_lrs.statement.continuation_manager'
         tags:
             - { name: 'controller.service_arguments' }
 

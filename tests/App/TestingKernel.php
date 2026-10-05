@@ -15,10 +15,12 @@ use Xabbuh\XApi\Model\State;
 use Xabbuh\XApi\Model\Statement;
 use Xabbuh\XApi\Model\StatementId;
 use Xabbuh\XApi\Model\StatementsFilter;
+use Xabbuh\XApi\Model\Verb;
 use XApi\LrsBundle\XApiLrsBundle;
 use XApi\Repository\Api\ActivityRepositoryInterface;
 use XApi\Repository\Api\StatementRepositoryInterface;
 use XApi\Repository\Api\StateRepositoryInterface;
+use XApi\Repository\Api\VerbRepositoryInterface;
 
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
@@ -26,6 +28,11 @@ use XApi\Repository\Api\StateRepositoryInterface;
 class FakeActivityRepository implements ActivityRepositoryInterface
 {
     public function findActivityById(IRI $iri): ?Activity { }
+}
+
+class FakeVerbRepository implements VerbRepositoryInterface
+{
+    public function findVerbById(IRI $iri): ?Verb { throw new NotFoundException('Not found'); }
 }
 
 class FakeStatementRepository implements StatementRepositoryInterface
@@ -85,6 +92,7 @@ class TestingKernel extends Kernel
             $container->register('xapi_lrs.repository.state', FakeStateRepository::class)->setPublic(true);
             $container->register('xapi_lrs.repository.statement', FakeStatementRepository::class)->setPublic(true);
             $container->register('xapi_lrs.repository.activity', FakeActivityRepository::class)->setPublic(true);
+            $container->register('xapi_lrs.repository.verb', FakeVerbRepository::class)->setPublic(true);
         });
     }
 

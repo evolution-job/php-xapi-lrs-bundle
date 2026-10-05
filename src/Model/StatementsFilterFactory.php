@@ -11,8 +11,8 @@
 
 namespace XApi\LrsBundle\Model;
 
+use DateMalformedStringException;
 use DateTime;
-use DateTimeInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Xabbuh\XApi\Model\Activity;
 use Xabbuh\XApi\Model\IRI;
@@ -22,11 +22,15 @@ use Xabbuh\XApi\Serializer\ActorSerializerInterface;
 
 /**
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
 class StatementsFilterFactory
 {
     public function __construct(private ActorSerializerInterface $actorSerializer) { }
 
+    /**
+     * @throws DateMalformedStringException
+     */
     public function createFromParameterBag(ParameterBag $parameterBag): StatementsFilter
     {
         $statementsFilter = new StatementsFilter();
@@ -60,11 +64,11 @@ class StatementsFilterFactory
         }
 
         if (($since = $parameterBag->get('since')) !== null) {
-            $statementsFilter->since(DateTime::createFromFormat(DateTimeInterface::ATOM, $since));
+            $statementsFilter->since(new DateTime($since));
         }
 
         if (($until = $parameterBag->get('until')) !== null) {
-            $statementsFilter->until(DateTime::createFromFormat(DateTimeInterface::ATOM, $until));
+            $statementsFilter->until(new DateTime($until));
         }
 
         if ($parameterBag->filter('ascending', false, FILTER_VALIDATE_BOOLEAN)) {

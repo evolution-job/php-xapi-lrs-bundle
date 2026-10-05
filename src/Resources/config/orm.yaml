@@ -43,3 +43,18 @@ services:
         arguments:
             - '@xapi_lrs.doctrine.object_manager'
             - '@xapi_lrs.doctrine.statementObject.class_metadata'
+
+    # Verb Repository
+    xapi_lrs.doctrine.verb.class_metadata:
+        class: Doctrine\ORM\Mapping\ClassMetadata
+        public: false
+        factory: [ '@xapi_lrs.doctrine.object_manager', 'getClassMetadata' ]
+        arguments:
+            - 'XApi\Repository\Doctrine\Mapping\Verb'
+
+    xapi_lrs.repository.mapped_verb:
+        class: XApi\Repository\ORM\VerbRepository
+        public: false
+        arguments:
+            - '@xapi_lrs.doctrine.object_manager'
+            - '@xapi_lrs.doctrine.verb.class_metadata'

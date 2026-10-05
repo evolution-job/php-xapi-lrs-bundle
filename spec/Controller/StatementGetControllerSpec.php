@@ -14,12 +14,12 @@ namespace spec\XApi\LrsBundle\Controller;
 use DateTime;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Router;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\StatementFixtures;
@@ -28,17 +28,26 @@ use Xabbuh\XApi\Model\Statement;
 use Xabbuh\XApi\Model\StatementId;
 use Xabbuh\XApi\Model\StatementResult;
 use Xabbuh\XApi\Model\StatementsFilter;
+use Xabbuh\XApi\Serializer\ActivitySerializerInterface;
 use Xabbuh\XApi\Serializer\StatementResultSerializerInterface;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use XApi\Fixtures\Json\StatementJsonFixtures;
 use XApi\Fixtures\Json\StatementResultJsonFixtures;
+use XApi\LrsBundle\Exception\BadRequestHttpException;
+use XApi\LrsBundle\Exception\NotFoundHttpException;
 use XApi\LrsBundle\Model\StatementsFilterFactory;
 use XApi\LrsBundle\Response\JsonXapiResponse;
 use XApi\LrsBundle\Response\MultipartResponse;
+use XApi\LrsBundle\Service\StatementContinuationManager;
+use XApi\LrsBundle\Service\StatementFormatNormalizer;
+use XApi\LrsBundle\Service\StatementGetQueryValidator;
+use XApi\Repository\Api\ActivityRepositoryInterface;
 use XApi\Repository\Api\StatementRepositoryInterface;
+use XApi\Repository\Api\VerbRepositoryInterface;
 
 /**
  * @author Christian Flothmann <christian.flothmann@xabbuh.de>
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
 class StatementGetControllerSpec extends ObjectBehavior
 {
@@ -47,7 +56,10 @@ class StatementGetControllerSpec extends ObjectBehavior
         StatementRepositoryInterface $statementRepository,
         StatementSerializerInterface $statementSerializer,
         StatementResultSerializerInterface $statementResultSerializer,
-        StatementsFilterFactory $statementsFilterFactory
+        StatementsFilterFactory $statementsFilterFactory,
+        ActivityRepositoryInterface $activityRepository,
+        VerbRepositoryInterface $verbRepository,
+        ActivitySerializerInterface $activitySerializer
     ): void {
 
         $statement = StatementFixtures::getAllPropertiesStatement();
@@ -65,9 +77,18 @@ class StatementGetControllerSpec extends ObjectBehavior
 
         $statementResultSerializer->serializeStatementResult(Argument::type(StatementResult::class))->willReturn(StatementResultJsonFixtures::getStatementResult());
 
-        $router->generate('xapi_lrs.statement.get', $statementsFilter->getFilter())->willReturn('/statements');
-
-        $this->beConstructedWith($router, $statementRepository, $statementSerializer, $statementResultSerializer, $statementsFilterFactory);
+        $this->beConstructedWith(
+            $statementRepository,
+            $statementResultSerializer,
+            $statementSerializer,
+            new StatementFormatNormalizer(
+                $activityRepository->getWrappedObject(),
+                $verbRepository->getWrappedObject(),
+                $activitySerializer->getWrappedObject()
+            ),
+            new StatementGetQueryValidator($statementsFilterFactory->getWrappedObject()),
+            new StatementContinuationManager(new ArrayAdapter(), $router->getWrappedObject())
+        );
     }
 
     public function it_throws_a_BadRequestHttpException_if_the_request_has_given_statement_id_and_voided_statement_id(): void
@@ -213,37 +234,68 @@ class StatementGetControllerSpec extends ObjectBehavior
         $this->getStatements($request);
     }
 
-    public function it_should_build_an_empty_statement_result_response_if_no_statement_is_found(
+    public function it_throws_not_found_if_a_statement_id_does_not_exist(
         StatementRepositoryInterface $statementRepository,
-        StatementResultSerializerInterface $statementResultSerializer
     ): void {
 
         $request = new Request();
         $request->query->set('statementId', StatementFixtures::DEFAULT_STATEMENT_ID);
 
         $statementRepository->findStatementById(StatementId::fromString(StatementFixtures::DEFAULT_STATEMENT_ID))->willThrow(NotFoundException::class);
-        $more =  IRL::fromString('/statements');
-        $statementResult = new StatementResult([], $more);
 
-        $statementResultSerializer->serializeStatementResult($statementResult)->shouldBeCalled()->willReturn(StatementResultJsonFixtures::getStatementResult());
+        $this->shouldThrow(NotFoundHttpException::class)->during('getStatements', [$request]);
+    }
 
-        $this->getStatements($request);
+    public function it_throws_not_found_if_a_voided_statement_id_does_not_exist(
+        StatementRepositoryInterface $statementRepository,
+    ): void {
+        $request = new Request();
+        $request->query->set('voidedStatementId', StatementFixtures::DEFAULT_STATEMENT_ID);
+
+        $statementRepository->findVoidedStatementById(StatementId::fromString(StatementFixtures::DEFAULT_STATEMENT_ID))->willThrow(NotFoundException::class);
+
+        $this->shouldThrow(NotFoundHttpException::class)->during('getStatements', [$request]);
+    }
+
+    public function it_rejects_unrecognized_query_parameters(): void
+    {
+        $request = new Request();
+        $request->query->set('unknown', 'value');
+
+        $this->shouldThrow(BadRequestHttpException::class)->during('getStatements', [$request]);
+    }
+
+    public function it_rejects_unsupported_statement_formats(): void
+    {
+        $request = new Request();
+        $request->query->set('format', 'other');
+
+        $this->shouldThrow(BadRequestHttpException::class)->during('getStatements', [$request]);
     }
 
     public function it_returns_a_paginated_envelope_for_statements_list(
         Request $request,
+        Router $router,
         StatementRepositoryInterface $statementRepository,
         StatementResultSerializerInterface $statementResultSerializer,
-        StatementsFilter $filter,
         StatementsFilterFactory $statementFilterFactory,
     ) {
-        $request->query = new InputBag([]);
+        $request->query = new InputBag(['limit' => 1, 'offset' => 1]);
         $request->isMethod(Request::METHOD_HEAD)->willReturn(false);
-        $statementFilterFactory->createFromParameterBag($request->query)->willReturn($filter);
+        $filter = new StatementsFilter();
+        $statementFilterFactory->createFromParameterBag(Argument::type(ParameterBag::class))->willReturn($filter);
 
-        $statementRepository->findStatementsBy($filter)->willReturn(StatementFixtures::getStatementCollection());
-        $more =  IRL::fromString('/statements');
-        $statementResult = new StatementResult(StatementFixtures::getStatementCollection(), $more);
+        $statements = StatementFixtures::getStatementCollection();
+        $statements[] = $statements[0];
+        $statementRepository->findStatementsBy($filter)->willReturn($statements);
+        $router->generate(
+            'xapi_lrs.statement.get',
+            Argument::that(static fn(array $parameters): bool => 1 === count($parameters)
+                && isset($parameters['moreId'])
+                && 1 === preg_match('/\A[a-f0-9]{64}\z/', $parameters['moreId']))
+        )->willReturn('/statements?moreId='.str_repeat('a', 64));
+        $more = IRL::fromString('/statements?moreId='.str_repeat('a', 64));
+        $statementResult = new StatementResult([$statements[1]], $more);
 
         $statementResultSerializer->serializeStatementResult($statementResult)->shouldBeCalled()->willReturn(StatementResultJsonFixtures::getStatementResultWithMore());
 

@@ -5,6 +5,12 @@ services:
         arguments:
             - '@xapi_lrs.repository.mapped_statementObject'
 
+    xapi_lrs.repository.verb.doctrine:
+        class: XApi\Repository\Doctrine\Repository\VerbRepository
+        public: false
+        arguments:
+            - '@xapi_lrs.repository.mapped_verb'
+
     xapi_lrs.repository.state.doctrine:
         class: XApi\Repository\Doctrine\Repository\StateRepository
         public: false
