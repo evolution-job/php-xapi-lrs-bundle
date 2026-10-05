@@ -25,11 +25,15 @@ final readonly class XapiRequestDeserializer
     public function __construct(
         private StatementSerializerInterface $statementSerializer,
         private StateSerializerInterface $stateSerializer
-    ) {
-    }
+    ) { }
 
+    /**
+     * @throws BadRequestException
+     */
     public function deserializeState(Request $request): State
     {
+        $this->validateStateQueryParameters($request);
+
         try {
             $parameters = [];
             foreach ($request->query->all() as $key => $value) {
@@ -72,6 +76,33 @@ final readonly class XapiRequestDeserializer
             return $state;
         } catch (UnsupportedStatementVersionException|InvalidArgumentException|DeserializationException|JsonException) {
             throw $this->createBadRequestException('state');
+        }
+    }
+
+    /**
+     * @throws BadRequestException
+     */
+    private function validateStateQueryParameters(Request $request): void
+    {
+        $allowedParameters = match ($request->getMethod()) {
+            Request::METHOD_GET, Request::METHOD_HEAD => ['activityId', 'agent', 'registration', 'stateId', 'since'],
+            Request::METHOD_POST, Request::METHOD_PUT, Request::METHOD_DELETE => ['activityId', 'agent', 'registration', 'stateId'],
+            default => [],
+        };
+
+        $unknownParameters = array_diff(array_keys($request->query->all()), $allowedParameters);
+        if ([] !== $unknownParameters) {
+            throw new BadRequestException(sprintf(
+                'Unrecognized query parameter(s): "%s".',
+                implode('", "', $unknownParameters)
+            ));
+        }
+
+        if (
+            $request->query->has('since')
+            && $request->query->has('stateId')
+        ) {
+            throw new BadRequestException('The "since" parameter cannot be used with "stateId".');
         }
     }
 

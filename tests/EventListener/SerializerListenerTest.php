@@ -147,6 +147,24 @@ class SerializerListenerTest extends TestCase
         }
     }
 
+    public function testOnKernelRequestRejectsUnknownStateQueryParameters(): void
+    {
+        $this->stateSerializer = $this->createMock(StateSerializerInterface::class);
+        $this->stateSerializer->expects($this->never())->method('deserializeState');
+        $this->listener = $this->createListener();
+
+        $request = $this->createStateRequest(Request::METHOD_GET);
+        $request->query->set('unexpected', 'value');
+        $event = new RequestEvent($this->createStub(HttpKernelInterface::class), $request, HttpKernelInterface::MAIN_REQUEST);
+
+        try {
+            $this->listener->onKernelRequest($event);
+            self::fail('Expected an unknown State query parameter to be rejected.');
+        } catch (BadRequestException $exception) {
+            self::assertSame(400, $exception->getCode());
+        }
+    }
+
     public function testOnKernelRequestPreservesNonJsonStateDocumentBody(): void
     {
         $this->stateSerializer = $this->createMock(StateSerializerInterface::class);
