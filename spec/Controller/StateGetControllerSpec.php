@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\DataFixtures\StateFixtures;
 use Xabbuh\XApi\Model\State;
 use XApi\LrsBundle\Response\JsonResponse;
+use XApi\LrsBundle\Response\StateDocumentResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
 
 /**
@@ -34,7 +35,7 @@ class StateGetControllerSpec extends ObjectBehavior
         $this->beConstructedWith($stateRepository);
 
         $response = $this->getState($request, $state);
-        $response->shouldReturnAnInstanceOf(JsonResponse::class);
+        $response->shouldReturnAnInstanceOf(StateDocumentResponse::class);
 
         $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
     }

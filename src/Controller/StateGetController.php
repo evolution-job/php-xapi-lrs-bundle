@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Model\State;
 use XApi\LrsBundle\Response\JsonResponse;
+use XApi\LrsBundle\Response\StateDocumentResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
 
 /**
@@ -24,7 +25,7 @@ final readonly class StateGetController
 {
     public function __construct(private StateRepositoryInterface $stateRepository) { }
 
-    public function getState(Request $request, State $state): JsonResponse
+    public function getState(Request $request, State $state): JsonResponse|StateDocumentResponse
     {
         $foundState = $this->stateRepository->findState($state);
 
@@ -32,7 +33,7 @@ final readonly class StateGetController
 
         if ($foundState instanceof State) {
 
-            return new JsonResponse($foundState->getData(), Response::HTTP_OK, isHeadRequest: $isHeadRequest);
+            return new StateDocumentResponse($foundState->getData(), Response::HTTP_OK, isHeadRequest: $isHeadRequest);
         }
 
         if ($state->getStateId() !== null) {

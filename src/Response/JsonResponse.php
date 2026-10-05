@@ -26,9 +26,7 @@ class JsonResponse extends SymfonyJsonResponse
     public function __construct(mixed $data = null, int $status = Response::HTTP_OK, array $headers = [], bool $json = false, bool $isHeadRequest = false)
     {
         $headers[XapiHeader::VERSION] = XapiVersion::V1_0_3;
-
-        $now = new DateTimeImmutable()->format(XapiHeader::DATE_FORMAT);
-        $headers[XapiHeader::CONSISTENT_THROUGH_HEADER] = $now;
+        $headers[XapiHeader::CONSISTENT_THROUGH_HEADER] = new DateTimeImmutable()->format(XapiHeader::DATE_FORMAT);
 
         $etag = null;
         if ($data !== null) {
