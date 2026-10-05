@@ -7,6 +7,9 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use XApi\LrsBundle\Tests\App\TestingKernel;
 
+/**
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
+ */
 class StatementOptionsControllerTest extends WebTestCase
 {
     private KernelBrowser $client;

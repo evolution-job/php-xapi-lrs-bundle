@@ -9,6 +9,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ServerBag;
 
+/**
+ * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
+ */
 class MultipartResponseSpec extends ObjectBehavior
 {
     public function let(JsonResponse $jsonResponse, Request $request, ServerBag $serverBag): void

@@ -15,6 +15,10 @@ use XApi\Fixtures\Json\StatementJsonFixtures;
 use XApi\LrsBundle\EventListener\XapiRequestMatcher;
 use XApi\LrsBundle\Exception\BadRequestHttpException;
 
+/**
+ * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
+ */
 class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
 {
     public function let(Router $router, RequestEvent $requestEvent, Request $request, HeaderBag $headerBag): void

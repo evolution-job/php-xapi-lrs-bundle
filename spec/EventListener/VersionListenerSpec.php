@@ -12,6 +12,10 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 use XApi\LrsBundle\EventListener\XapiRequestMatcher;
 use XApi\LrsBundle\Exception\BadRequestHttpException;
 
+/**
+ * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
+ */
 class VersionListenerSpec extends ObjectBehavior
 {
     public function let(RequestEvent $requestEvent, Request $request, ParameterBag $parameterBag, HeaderBag $headerBag): void

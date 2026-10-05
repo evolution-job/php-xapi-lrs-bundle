@@ -14,6 +14,7 @@ use XApi\LrsBundle\Exception\BadRequestHttpException;
 
 /**
  * @author Christian Flothmann <christian.flothmann@xabbuh.de>
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
 final readonly class SerializerListener
 {

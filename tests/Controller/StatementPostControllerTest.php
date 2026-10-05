@@ -9,6 +9,9 @@ use Symfony\Component\HttpFoundation\Response;
 use XApi\Fixtures\Json\StatementJsonFixtures;
 use XApi\LrsBundle\Tests\App\TestingKernel;
 
+/**
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
+ */
 class StatementPostControllerTest extends WebTestCase
 {
     private KernelBrowser $client;

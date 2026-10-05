@@ -20,6 +20,9 @@ use XApi\Repository\Api\ActivityRepositoryInterface;
 use XApi\Repository\Api\StatementRepositoryInterface;
 use XApi\Repository\Api\StateRepositoryInterface;
 
+/**
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
+ */
 class FakeActivityRepository implements ActivityRepositoryInterface
 {
     public function findActivityById(IRI $iri): ?Activity { }

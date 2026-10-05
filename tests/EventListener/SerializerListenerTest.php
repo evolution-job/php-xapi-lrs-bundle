@@ -11,6 +11,9 @@ use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use Xabbuh\XApi\Serializer\StateSerializerInterface;
 use XApi\LrsBundle\EventListener\SerializerListener;
 
+/**
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
+ */
 class SerializerListenerTest extends TestCase
 {
     private StatementSerializerInterface $statementSerializer;

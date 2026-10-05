@@ -5,6 +5,9 @@ namespace spec\XApi\LrsBundle\DependencyInjection;
 use PhpSpec\ObjectBehavior;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 
+/**
+ * @author Christian Flothmann <christian.flothmann@xabbuh.de>
+ */
 class XApiLrsExtensionSpec extends ObjectBehavior
 {
     public function it_is_a_di_extension(): void

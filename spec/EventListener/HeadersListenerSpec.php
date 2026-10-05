@@ -12,6 +12,9 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use XApi\LrsBundle\EventListener\XapiRequestMatcher;
 
+/**
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
+ */
 class HeadersListenerSpec extends ObjectBehavior
 {
     public function let(Request $request, ParameterBag $parameterBag, HeaderBag $headerBag): void

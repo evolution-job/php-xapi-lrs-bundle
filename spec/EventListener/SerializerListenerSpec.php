@@ -14,6 +14,10 @@ use XApi\Fixtures\Json\StatementJsonFixtures;
 use XApi\LrsBundle\EventListener\XapiRequestMatcher;
 use XApi\LrsBundle\Exception\BadRequestHttpException;
 
+/**
+ * @author Christian Flothmann <christian.flothmann@xabbuh.de>
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
+ */
 class SerializerListenerSpec extends ObjectBehavior
 {
     public function let(StatementSerializerInterface $statementSerializer, StateSerializerInterface $stateSerializer, RequestEvent $requestEvent, Request $request, ParameterBag $parameterBag): void

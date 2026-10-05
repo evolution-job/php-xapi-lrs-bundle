@@ -5,6 +5,9 @@ namespace XApi\LrsBundle\EventListener;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
 use XApi\LrsBundle\App\XapiAttribute;
 
+/**
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
+ */
 final class XapiRequestMatcher
 {
     public function matches(KernelEvent $event): bool

@@ -12,6 +12,10 @@ use Xabbuh\XApi\Model\StatementsFilter;
 use Xabbuh\XApi\Serializer\ActorSerializerInterface;
 use XApi\Fixtures\Json\ActorJsonFixtures;
 
+/**
+ * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
+ */
 class StatementsFilterFactorySpec extends ObjectBehavior
 {
     public function let(ActorSerializerInterface $actorSerializer): void

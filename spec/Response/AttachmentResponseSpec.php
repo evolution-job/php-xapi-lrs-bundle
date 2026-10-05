@@ -7,6 +7,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Xabbuh\XApi\DataFixtures\AttachmentFixtures;
 use Xabbuh\XApi\Model\Attachment;
 
+/**
+ * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
+ */
 class AttachmentResponseSpec extends ObjectBehavior
 {
     private ?Attachment $attachment = null;
