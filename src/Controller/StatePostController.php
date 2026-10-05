@@ -13,7 +13,7 @@ namespace XApi\LrsBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Model\State;
-use XApi\LrsBundle\Response\XapiJsonResponse;
+use XApi\LrsBundle\Response\JsonXapiResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
 
 /**
@@ -23,10 +23,10 @@ final readonly class StatePostController
 {
     public function __construct(private StateRepositoryInterface $stateRepository) { }
 
-    public function postState(State $state): XapiJsonResponse
+    public function postState(State $state): JsonXapiResponse
     {
         $this->stateRepository->storeState($state);
 
-        return new XapiJsonResponse(status: Response::HTTP_NO_CONTENT);
+        return new JsonXapiResponse(status: Response::HTTP_NO_CONTENT);
     }
 }

@@ -15,7 +15,7 @@ use PhpSpec\ObjectBehavior;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\DataFixtures\StateFixtures;
-use XApi\LrsBundle\Response\XapiJsonResponse;
+use XApi\LrsBundle\Response\JsonXapiResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
 
 /**
@@ -33,7 +33,7 @@ class StateGetControllerSpec extends ObjectBehavior
         $this->beConstructedWith($stateRepository);
 
         $response = $this->getState($request, $state);
-        $response->shouldReturnAnInstanceOf(XapiJsonResponse::class);
+        $response->shouldReturnAnInstanceOf(JsonXapiResponse::class);
 
         $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
     }
@@ -48,7 +48,7 @@ class StateGetControllerSpec extends ObjectBehavior
         $this->beConstructedWith($stateRepository);
 
         $response = $this->getState($request, $state);
-        $response->shouldReturnAnInstanceOf(XapiJsonResponse::class);
+        $response->shouldReturnAnInstanceOf(JsonXapiResponse::class);
 
         $response->getStatusCode()->shouldReturn(Response::HTTP_NOT_FOUND);
     }

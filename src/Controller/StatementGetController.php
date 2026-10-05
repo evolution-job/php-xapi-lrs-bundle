@@ -28,8 +28,8 @@ use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use XApi\LrsBundle\App\XapiVersion;
 use XApi\LrsBundle\Model\StatementsFilterFactory;
 use XApi\LrsBundle\Response\AttachmentResponse;
+use XApi\LrsBundle\Response\JsonXapiResponse;
 use XApi\LrsBundle\Response\MultipartResponse;
-use XApi\LrsBundle\Response\XapiJsonResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
 /**
@@ -67,7 +67,7 @@ final class StatementGetController
     /**
      * @throws BadRequestHttpException if the query parameters does not comply with xAPI specification
      */
-    public function getStatements(Request $request): XapiJsonResponse|MultipartResponse
+    public function getStatements(Request $request): JsonXapiResponse|MultipartResponse
     {
         $parameters = array_intersect_key($request->query->all(), self::$getParameters);
         $query = new ParameterBag($parameters);
@@ -107,7 +107,7 @@ final class StatementGetController
     /**
      * @param Statement[] $statements
      */
-    protected function buildMultipartResponse(XapiJsonResponse $xApiJsonResponse, array $statements): MultipartResponse
+    protected function buildMultipartResponse(JsonXapiResponse $JsonXapiResponse, array $statements): MultipartResponse
     {
         $attachmentsParts = [];
 
@@ -117,7 +117,7 @@ final class StatementGetController
             }
         }
 
-        return new MultipartResponse($xApiJsonResponse, $attachmentsParts);
+        return new MultipartResponse($JsonXapiResponse, $attachmentsParts);
     }
 
     /**
@@ -129,27 +129,27 @@ final class StatementGetController
         StatementsFilter $statementsFilter,
         array $statements,
         bool $includeAttachments = false
-    ): XapiJsonResponse|MultipartResponse {
+    ): JsonXapiResponse|MultipartResponse {
 
         $route = $this->router->generate('xapi_lrs.statement.get', $statementsFilter->getFilter());
         $more =  IRL::fromString($route);
         $statementResult = new StatementResult($statements, $more);
         $json = $this->statementResultSerializer->serializeStatementResult($statementResult);
 
-        $xApiJsonResponse = new XapiJsonResponse($json, Response::HTTP_OK, json: true, isHeadRequest: $request->isMethod(Request::METHOD_HEAD));
+        $JsonXapiResponse = new JsonXapiResponse($json, Response::HTTP_OK, json: true, isHeadRequest: $request->isMethod(Request::METHOD_HEAD));
 
         if ($includeAttachments) {
-            return $this->buildMultipartResponse($xApiJsonResponse, $statements);
+            return $this->buildMultipartResponse($JsonXapiResponse, $statements);
         }
 
-        return $xApiJsonResponse;
+        return $JsonXapiResponse;
     }
 
     /**
      * @param bool $includeAttachments true to include the attachments in the response, false otherwise
      * @throws UnsupportedStatementVersionException
      */
-    protected function buildSingleStatementResponse(Request $request, Statement $statement, bool $includeAttachments = false): XapiJsonResponse|MultipartResponse
+    protected function buildSingleStatementResponse(Request $request, Statement $statement, bool $includeAttachments = false): JsonXapiResponse|MultipartResponse
     {
         if (null === $statement->getVersion()) {
             $statement = $statement->withVersion(XapiVersion::V1_0_3);
@@ -157,7 +157,7 @@ final class StatementGetController
 
         $json = $this->statementSerializer->serializeStatement($statement);
 
-        $response = new XapiJsonResponse($json, Response::HTTP_OK, json: true, isHeadRequest: $request->isMethod(Request::METHOD_HEAD));
+        $response = new JsonXapiResponse($json, Response::HTTP_OK, json: true, isHeadRequest: $request->isMethod(Request::METHOD_HEAD));
 
         if ($includeAttachments) {
             $response = $this->buildMultipartResponse($response, [$statement]);

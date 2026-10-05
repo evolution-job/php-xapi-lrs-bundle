@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\StatementFixtures;
-use XApi\LrsBundle\Response\XapiJsonResponse;
+use XApi\LrsBundle\Response\JsonXapiResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
 /**
@@ -92,7 +92,7 @@ class StatementPostControllerSpec extends ObjectBehavior
 
         $response = $this->postStatementss($statements);
 
-        $response->shouldHaveType(XapiJsonResponse::class);
+        $response->shouldHaveType(JsonXapiResponse::class);
         $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
         $response->getContent()->shouldReturn(json_encode($uuids, JSON_THROW_ON_ERROR));
     }

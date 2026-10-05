@@ -18,7 +18,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\Model\IRI;
 use Xabbuh\XApi\Serializer\ActivitySerializerInterface;
-use XApi\LrsBundle\Response\XapiJsonResponse;
+use XApi\LrsBundle\Response\JsonXapiResponse;
 use XApi\Repository\Api\ActivityRepositoryInterface;
 
 /**
@@ -31,7 +31,7 @@ final readonly class ActivityGetController
         private ActivitySerializerInterface $activitySerializer
     ) {}
 
-    public function getActivities(Request $request): XapiJsonResponse
+    public function getActivities(Request $request): JsonXapiResponse
     {
         if (!$activityId = $request->query->all()['activityId'] ?? null) {
             throw new BadRequestHttpException('Required activityId parameter is missing.');
@@ -44,7 +44,7 @@ final readonly class ActivityGetController
         try {
             $activity = $this->activityRepository->findActivityById(IRI::fromString($activityId));
 
-            return new XapiJsonResponse(
+            return new JsonXapiResponse(
                 $this->activitySerializer->serializeActivity($activity),
                 Response::HTTP_OK,
                 [],

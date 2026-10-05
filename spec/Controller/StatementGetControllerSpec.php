@@ -33,8 +33,8 @@ use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use XApi\Fixtures\Json\StatementJsonFixtures;
 use XApi\Fixtures\Json\StatementResultJsonFixtures;
 use XApi\LrsBundle\Model\StatementsFilterFactory;
+use XApi\LrsBundle\Response\JsonXapiResponse;
 use XApi\LrsBundle\Response\MultipartResponse;
-use XApi\LrsBundle\Response\XapiJsonResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
 /**
@@ -173,15 +173,15 @@ class StatementGetControllerSpec extends ObjectBehavior
         $this->getStatements($request)->shouldReturnAnInstanceOf(MultipartResponse::class);
     }
 
-    public function it_returns_a_XapiJsonResponse_if_attachments_parameter_is_false_or_not_set(): void
+    public function it_returns_a_JsonXapiResponse_if_attachments_parameter_is_false_or_not_set(): void
     {
         $request = new Request();
 
-        $this->getStatements($request)->shouldReturnAnInstanceOf(XapiJsonResponse::class);
+        $this->getStatements($request)->shouldReturnAnInstanceOf(JsonXapiResponse::class);
 
         $request->query->set('attachments', false);
 
-        $this->getStatements($request)->shouldReturnAnInstanceOf(XapiJsonResponse::class);
+        $this->getStatements($request)->shouldReturnAnInstanceOf(JsonXapiResponse::class);
     }
 
     public function it_should_fetch_a_statement(StatementRepositoryInterface $statementRepository): void
@@ -249,7 +249,7 @@ class StatementGetControllerSpec extends ObjectBehavior
 
         $response = $this->getStatements($request);
 
-        $response->shouldHaveType(XapiJsonResponse::class);
+        $response->shouldHaveType(JsonXapiResponse::class);
         $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
 
         $response->getContent()->shouldContain('"statements":');

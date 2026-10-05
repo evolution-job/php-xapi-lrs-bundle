@@ -15,7 +15,7 @@ use DateTime;
 use PhpSpec\ObjectBehavior;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\DataFixtures\StateFixtures;
-use XApi\LrsBundle\Response\XapiJsonResponse;
+use XApi\LrsBundle\Response\JsonXapiResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
 
 /**
@@ -34,7 +34,7 @@ class StatePutControllerSpec extends ObjectBehavior
         $response = $this->putState($state);
 
         $dateTime = new DateTime();
-        $response->shouldHaveType(XapiJsonResponse::class);
+        $response->shouldHaveType(JsonXapiResponse::class);
         $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
         $response->headers->get('X-Experience-API-Consistent-Through')->shouldReturn($dateTime->format('Y-m-d\TH:i:s.v\Z'));
     }

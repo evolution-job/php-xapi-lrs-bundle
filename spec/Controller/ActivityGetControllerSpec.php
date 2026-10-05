@@ -20,7 +20,7 @@ use Xabbuh\XApi\DataFixtures\ActivityFixtures;
 use Xabbuh\XApi\Model\IRI;
 use Xabbuh\XApi\Serializer\ActivitySerializerInterface;
 use XApi\Fixtures\Json\ActivityJsonFixtures;
-use XApi\LrsBundle\Response\XapiJsonResponse;
+use XApi\LrsBundle\Response\JsonXapiResponse;
 use XApi\Repository\Api\ActivityRepositoryInterface;
 
 /**
@@ -56,7 +56,7 @@ class ActivityGetControllerSpec extends ObjectBehavior
             ->during('getActivities', [$request]);
     }
 
-    public function it_should_returns_a_XapiJsonResponse(ActivityRepositoryInterface $activityRepository, ActivitySerializerInterface $activitySerializer): void
+    public function it_should_returns_a_JsonXapiResponse(ActivityRepositoryInterface $activityRepository, ActivitySerializerInterface $activitySerializer): void
     {
         $activityId = 'http://tincanapi.com/conformancetest/activityid';
         $activity = ActivityFixtures::getTypicalActivity();
@@ -67,6 +67,6 @@ class ActivityGetControllerSpec extends ObjectBehavior
         $activityRepository->findActivityById(IRI::fromString($activityId))->shouldBeCalled()->willReturn($activity);
         $activitySerializer->serializeActivity($activity)->shouldBeCalled()->willReturn(ActivityJsonFixtures::getTypicalActivity());
 
-        $this->getActivities($request)->shouldReturnAnInstanceOf(XapiJsonResponse::class);
+        $this->getActivities($request)->shouldReturnAnInstanceOf(JsonXapiResponse::class);
     }
 }

@@ -18,7 +18,7 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\Model\Statement;
 use Xabbuh\XApi\Model\StatementId;
-use XApi\LrsBundle\Response\XapiJsonResponse;
+use XApi\LrsBundle\Response\JsonXapiResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
 /**
@@ -29,19 +29,19 @@ final readonly class StatementPostController
 {
     public function __construct(private StatementRepositoryInterface $statementRepository) { }
 
-    public function postStatements(Statement $statement): XapiJsonResponse
+    public function postStatements(Statement $statement): JsonXapiResponse
     {
         $statement = $this->resolveStatement($statement);
 
         $this->storeStatement($statement);
 
-        return new XapiJsonResponse([$statement->getId()?->getValue()], Response::HTTP_OK);
+        return new JsonXapiResponse([$statement->getId()?->getValue()], Response::HTTP_OK);
     }
 
     /**
      * @param Statement[] $statements
      */
-    public function postStatementss(array $statements): XapiJsonResponse
+    public function postStatementss(array $statements): JsonXapiResponse
     {
         $uuids = [];
 
@@ -56,7 +56,7 @@ final readonly class StatementPostController
             }
         }
 
-        return new XapiJsonResponse($uuids, Response::HTTP_OK);
+        return new JsonXapiResponse($uuids, Response::HTTP_OK);
     }
 
     private function resolveStatement(Statement $statement): Statement

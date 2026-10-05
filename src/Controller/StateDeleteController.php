@@ -13,7 +13,7 @@ namespace XApi\LrsBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Model\State;
-use XApi\LrsBundle\Response\XapiJsonResponse;
+use XApi\LrsBundle\Response\JsonXapiResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
 
 /**
@@ -23,7 +23,7 @@ final readonly class StateDeleteController
 {
     public function __construct(private StateRepositoryInterface $stateRepository) { }
 
-    public function deleteState(State $state): XapiJsonResponse
+    public function deleteState(State $state): JsonXapiResponse
     {
         $foundState = $this->stateRepository->findState($state);
 
@@ -32,6 +32,6 @@ final readonly class StateDeleteController
             $this->stateRepository->removeState($state);
         }
 
-        return new XapiJsonResponse(status: Response::HTTP_NO_CONTENT);
+        return new JsonXapiResponse(status: Response::HTTP_NO_CONTENT);
     }
 }

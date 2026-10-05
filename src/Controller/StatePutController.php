@@ -12,7 +12,7 @@
 namespace XApi\LrsBundle\Controller;
 
 use Xabbuh\XApi\Model\State;
-use XApi\LrsBundle\Response\XapiJsonResponse;
+use XApi\LrsBundle\Response\JsonXapiResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
 
 
@@ -23,10 +23,10 @@ final readonly class StatePutController
 {
     public function __construct(private StateRepositoryInterface $stateRepository) { }
 
-    public function putState(State $state): XapiJsonResponse
+    public function putState(State $state): JsonXapiResponse
     {
         $this->stateRepository->storeState($state);
 
-        return new XapiJsonResponse();
+        return new JsonXapiResponse();
     }
 }

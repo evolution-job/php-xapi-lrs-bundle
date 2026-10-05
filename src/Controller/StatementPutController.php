@@ -19,7 +19,7 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\Model\Statement;
 use Xabbuh\XApi\Model\StatementId;
-use XApi\LrsBundle\Response\XapiJsonResponse;
+use XApi\LrsBundle\Response\JsonXapiResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
 /**
@@ -30,7 +30,7 @@ final readonly class StatementPutController
 {
     public function __construct(private StatementRepositoryInterface $statementRepository) { }
 
-    public function putStatements(Request $request, Statement $statement): XapiJsonResponse
+    public function putStatements(Request $request, Statement $statement): JsonXapiResponse
     {
         if (null === $id = $request->query->all()['statementId'] ?? null) {
             throw new BadRequestHttpException('Required statementId parameter is missing.');
@@ -52,7 +52,7 @@ final readonly class StatementPutController
             $this->statementRepository->storeStatement($statement);
         }
 
-        return new XapiJsonResponse(status: Response::HTTP_NO_CONTENT);
+        return new JsonXapiResponse(status: Response::HTTP_NO_CONTENT);
     }
 
     private function resolveStatement(string $id, Statement $statement): Statement
