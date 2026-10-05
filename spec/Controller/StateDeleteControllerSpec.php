@@ -14,7 +14,7 @@ namespace spec\XApi\LrsBundle\Controller;
 use PhpSpec\ObjectBehavior;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\DataFixtures\StateFixtures;
-use XApi\LrsBundle\Response\JsonXapiResponse;
+use XApi\LrsBundle\Response\JsonResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
 
 /**
@@ -33,7 +33,7 @@ class StateDeleteControllerSpec extends ObjectBehavior
 
         $response = $this->deleteState($state);
 
-        $response->shouldReturnAnInstanceOf(JsonXapiResponse::class);
+        $response->shouldReturnAnInstanceOf(JsonResponse::class);
 
         $response->getStatusCode()->shouldReturn(Response::HTTP_NO_CONTENT);
     }

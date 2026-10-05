@@ -18,11 +18,10 @@ use Symfony\Component\HttpFoundation\Response;
 use XApi\LrsBundle\App\XapiHeader;
 use XApi\LrsBundle\App\XapiVersion;
 
-
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
-class JsonXapiResponse extends SymfonyJsonResponse
+class JsonResponse extends SymfonyJsonResponse
 {
     public function __construct(mixed $data = null, int $status = Response::HTTP_OK, array $headers = [], bool $json = false, bool $isHeadRequest = false)
     {

@@ -58,7 +58,7 @@ xapi_lrs.statement.get:
     path: /statements
     methods: [ GET, HEAD ]
     defaults:
-        _controller: 'xapi_lrs.controller.statement.get::getStatement'
+        _controller: 'xapi_lrs.controller.statement.get::getStatements'
         xapi_lrs.route: true
 
 xapi_lrs.statement.options:
@@ -72,7 +72,7 @@ xapi_lrs.statement.post:
     path: /statements
     methods: [ POST ]
     defaults:
-        _controller: 'xapi_lrs.controller.statement.post::postStatements'
+        _controller: 'xapi_lrs.controller.statement.post::postStatement'
         xapi_serializer: statement
         xapi_lrs.route: true
 

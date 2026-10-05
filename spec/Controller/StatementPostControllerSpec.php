@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\StatementFixtures;
 use XApi\LrsBundle\Exception\ConflictHttpException;
-use XApi\LrsBundle\Response\JsonXapiResponse;
+use XApi\LrsBundle\Response\JsonResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
 /**
@@ -35,7 +35,7 @@ class StatementPostControllerSpec extends ObjectBehavior
 
         $this->beConstructedWith($statementRepository);
 
-        $response = $this->postStatements($statement);
+        $response = $this->postStatement($statement);
 
         $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
         $response->getContent()->shouldMatch('/^\["[0-9a-f-]{36}"\]$/');
@@ -50,7 +50,7 @@ class StatementPostControllerSpec extends ObjectBehavior
 
         $this->beConstructedWith($statementRepository);
 
-        $response = $this->postStatements($statement);
+        $response = $this->postStatement($statement);
 
         $response->shouldHaveType(Response::class);
         $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
@@ -65,7 +65,7 @@ class StatementPostControllerSpec extends ObjectBehavior
 
         $this->beConstructedWith($statementRepository);
 
-        $this->postStatements($statement);
+        $this->postStatement($statement);
     }
 
     public function it_throws_a_ConflictHttpException_if_an_existing_statement_with_the_same_id_is_not_equal_during_a_post_request(StatementRepositoryInterface $statementRepository): void
@@ -79,7 +79,7 @@ class StatementPostControllerSpec extends ObjectBehavior
 
         $this
             ->shouldThrow(ConflictHttpException::class)
-            ->during('postStatements', [$statement]);
+            ->during('postStatement', [$statement]);
     }
 
     public function it_stores_statements_and_returns_a_204_response_if_the_statement_did_not_exist_before(StatementRepositoryInterface $statementRepository): void
@@ -100,9 +100,9 @@ class StatementPostControllerSpec extends ObjectBehavior
 
         $this->beConstructedWith($statementRepository);
 
-        $response = $this->postStatementss($statements);
+        $response = $this->postStatements($statements);
 
-        $response->shouldHaveType(JsonXapiResponse::class);
+        $response->shouldHaveType(JsonResponse::class);
         $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
         $response->getContent()->shouldReturn(json_encode($uuids, JSON_THROW_ON_ERROR));
     }

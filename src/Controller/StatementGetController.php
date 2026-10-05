@@ -32,7 +32,7 @@ use XApi\LrsBundle\App\XapiVersion;
 use XApi\LrsBundle\Exception\BadRequestHttpException;
 use XApi\LrsBundle\Exception\NotFoundHttpException;
 use XApi\LrsBundle\Response\AttachmentResponse;
-use XApi\LrsBundle\Response\JsonXapiResponse;
+use XApi\LrsBundle\Response\JsonResponse;
 use XApi\LrsBundle\Response\MultipartResponse;
 use XApi\LrsBundle\Service\StatementContinuationManager;
 use XApi\LrsBundle\Service\StatementFormatNormalizer;
@@ -58,14 +58,14 @@ final class StatementGetController
 
     /**
      * @param Request $request
-     * @return JsonXapiResponse|MultipartResponse
+     * @return JsonResponse|MultipartResponse
      * @throws DateMalformedStringException
      * @throws InvalidArgumentException
      * @throws JsonException
      * @throws UnsupportedStatementVersionException
      * @throws RandomException
      */
-    public function getStatements(Request $request): JsonXapiResponse|MultipartResponse
+    public function getStatements(Request $request): JsonResponse|MultipartResponse
     {
         $parameters = $this->continuationManager->resolveParameters($request);
         $query = new ParameterBag($parameters);
@@ -131,7 +131,7 @@ final class StatementGetController
     /**
      * @param Statement[] $statements
      */
-    protected function buildMultipartResponse(JsonXapiResponse $JsonXapiResponse, array $statements): MultipartResponse
+    protected function buildMultipartResponse(JsonResponse $JsonXapiResponse, array $statements): MultipartResponse
     {
         $attachmentsParts = [];
 
@@ -155,13 +155,13 @@ final class StatementGetController
         bool $includeAttachments = false,
         ?IRL $more = null,
         string $format = 'exact'
-    ): JsonXapiResponse|MultipartResponse {
+    ): JsonResponse|MultipartResponse {
 
         $statementResult = new StatementResult($statements, $more ?? IRL::fromString(''));
         $json = $this->statementResultSerializer->serializeStatementResult($statementResult);
         $json = $this->formatNormalizer->normalize($json, $format, $request, true);
 
-        $JsonXapiResponse = new JsonXapiResponse($json, Response::HTTP_OK, json: true, isHeadRequest: $request->isMethod(Request::METHOD_HEAD));
+        $JsonXapiResponse = new JsonResponse($json, Response::HTTP_OK, json: true, isHeadRequest: $request->isMethod(Request::METHOD_HEAD));
 
         if ($includeAttachments) {
             return $this->buildMultipartResponse($JsonXapiResponse, $statements);
@@ -179,7 +179,7 @@ final class StatementGetController
         Statement $statement,
         bool $includeAttachments = false,
         string $format = 'exact'
-    ): JsonXapiResponse|MultipartResponse {
+    ): JsonResponse|MultipartResponse {
         if (null === $statement->getVersion()) {
             $statement = $statement->withVersion(XapiVersion::V1_0_3);
         }
@@ -187,7 +187,7 @@ final class StatementGetController
         $json = $this->statementSerializer->serializeStatement($statement);
         $json = $this->formatNormalizer->normalize($json, $format, $request);
 
-        $response = new JsonXapiResponse($json, Response::HTTP_OK, json: true, isHeadRequest: $request->isMethod(Request::METHOD_HEAD));
+        $response = new JsonResponse($json, Response::HTTP_OK, json: true, isHeadRequest: $request->isMethod(Request::METHOD_HEAD));
 
         if ($includeAttachments) {
             $response = $this->buildMultipartResponse($response, [$statement]);

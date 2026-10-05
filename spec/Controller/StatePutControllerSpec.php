@@ -14,7 +14,7 @@ namespace spec\XApi\LrsBundle\Controller;
 use PhpSpec\ObjectBehavior;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\DataFixtures\StateFixtures;
-use XApi\LrsBundle\Response\JsonXapiResponse;
+use XApi\LrsBundle\Response\JsonResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
 
 /**
@@ -32,7 +32,7 @@ class StatePutControllerSpec extends ObjectBehavior
 
         $response = $this->putState($state);
 
-        $response->shouldHaveType(JsonXapiResponse::class);
+        $response->shouldHaveType(JsonResponse::class);
         $response->getStatusCode()->shouldReturn(Response::HTTP_NO_CONTENT);
         $response->getContent()->shouldReturn('');
         $response->headers->get('X-Experience-API-Consistent-Through')->shouldNotBe(null);

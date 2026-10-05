@@ -20,7 +20,7 @@ use Xabbuh\XApi\Serializer\ActivitySerializerInterface;
 use XApi\Fixtures\Json\ActivityJsonFixtures;
 use XApi\LrsBundle\Exception\BadRequestHttpException;
 use XApi\LrsBundle\Exception\NotFoundHttpException;
-use XApi\LrsBundle\Response\JsonXapiResponse;
+use XApi\LrsBundle\Response\JsonResponse;
 use XApi\Repository\Api\ActivityRepositoryInterface;
 
 /**
@@ -67,6 +67,6 @@ class ActivityGetControllerSpec extends ObjectBehavior
         $activityRepository->findActivityById(IRI::fromString($activityId))->shouldBeCalled()->willReturn($activity);
         $activitySerializer->serializeActivity($activity)->shouldBeCalled()->willReturn(ActivityJsonFixtures::getTypicalActivity());
 
-        $this->getActivities($request)->shouldReturnAnInstanceOf(JsonXapiResponse::class);
+        $this->getActivities($request)->shouldReturnAnInstanceOf(JsonResponse::class);
     }
 }

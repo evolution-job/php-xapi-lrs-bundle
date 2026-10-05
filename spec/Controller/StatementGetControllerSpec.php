@@ -36,7 +36,7 @@ use XApi\Fixtures\Json\StatementResultJsonFixtures;
 use XApi\LrsBundle\Exception\BadRequestHttpException;
 use XApi\LrsBundle\Exception\NotFoundHttpException;
 use XApi\LrsBundle\Model\StatementsFilterFactory;
-use XApi\LrsBundle\Response\JsonXapiResponse;
+use XApi\LrsBundle\Response\JsonResponse;
 use XApi\LrsBundle\Response\MultipartResponse;
 use XApi\LrsBundle\Service\StatementContinuationManager;
 use XApi\LrsBundle\Service\StatementFormatNormalizer;
@@ -198,11 +198,11 @@ class StatementGetControllerSpec extends ObjectBehavior
     {
         $request = new Request();
 
-        $this->getStatements($request)->shouldReturnAnInstanceOf(JsonXapiResponse::class);
+        $this->getStatements($request)->shouldReturnAnInstanceOf(JsonResponse::class);
 
         $request->query->set('attachments', false);
 
-        $this->getStatements($request)->shouldReturnAnInstanceOf(JsonXapiResponse::class);
+        $this->getStatements($request)->shouldReturnAnInstanceOf(JsonResponse::class);
     }
 
     public function it_should_fetch_a_statement(StatementRepositoryInterface $statementRepository): void
@@ -301,7 +301,7 @@ class StatementGetControllerSpec extends ObjectBehavior
 
         $response = $this->getStatements($request);
 
-        $response->shouldHaveType(JsonXapiResponse::class);
+        $response->shouldHaveType(JsonResponse::class);
         $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
 
         $response->getContent()->shouldContain('"statements":');

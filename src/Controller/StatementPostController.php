@@ -18,7 +18,7 @@ use Xabbuh\XApi\Model\StatementId;
 use Xabbuh\XApi\Model\Uuid;
 use XApi\LrsBundle\Exception\BadRequestHttpException;
 use XApi\LrsBundle\Exception\ConflictHttpException;
-use XApi\LrsBundle\Response\JsonXapiResponse;
+use XApi\LrsBundle\Response\JsonResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
 /**
@@ -29,7 +29,7 @@ final readonly class StatementPostController
 {
     public function __construct(private StatementRepositoryInterface $statementRepository) { }
 
-    public function postStatement(Statement $statement): JsonXapiResponse
+    public function postStatement(Statement $statement): JsonResponse
     {
         $statement = $this->resolveStatement($statement);
 
@@ -37,13 +37,13 @@ final readonly class StatementPostController
             $this->statementRepository->storeStatement($statement);
         }
 
-        return new JsonXapiResponse([$statement->getId()?->getValue()], Response::HTTP_OK);
+        return new JsonResponse([$statement->getId()?->getValue()], Response::HTTP_OK);
     }
 
     /**
      * @param Statement[] $statements
      */
-    public function postStatements(array $statements): JsonXapiResponse
+    public function postStatements(array $statements): JsonResponse
     {
         $resolvedStatements = [];
         $statementIds = [];
@@ -77,7 +77,7 @@ final readonly class StatementPostController
             $resolvedStatements
         );
 
-        return new JsonXapiResponse($uuids, Response::HTTP_OK);
+        return new JsonResponse($uuids, Response::HTTP_OK);
     }
 
     private function resolveStatement(Statement $statement): Statement

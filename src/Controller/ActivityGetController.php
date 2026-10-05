@@ -18,7 +18,7 @@ use Xabbuh\XApi\Model\IRI;
 use Xabbuh\XApi\Serializer\ActivitySerializerInterface;
 use XApi\LrsBundle\Exception\BadRequestHttpException;
 use XApi\LrsBundle\Exception\NotFoundHttpException;
-use XApi\LrsBundle\Response\JsonXapiResponse;
+use XApi\LrsBundle\Response\JsonResponse;
 use XApi\Repository\Api\ActivityRepositoryInterface;
 
 /**
@@ -31,7 +31,7 @@ final readonly class ActivityGetController
         private ActivitySerializerInterface $activitySerializer
     ) {}
 
-    public function getActivities(Request $request): JsonXapiResponse
+    public function getActivities(Request $request): JsonResponse
     {
         if (!$activityId = $request->query->all()['activityId'] ?? null) {
             throw new BadRequestHttpException('Required activityId parameter is missing.');
@@ -44,7 +44,7 @@ final readonly class ActivityGetController
         try {
             $activity = $this->activityRepository->findActivityById(IRI::fromString($activityId));
 
-            return new JsonXapiResponse(
+            return new JsonResponse(
                 $this->activitySerializer->serializeActivity($activity),
                 Response::HTTP_OK,
                 [],
