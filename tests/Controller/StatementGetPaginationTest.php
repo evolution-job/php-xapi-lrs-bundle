@@ -103,7 +103,7 @@ class StatementGetPaginationTest extends TestCase
         $router->method('generate')->willReturnCallback(static fn(string $route, array $parameters): string => '/statements?moreId='.$parameters['moreId']);
 
         $repository = $this->createMock(StatementRepositoryInterface::class);
-        $repository->expects(self::exactly(3))
+        $repository->expects($this->exactly(3))
             ->method('findStatementsBy')
             ->willReturn($statements);
 
@@ -152,7 +152,7 @@ class StatementGetPaginationTest extends TestCase
             ->withStored(new \DateTime('2024-01-03T00:00:00Z'));
 
         $repository = $this->createMock(StatementRepositoryInterface::class);
-        $repository->expects(self::once())
+        $repository->expects($this->once())
             ->method('findStatementsBy')
             ->willReturnCallback(static function ($filter) use ($outer, $middle, $target): array {
                 $criteria = $filter->getFilter();
@@ -201,13 +201,13 @@ class StatementGetPaginationTest extends TestCase
         $statement = StatementFixtures::getMinimalStatement();
 
         $activityRepository = $this->createMock(ActivityRepositoryInterface::class);
-        $activityRepository->expects(self::once())
+        $activityRepository->expects($this->once())
             ->method('findActivityById')
             ->with(self::callback(static fn(IRI $iri): bool => $iri->getValue() === $activityId))
             ->willReturn($activity);
 
         $verbRepository = $this->createMock(VerbRepositoryInterface::class);
-        $verbRepository->expects(self::once())
+        $verbRepository->expects($this->once())
             ->method('findVerbById')
             ->with(self::callback(static fn(IRI $iri): bool => $iri->getValue() === $verbId))
             ->willReturn($verb);
@@ -370,7 +370,7 @@ class StatementGetPaginationTest extends TestCase
         ];
 
         $repository = $this->createMock(StatementRepositoryInterface::class);
-        $repository->expects(self::exactly(2))
+        $repository->expects($this->exactly(2))
             ->method('findStatementsBy')
             ->willReturnCallback(static function ($filter) use ($statements): array {
                 if (isset($filter->getFilter()['activity'])) {

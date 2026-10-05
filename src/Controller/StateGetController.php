@@ -14,6 +14,7 @@ namespace XApi\LrsBundle\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Model\State;
+use XApi\LrsBundle\App\XapiTimestampParser;
 use XApi\LrsBundle\Response\JsonResponse;
 use XApi\LrsBundle\Response\StateDocumentResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
@@ -27,28 +28,30 @@ final readonly class StateGetController
 
     public function getState(Request $request, State $state): JsonResponse|StateDocumentResponse
     {
-        $foundState = $this->stateRepository->findState($state);
-
         $isHeadRequest = $request->isMethod(Request::METHOD_HEAD);
 
-        if ($foundState instanceof State) {
+        if (null !== $state->getStateId()) {
+            $foundState = $this->stateRepository->findState($state);
 
-            return new StateDocumentResponse($foundState->getData(), Response::HTTP_OK, isHeadRequest: $isHeadRequest);
-        }
-
-        if ($state->getStateId() !== null) {
+            if ($foundState instanceof State) {
+                return new StateDocumentResponse($foundState->getData(), Response::HTTP_OK, isHeadRequest: $isHeadRequest);
+            }
 
             return new JsonResponse(status: Response::HTTP_NOT_FOUND);
         }
 
+        $since = $request->query->has('since')
+            ? XapiTimestampParser::parse($request->query->all()['since'], 'since')
+            : null;
+
         // List of available States
-        $states = $this->stateRepository->findStates($state);
+        $states = $this->stateRepository->findStates($state, $since);
 
         $stateIds = [];
         foreach ($states as $foundState) {
             $stateIds[] = $foundState->getStateId();
         }
 
-        return new JsonResponse(array_unique($stateIds), Response::HTTP_OK);
+        return new JsonResponse(array_unique($stateIds), Response::HTTP_OK, isHeadRequest: $isHeadRequest);
     }
 }

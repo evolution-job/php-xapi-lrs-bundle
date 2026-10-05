@@ -38,11 +38,11 @@ class StatePostControllerTest extends TestCase
         );
 
         $repository = $this->createMock(StateRepositoryInterface::class);
-        $repository->expects(self::once())
+        $repository->expects($this->once())
             ->method('findState')
             ->with($postedState)
             ->willReturn($existingState);
-        $repository->expects(self::once())
+        $repository->expects($this->once())
             ->method('storeState')
             ->with(self::callback(static function (State $storedState): bool {
                 return [
@@ -54,7 +54,7 @@ class StatePostControllerTest extends TestCase
             }));
 
         $request = new Request(server: ['CONTENT_TYPE' => 'application/json; charset=utf-8'], content: '{"progress":0.75,"bookmark":{"page":15},"new":"value"}');
-        $response = (new StatePostController($repository))->postState($postedState, $request);
+        $response = new StatePostController($repository)->postState($postedState, $request);
 
         self::assertSame(204, $response->getStatusCode());
     }
@@ -63,13 +63,13 @@ class StatePostControllerTest extends TestCase
     {
         $state = StateFixtures::getTypicalState();
         $repository = $this->createMock(StateRepositoryInterface::class);
-        $repository->expects(self::once())->method('findState')->willReturn($state);
-        $repository->expects(self::never())->method('storeState');
+        $repository->expects($this->once())->method('findState')->willReturn($state);
+        $repository->expects($this->never())->method('storeState');
 
         $request = new Request(server: ['CONTENT_TYPE' => 'text/plain'], content: 'replacement');
 
         try {
-            (new StatePostController($repository))->postState($state, $request);
+            new StatePostController($repository)->postState($state, $request);
             self::fail('Expected POST to reject a non-JSON document.');
         } catch (BadRequestHttpException $exception) {
             self::assertSame(400, $exception->getStatusCode());
@@ -80,13 +80,13 @@ class StatePostControllerTest extends TestCase
     {
         $state = StateFixtures::getTypicalState();
         $repository = $this->createMock(StateRepositoryInterface::class);
-        $repository->expects(self::once())->method('findState')->willReturn($state);
-        $repository->expects(self::never())->method('storeState');
+        $repository->expects($this->once())->method('findState')->willReturn($state);
+        $repository->expects($this->never())->method('storeState');
 
         $request = new Request(server: ['CONTENT_TYPE' => 'application/json'], content: '[]');
 
         try {
-            (new StatePostController($repository))->postState($state, $request);
+            new StatePostController($repository)->postState($state, $request);
             self::fail('Expected POST to reject a JSON array.');
         } catch (BadRequestHttpException $exception) {
             self::assertSame(400, $exception->getStatusCode());

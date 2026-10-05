@@ -17,6 +17,7 @@ use Xabbuh\XApi\Model\StatementId;
 use Xabbuh\XApi\Model\StatementsFilter;
 use Xabbuh\XApi\Model\Uuid;
 use XApi\LrsBundle\App\IriValidator;
+use XApi\LrsBundle\App\XapiTimestampParser;
 use XApi\LrsBundle\Exception\BadRequestHttpException;
 use XApi\LrsBundle\Model\StatementsFilterFactory;
 
@@ -164,27 +165,7 @@ final readonly class StatementGetQueryValidator
 
     public function parseTimestamp(mixed $value, string $parameter): DateTimeImmutable
     {
-        if (!is_string($value) || 1 !== preg_match(
-            '/\A(?<date>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(?<fraction>\d+))?(?<timezone>Z|[+-]\d{2}:\d{2})\z/',
-            $value,
-            $matches
-        )) {
-            throw new BadRequestHttpException(sprintf('Parameter "%s" must be a valid ISO 8601 timestamp.', $parameter));
-        }
-
-        $fraction = str_pad(substr($matches['fraction'] ?? '0', 0, 6), 6, '0');
-        $timezone = 'Z' === $matches['timezone'] ? '+00:00' : $matches['timezone'];
-        $timestamp = DateTimeImmutable::createFromFormat(
-            '!Y-m-d\TH:i:s.uP',
-            $matches['date'].'.'.$fraction.$timezone
-        );
-        $errors = DateTimeImmutable::getLastErrors();
-
-        if (false === $timestamp || (false !== $errors && (0 !== $errors['warning_count'] || 0 !== $errors['error_count']))) {
-            throw new BadRequestHttpException(sprintf('Parameter "%s" must be a valid ISO 8601 timestamp.', $parameter));
-        }
-
-        return $timestamp;
+        return XapiTimestampParser::parse($value, $parameter);
     }
 
     private function hasNonZeroFraction(mixed $value): bool
@@ -193,5 +174,4 @@ final readonly class StatementGetQueryValidator
             && 1 === preg_match('/\.(\d+)(?:Z|[+-]\d{2}:\d{2})\z/', $value, $matches)
             && '' !== trim($matches[1], '0');
     }
-
 }

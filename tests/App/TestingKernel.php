@@ -2,6 +2,7 @@
 
 namespace XApi\LrsBundle\Tests\App;
 
+use DateTimeImmutable;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -51,7 +52,7 @@ class FakeStateRepository implements StateRepositoryInterface
 
     public function findState(State $state): ?State { }
 
-    public function findStates(State $state): array { }
+    public function findStates(State $state, ?DateTimeImmutable $since = null): array { }
 
     public function removeState(State $state, bool $flush = true): void { }
 
