@@ -119,17 +119,12 @@ final readonly class MultipartStatementParser
      */
     private function getJsonStatementPart(array $headers, string $body): string
     {
-        $mediaType = strtolower($headers['content-type'] ?? '');
-        $body = ltrim($body);
-
-        if (
-            ('' !== $mediaType && str_starts_with($mediaType, 'application/json'))
-            || preg_match('/\A[\[{]/', $body) === 1
-        ) {
-            return $body;
+        $mediaType = strtolower(trim(explode(';', $headers['content-type'] ?? '', 2)[0]));
+        if ('application/json' !== $mediaType) {
+            throw new BadRequestException('The first multipart part must have a Content-Type of application/json.');
         }
 
-        throw new BadRequestException('The first multipart part must contain a JSON statement payload.');
+        return ltrim($body);
     }
 
     /**
@@ -138,6 +133,10 @@ final readonly class MultipartStatementParser
      */
     private function validateAttachmentPart(array $headers, string $body, array $attachmentMetadata): string
     {
+        if ('binary' !== strtolower(trim($headers['content-transfer-encoding'] ?? ''))) {
+            throw new BadRequestException('Multipart attachment parts must declare Content-Transfer-Encoding: binary.');
+        }
+
         $sha2 = strtolower(trim($headers['x-experience-api-hash'] ?? ''));
         $algorithm = match (strlen($sha2)) {
             64 => 'sha256',

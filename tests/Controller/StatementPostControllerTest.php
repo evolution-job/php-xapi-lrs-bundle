@@ -325,6 +325,39 @@ class StatementPostControllerTest extends WebTestCase
         $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
     }
 
+    public function testNormalMultipartMixedStatementRequiresJsonContentTypeOnFirstPart(): void
+    {
+        $response = $this->postMultipartStatement(
+            'attachment',
+            'sha256',
+            firstPartContentType: 'text/plain'
+        );
+
+        $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+    }
+
+    public function testNormalMultipartMixedStatementRequiresBinaryTransferEncodingForAttachments(): void
+    {
+        $response = $this->postMultipartStatement(
+            'attachment',
+            'sha256',
+            transferEncoding: null
+        );
+
+        $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+    }
+
+    public function testStatementMultipartUploadRejectsOtherMultipartMediaTypes(): void
+    {
+        $response = $this->postMultipartStatement(
+            'attachment',
+            'sha256',
+            requestMediaType: 'multipart/form-data'
+        );
+
+        $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+    }
+
     /**
      * Query String should only contain "method" parameter
      */
@@ -429,7 +462,10 @@ class StatementPostControllerTest extends WebTestCase
         string $hashAlgorithm,
         string $attachmentContentType = 'application/octet-stream',
         ?string $partContentType = 'application/octet-stream',
-        ?string $partContentLength = null
+        ?string $partContentLength = null,
+        string $firstPartContentType = 'application/json',
+        ?string $transferEncoding = 'binary',
+        string $requestMediaType = 'multipart/mixed'
     ): Response {
         $attachmentHash = hash($hashAlgorithm, $attachmentContent);
         $statement = json_decode(StatementJsonFixtures::getMinimalStatement(), true, 512, JSON_THROW_ON_ERROR);
@@ -445,6 +481,9 @@ class StatementPostControllerTest extends WebTestCase
 
         $boundary = 'xapi-boundary';
         $attachmentHeaders = [];
+        if (null !== $transferEncoding) {
+            $attachmentHeaders[] = 'Content-Transfer-Encoding: '.$transferEncoding;
+        }
         if (null !== $partContentType) {
             $attachmentHeaders[] = 'Content-Type: '.$partContentType;
         }
@@ -455,7 +494,7 @@ class StatementPostControllerTest extends WebTestCase
 
         $body = implode("\r\n", [
             '--'.$boundary,
-            'Content-Type: application/json',
+            'Content-Type: '.$firstPartContentType,
             '',
             json_encode($statement, JSON_THROW_ON_ERROR),
             '--'.$boundary,
@@ -471,7 +510,7 @@ class StatementPostControllerTest extends WebTestCase
             '/statements',
             [],
             [],
-            ['CONTENT_TYPE' => 'multipart/mixed; boundary='.$boundary, 'HTTP_X-Experience-API-Version' => '1.0.3'],
+            ['CONTENT_TYPE' => $requestMediaType.'; boundary='.$boundary, 'HTTP_X-Experience-API-Version' => '1.0.3'],
             $body
         );
 
