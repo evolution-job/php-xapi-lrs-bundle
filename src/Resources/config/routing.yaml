@@ -1,3 +1,65 @@
+# Agents
+xapi_lrs.agent.get:
+    path: /agents
+    methods: [ GET, HEAD ]
+    defaults:
+        _controller: 'xapi_lrs.controller.agent.get::getAgent'
+        xapi_lrs.route: true
+
+# Agent Profile
+xapi_lrs.agent.profile.get:
+    path: /agents/profile
+    methods: [ GET, HEAD ]
+    defaults: { _controller: 'xapi_lrs.controller.profile.get::getAgentProfile', xapi_lrs.route: true }
+xapi_lrs.agent.profile.post:
+    path: /agents/profile
+    methods: [ POST ]
+    defaults: { _controller: 'xapi_lrs.controller.profile.post::postAgentProfile', xapi_lrs.route: true }
+xapi_lrs.agent.profile.put:
+    path: /agents/profile
+    methods: [ PUT ]
+    defaults: { _controller: 'xapi_lrs.controller.profile.put::putAgentProfile', xapi_lrs.route: true }
+xapi_lrs.agent.profile.delete:
+    path: /agents/profile
+    methods: [ DELETE ]
+    defaults: { _controller: 'xapi_lrs.controller.profile.delete::deleteAgentProfile', xapi_lrs.route: true }
+xapi_lrs.agent.profile.options:
+    path: /agents/profile
+    methods: [ OPTIONS ]
+    defaults: { _controller: 'xapi_lrs.controller.profile.options::optionsProfiles', xapi_lrs.route: true }
+
+# Activity Profile
+xapi_lrs.activity.profile.get:
+    path: /activities/profile
+    methods: [ GET, HEAD ]
+    defaults: { _controller: 'xapi_lrs.controller.profile.get::getActivityProfile', xapi_lrs.route: true }
+xapi_lrs.activity.profile.post:
+    path: /activities/profile
+    methods: [ POST ]
+    defaults: { _controller: 'xapi_lrs.controller.profile.post::postActivityProfile', xapi_lrs.route: true }
+xapi_lrs.activity.profile.put:
+    path: /activities/profile
+    methods: [ PUT ]
+    defaults: { _controller: 'xapi_lrs.controller.profile.put::putActivityProfile', xapi_lrs.route: true }
+xapi_lrs.activity.profile.delete:
+    path: /activities/profile
+    methods: [ DELETE ]
+    defaults: { _controller: 'xapi_lrs.controller.profile.delete::deleteActivityProfile', xapi_lrs.route: true }
+xapi_lrs.activity.profile.options:
+    path: /activities/profile
+    methods: [ OPTIONS ]
+    defaults: { _controller: 'xapi_lrs.controller.profile.options::optionsProfiles', xapi_lrs.route: true }
+
+# About
+xapi_lrs.about.get:
+    path: /about
+    methods: [ GET, HEAD ]
+    defaults: { _controller: 'xapi_lrs.controller.about.get::getAbout', xapi_lrs.route: true }
+xapi_lrs.about.options:
+    path: /about
+    methods: [ OPTIONS ]
+    defaults: { _controller: 'xapi_lrs.controller.about.options::optionsAbout', xapi_lrs.route: true }
+
 # Activity
 xapi_lrs.activity.get:
     path: /activities

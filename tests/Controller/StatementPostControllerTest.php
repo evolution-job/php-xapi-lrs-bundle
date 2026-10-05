@@ -31,7 +31,7 @@ class StatementPostControllerTest extends WebTestCase
 
     protected function setUp(): void
     {
-        $this->client = static::createClient();
+        $this->client = self::createClient();
     }
 
     /**

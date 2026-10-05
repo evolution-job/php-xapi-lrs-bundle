@@ -1,4 +1,10 @@
 services:
+    xapi_lrs.repository.profile.doctrine:
+        class: XApi\Repository\Doctrine\Repository\ProfileRepository
+        public: false
+        arguments:
+            - '@xapi_lrs.repository.mapped_profile'
+
     xapi_lrs.repository.activity.doctrine:
         class: XApi\Repository\Doctrine\Repository\ActivityRepository
         public: false

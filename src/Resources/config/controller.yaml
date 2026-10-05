@@ -1,4 +1,63 @@
 services:
+    # Agents
+    xapi_lrs.controller.agent.get:
+        class: XApi\LrsBundle\Controller\AgentGetController
+        arguments:
+            - '@xapi_lrs.profile.request_parser'
+        tags:
+            - { name: 'controller.service_arguments' }
+
+    # Profiles
+    xapi_lrs.profile.service:
+        class: XApi\LrsBundle\Service\ProfileService
+        arguments:
+            - '@xapi_lrs.repository.profile'
+            - '@xapi_lrs.profile.request_parser'
+
+    xapi_lrs.controller.profile.get:
+        class: XApi\LrsBundle\Controller\ProfileGetController
+        arguments:
+            - '@xapi_lrs.profile.service'
+        tags:
+            - { name: 'controller.service_arguments' }
+
+    xapi_lrs.controller.profile.post:
+        class: XApi\LrsBundle\Controller\ProfilePostController
+        arguments:
+            - '@xapi_lrs.profile.service'
+        tags:
+            - { name: 'controller.service_arguments' }
+
+    xapi_lrs.controller.profile.put:
+        class: XApi\LrsBundle\Controller\ProfilePutController
+        arguments:
+            - '@xapi_lrs.profile.service'
+        tags:
+            - { name: 'controller.service_arguments' }
+
+    xapi_lrs.controller.profile.delete:
+        class: XApi\LrsBundle\Controller\ProfileDeleteController
+        arguments:
+            - '@xapi_lrs.profile.service'
+        tags:
+            - { name: 'controller.service_arguments' }
+
+    xapi_lrs.controller.profile.options:
+        class: XApi\LrsBundle\Controller\ProfileOptionsController
+        tags:
+            - { name: 'controller.service_arguments' }
+
+    # About
+    xapi_lrs.controller.about.get:
+        class: XApi\LrsBundle\Controller\AboutGetController
+        tags:
+            - { name: 'controller.service_arguments' }
+
+    xapi_lrs.controller.about.options:
+        class: XApi\LrsBundle\Controller\AboutOptionsController
+        tags:
+            - { name: 'controller.service_arguments' }
+
     # Activity
     xapi_lrs.controller.activity.get:
         class: XApi\LrsBundle\Controller\ActivityGetController

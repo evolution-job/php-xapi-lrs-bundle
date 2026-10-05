@@ -49,6 +49,7 @@ final class XApiLrsExtension extends Extension
                 $container->setAlias('xapi_lrs.repository.activity', 'xapi_lrs.repository.activity.doctrine');
                 $container->setAlias('xapi_lrs.repository.verb', 'xapi_lrs.repository.verb.doctrine');
                 $container->setAlias('xapi_lrs.repository.state', 'xapi_lrs.repository.state.doctrine');
+                $container->setAlias('xapi_lrs.repository.profile', 'xapi_lrs.repository.profile.doctrine');
                 $container->setAlias('xapi_lrs.repository.statement', 'xapi_lrs.repository.statement.doctrine');
                 break;
             case 'orm':
@@ -59,6 +60,7 @@ final class XApiLrsExtension extends Extension
                 $container->setAlias('xapi_lrs.repository.activity', 'xapi_lrs.repository.activity.doctrine');
                 $container->setAlias('xapi_lrs.repository.verb', 'xapi_lrs.repository.verb.doctrine');
                 $container->setAlias('xapi_lrs.repository.state', 'xapi_lrs.repository.state.doctrine');
+                $container->setAlias('xapi_lrs.repository.profile', 'xapi_lrs.repository.profile.doctrine');
                 $container->setAlias('xapi_lrs.repository.statement', 'xapi_lrs.repository.statement.doctrine');
                 break;
         }

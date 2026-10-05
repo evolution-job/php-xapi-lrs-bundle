@@ -12,8 +12,11 @@ services:
             - '@xapi_lrs.state.serializer'
             - '@xapi_lrs.multipart_statement_parser'
 
-    xapi_lrs.repository.profile:
-        class: XApi\LrsBundle\Repository\InMemoryProfileRepository
+    xapi_lrs.profile.service:
+        class: XApi\LrsBundle\Service\ProfileService
+        arguments:
+            - '@xapi_lrs.repository.profile'
+            - '@xapi_lrs.profile.request_parser'
 
     xapi_lrs.profile.request_parser:
         class: XApi\LrsBundle\Service\ProfileRequestParser

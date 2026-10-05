@@ -19,6 +19,7 @@ use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\Model\Activity;
 use Xabbuh\XApi\Model\Actor;
 use Xabbuh\XApi\Model\IRI;
+use Xabbuh\XApi\Model\ProfileDocument;
 use Xabbuh\XApi\Model\State;
 use Xabbuh\XApi\Model\Statement;
 use Xabbuh\XApi\Model\StatementId;
@@ -26,6 +27,7 @@ use Xabbuh\XApi\Model\StatementsFilter;
 use Xabbuh\XApi\Model\Verb;
 use XApi\LrsBundle\XApiLrsBundle;
 use XApi\Repository\Api\ActivityRepositoryInterface;
+use XApi\Repository\Api\ProfileRepositoryInterface;
 use XApi\Repository\Api\StatementRepositoryInterface;
 use XApi\Repository\Api\StateRepositoryInterface;
 use XApi\Repository\Api\VerbRepositoryInterface;
@@ -38,9 +40,41 @@ class FakeActivityRepository implements ActivityRepositoryInterface
     public function findActivityById(IRI $iri): ?Activity { return null; }
 }
 
-class FakeVerbRepository implements VerbRepositoryInterface
+class FakeProfileRepository implements ProfileRepositoryInterface
 {
-    public function findVerbById(IRI $iri): ?Verb { throw new NotFoundException('Not found'); }
+    /** @var array<string, array<string, ProfileDocument>> */
+    private array $documents = [];
+
+    public function find(string $resource, string $profileId): ?ProfileDocument
+    {
+        return $this->documents[$resource][$profileId] ?? null;
+    }
+
+    public function findIds(string $resource, ?DateTimeImmutable $since = null): array
+    {
+        $documents = $this->documents[$resource] ?? [];
+
+        return array_keys(array_filter(
+            $documents,
+            static fn (ProfileDocument $profileDocument): bool => !$since instanceof DateTimeImmutable || $profileDocument->updated > $since
+        ));
+    }
+
+    public function store(string $resource, string $profileId, ProfileDocument $profileDocument): void
+    {
+        $this->documents[$resource][$profileId] = $profileDocument;
+    }
+
+    public function remove(string $resource, ?string $profileId = null): void
+    {
+        if (null === $profileId) {
+            unset($this->documents[$resource]);
+
+            return;
+        }
+
+        unset($this->documents[$resource][$profileId]);
+    }
 }
 
 class FakeStatementRepository implements StatementRepositoryInterface
@@ -65,6 +99,12 @@ class FakeStateRepository implements StateRepositoryInterface
 
     public function storeState(State $state, bool $flush = true): void { }
 }
+
+class FakeVerbRepository implements VerbRepositoryInterface
+{
+    public function findVerbById(IRI $iri): ?Verb { throw new NotFoundException('Not found'); }
+}
+
 
 class TestingKernel extends Kernel
 {
@@ -97,9 +137,10 @@ class TestingKernel extends Kernel
                 'allowed_origins'        => ['https://lrs.example.com', 'https://learning.repository.example.com'],
             ]);
 
+            $container->register('xapi_lrs.repository.activity', FakeActivityRepository::class)->setPublic(true);
+            $container->register('xapi_lrs.repository.profile', FakeProfileRepository::class)->setPublic(true);
             $container->register('xapi_lrs.repository.state', FakeStateRepository::class)->setPublic(true);
             $container->register('xapi_lrs.repository.statement', FakeStatementRepository::class)->setPublic(true);
-            $container->register('xapi_lrs.repository.activity', FakeActivityRepository::class)->setPublic(true);
             $container->register('xapi_lrs.repository.verb', FakeVerbRepository::class)->setPublic(true);
         });
     }

@@ -32,6 +32,9 @@ final readonly class ActivityGetController
         private ActivitySerializerInterface $activitySerializer
     ) {}
 
+    /**
+     * @throws BadRequestException
+     */
     public function getActivities(Request $request): JsonResponse
     {
         $parameters = $request->query->all();

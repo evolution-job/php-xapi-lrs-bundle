@@ -1,4 +1,19 @@
 services:
+    # Profile Repository
+    xapi_lrs.doctrine.profile.class_metadata:
+        class: Doctrine\ORM\Mapping\ClassMetadata
+        public: false
+        factory: [ '@xapi_lrs.doctrine.object_manager', 'getClassMetadata' ]
+        arguments:
+            - 'XApi\Repository\Doctrine\Mapping\Profile'
+
+    xapi_lrs.repository.mapped_profile:
+        class: XApi\Repository\ORM\ProfileRepository
+        public: false
+        arguments:
+            - '@xapi_lrs.doctrine.object_manager'
+            - '@xapi_lrs.doctrine.profile.class_metadata'
+
     # State Repository
     xapi_lrs.doctrine.state.class_metadata:
         class: Doctrine\ORM\Mapping\ClassMetadata
