@@ -14,6 +14,7 @@ namespace spec\XApi\LrsBundle\Controller;
 use PhpSpec\ObjectBehavior;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\DataFixtures\StateFixtures;
+use Xabbuh\XApi\Model\State;
 use XApi\LrsBundle\Response\JsonResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
 
@@ -35,6 +36,22 @@ class StateDeleteControllerSpec extends ObjectBehavior
 
         $response->shouldReturnAnInstanceOf(JsonResponse::class);
 
+        $response->getStatusCode()->shouldReturn(Response::HTTP_NO_CONTENT);
+    }
+
+    public function it_removes_all_matching_states_when_state_id_is_omitted(StateRepositoryInterface $stateRepository): void
+    {
+        $typicalState = StateFixtures::getMinimalState();
+        $state = new State($typicalState->getActivity(), $typicalState->getAgent(), null);
+
+        $stateRepository->findState($state)->shouldNotBeCalled();
+        $stateRepository->removeState($state)->shouldBeCalled();
+
+        $this->beConstructedWith($stateRepository);
+
+        $response = $this->deleteState($state);
+
+        $response->shouldReturnAnInstanceOf(JsonResponse::class);
         $response->getStatusCode()->shouldReturn(Response::HTTP_NO_CONTENT);
     }
 }

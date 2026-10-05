@@ -25,10 +25,7 @@ final readonly class StateDeleteController
 
     public function deleteState(State $state): JsonResponse
     {
-        $foundState = $this->stateRepository->findState($state);
-
-        if ($foundState instanceof State) {
-
+        if (null === $state->getStateId() || $this->stateRepository->findState($state) instanceof State) {
             $this->stateRepository->removeState($state);
         }
 

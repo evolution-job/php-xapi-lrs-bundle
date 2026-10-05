@@ -51,7 +51,15 @@ final readonly class SerializerListener
 
                     $jsonEncodeParameters = json_encode($parameters, JSON_THROW_ON_ERROR);
 
-                    $request->attributes->set('state', $this->stateSerializer->deserializeState($jsonEncodeParameters, $request->getContent() ?? ''));
+                    $state = $this->stateSerializer->deserializeState($jsonEncodeParameters, $request->getContent() ?? '');
+
+                    if (null === $state->getStateId()
+                        && in_array($request->getMethod(), [Request::METHOD_POST, Request::METHOD_PUT], true)
+                    ) {
+                        throw new BadRequestHttpException('The stateId parameter is required for this request.');
+                    }
+
+                    $request->attributes->set('state', $state);
 
                     break;
 
