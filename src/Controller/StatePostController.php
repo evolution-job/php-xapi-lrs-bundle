@@ -46,9 +46,10 @@ final readonly class StatePostController
 
         if (
             'application/json' !== $contentType
-            || (null !== $existingContentType && 'application/json' !== strtolower(trim(explode(';', $existingContentType, 2)[0])))
+            || null === $existingContentType
+            || 'application/json' !== strtolower(trim(explode(';', $existingContentType, 2)[0]))
             || !is_array($existingData)
-            || array_is_list($existingData)
+            || ([] !== $existingData && array_is_list($existingData))
         ) {
             throw new BadRequestException('POST can only merge an existing JSON object using application/json.');
         }

@@ -103,7 +103,7 @@ class StatePostControllerTest extends TestCase
         }
     }
 
-    public function testPostRejectsAnExistingEmptyJsonArray(): void
+    public function testPostMergesAnExistingEmptyJsonDocument(): void
     {
         $state = StateFixtures::getTypicalState();
         $existingState = new State(
@@ -116,13 +116,29 @@ class StatePostControllerTest extends TestCase
         );
         $repository = $this->createMock(StateRepositoryInterface::class);
         $repository->expects($this->once())->method('findState')->willReturn($existingState);
+        $repository->expects($this->once())
+            ->method('storeState')
+            ->with(self::callback(static fn (State $storedState): bool => ['added' => true] === $storedState->getData()));
+
+        $request = new Request(server: ['CONTENT_TYPE' => 'application/json'], content: '{"added":true}');
+
+        $response = new StatePostController($repository)->postState($state, $request);
+
+        self::assertSame(204, $response->getStatusCode());
+    }
+
+    public function testPostRejectsExistingDocumentWithoutContentType(): void
+    {
+        $state = StateFixtures::getTypicalState();
+        $repository = $this->createMock(StateRepositoryInterface::class);
+        $repository->expects($this->once())->method('findState')->willReturn($state->withContentType(null));
         $repository->expects($this->never())->method('storeState');
 
         $request = new Request(server: ['CONTENT_TYPE' => 'application/json'], content: '{"added":true}');
 
         try {
-            (new StatePostController($repository))->postState($state, $request);
-            self::fail('Expected POST to reject an existing JSON array.');
+            new StatePostController($repository)->postState($state, $request);
+            self::fail('Expected POST to reject an existing document without a content type.');
         } catch (BadRequestException $exception) {
             self::assertSame(400, $exception->getCode());
         }
