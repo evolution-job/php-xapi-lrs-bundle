@@ -51,10 +51,10 @@ class StatementGetPaginationTest extends TestCase
 
         foreach ($invalidParameters as $name => $value) {
             $controller = $this->createController(
-                $this->createMock(StatementRepositoryInterface::class),
-                $this->createMock(StatementResultSerializerInterface::class),
-                $this->createMock(StatementSerializerInterface::class),
-                new StatementsFilterFactory($this->createMock(ActorSerializerInterface::class))
+                $this->createStub(StatementRepositoryInterface::class),
+                $this->createStub(StatementResultSerializerInterface::class),
+                $this->createStub(StatementSerializerInterface::class),
+                new StatementsFilterFactory($this->createStub(ActorSerializerInterface::class))
             );
             $request = new Request();
             $request->query->set($name, $value);
@@ -70,13 +70,13 @@ class StatementGetPaginationTest extends TestCase
 
     public function testInvalidAgentObjectIsRejectedAsBadRequest(): void
     {
-        $actorSerializer = $this->createMock(ActorSerializerInterface::class);
+        $actorSerializer = $this->createStub(ActorSerializerInterface::class);
         $actorSerializer->method('deserializeActor')->willThrowException(new ActorDeserializationException('Invalid Agent.'));
 
         $controller = $this->createController(
-            $this->createMock(StatementRepositoryInterface::class),
-            $this->createMock(StatementResultSerializerInterface::class),
-            $this->createMock(StatementSerializerInterface::class),
+            $this->createStub(StatementRepositoryInterface::class),
+            $this->createStub(StatementResultSerializerInterface::class),
+            $this->createStub(StatementSerializerInterface::class),
             new StatementsFilterFactory($actorSerializer)
         );
         $request = new Request();
@@ -99,7 +99,7 @@ class StatementGetPaginationTest extends TestCase
         ];
 
         $cache = new ArrayAdapter();
-        $router = $this->createMock(Router::class);
+        $router = $this->createStub(Router::class);
         $router->method('generate')->willReturnCallback(static fn(string $route, array $parameters): string => '/statements?moreId='.$parameters['moreId']);
 
         $repository = $this->createMock(StatementRepositoryInterface::class);
@@ -107,7 +107,7 @@ class StatementGetPaginationTest extends TestCase
             ->method('findStatementsBy')
             ->willReturn($statements);
 
-        $resultSerializer = $this->createMock(StatementResultSerializerInterface::class);
+        $resultSerializer = $this->createStub(StatementResultSerializerInterface::class);
         $resultSerializer->method('serializeStatementResult')->willReturnCallback(
             static fn(StatementResult $result): string => json_encode([
                 'statements' => array_map(
@@ -121,8 +121,8 @@ class StatementGetPaginationTest extends TestCase
         $controller = $this->createController(
             $repository,
             $resultSerializer,
-            $this->createMock(StatementSerializerInterface::class),
-            new StatementsFilterFactory($this->createMock(ActorSerializerInterface::class)),
+            $this->createStub(StatementSerializerInterface::class),
+            new StatementsFilterFactory($this->createStub(ActorSerializerInterface::class)),
             $cache,
             $router
         );
@@ -162,7 +162,7 @@ class StatementGetPaginationTest extends TestCase
                 return [$outer, $middle, $target];
             });
 
-        $resultSerializer = $this->createMock(StatementResultSerializerInterface::class);
+        $resultSerializer = $this->createStub(StatementResultSerializerInterface::class);
         $resultSerializer->method('serializeStatementResult')->willReturnCallback(
             static fn(StatementResult $result): string => json_encode([
                 'statements' => array_map(
@@ -176,8 +176,8 @@ class StatementGetPaginationTest extends TestCase
         $controller = $this->createController(
             $repository,
             $resultSerializer,
-            $this->createMock(StatementSerializerInterface::class),
-            new StatementsFilterFactory($this->createMock(ActorSerializerInterface::class))
+            $this->createStub(StatementSerializerInterface::class),
+            new StatementsFilterFactory($this->createStub(ActorSerializerInterface::class))
         );
 
         $response = $controller->getStatements(Request::create(
@@ -212,10 +212,10 @@ class StatementGetPaginationTest extends TestCase
             ->with(self::callback(static fn(IRI $iri): bool => $iri->getValue() === $verbId))
             ->willReturn($verb);
 
-        $repository = $this->createMock(StatementRepositoryInterface::class);
+        $repository = $this->createStub(StatementRepositoryInterface::class);
         $repository->method('findStatementsBy')->willReturn([$statement]);
 
-        $resultSerializer = $this->createMock(StatementResultSerializerInterface::class);
+        $resultSerializer = $this->createStub(StatementResultSerializerInterface::class);
         $resultSerializer->method('serializeStatementResult')->willReturn(json_encode([
             'statements' => [[
                 'actor' => ['objectType' => 'Agent', 'mbox' => 'mailto:original@example.com', 'name' => 'Original'],
@@ -234,7 +234,7 @@ class StatementGetPaginationTest extends TestCase
             'more' => '',
         ], JSON_THROW_ON_ERROR));
 
-        $activitySerializer = $this->createMock(ActivitySerializerInterface::class);
+        $activitySerializer = $this->createStub(ActivitySerializerInterface::class);
         $activitySerializer->method('serializeActivity')->willReturn(json_encode([
             'objectType' => 'Activity',
             'id' => $activityId,
@@ -250,8 +250,8 @@ class StatementGetPaginationTest extends TestCase
         $controller = $this->createController(
             $repository,
             $resultSerializer,
-            $this->createMock(StatementSerializerInterface::class),
-            new StatementsFilterFactory($this->createMock(ActorSerializerInterface::class)),
+            $this->createStub(StatementSerializerInterface::class),
+            new StatementsFilterFactory($this->createStub(ActorSerializerInterface::class)),
             activityRepository: $activityRepository,
             verbRepository: $verbRepository,
             activitySerializer: $activitySerializer
@@ -279,10 +279,10 @@ class StatementGetPaginationTest extends TestCase
     public function testMalformedSinceOrUntilTimestampIsRejected(): void
     {
         $controller = $this->createController(
-            $this->createMock(StatementRepositoryInterface::class),
-            $this->createMock(StatementResultSerializerInterface::class),
-            $this->createMock(StatementSerializerInterface::class),
-            new StatementsFilterFactory($this->createMock(ActorSerializerInterface::class))
+            $this->createStub(StatementRepositoryInterface::class),
+            $this->createStub(StatementResultSerializerInterface::class),
+            $this->createStub(StatementSerializerInterface::class),
+            new StatementsFilterFactory($this->createStub(ActorSerializerInterface::class))
         );
 
         foreach (['since', 'until'] as $parameter) {
@@ -300,7 +300,7 @@ class StatementGetPaginationTest extends TestCase
     public function testIdsFormatStripsPropertiesBeyondObjectIdentifiers(): void
     {
         $statement = StatementFixtures::getMinimalStatement();
-        $repository = $this->createMock(StatementRepositoryInterface::class);
+        $repository = $this->createStub(StatementRepositoryInterface::class);
         $repository->method('findStatementsBy')->willReturn([$statement]);
 
         $serializedResult = [
@@ -316,14 +316,14 @@ class StatementGetPaginationTest extends TestCase
             'more' => '',
         ];
 
-        $resultSerializer = $this->createMock(StatementResultSerializerInterface::class);
+        $resultSerializer = $this->createStub(StatementResultSerializerInterface::class);
         $resultSerializer->method('serializeStatementResult')->willReturn(json_encode($serializedResult, JSON_THROW_ON_ERROR));
 
         $controller = $this->createController(
             $repository,
             $resultSerializer,
-            $this->createMock(StatementSerializerInterface::class),
-            new StatementsFilterFactory($this->createMock(ActorSerializerInterface::class))
+            $this->createStub(StatementSerializerInterface::class),
+            new StatementsFilterFactory($this->createStub(ActorSerializerInterface::class))
         );
 
         $response = $controller->getStatements(Request::create('/statements?format=ids&limit=1'));
@@ -342,10 +342,10 @@ class StatementGetPaginationTest extends TestCase
     public function testUnknownQueryParameterIsRejected(): void
     {
         $controller = $this->createController(
-            $this->createMock(StatementRepositoryInterface::class),
-            $this->createMock(StatementResultSerializerInterface::class),
-            $this->createMock(StatementSerializerInterface::class),
-            new StatementsFilterFactory($this->createMock(ActorSerializerInterface::class))
+            $this->createStub(StatementRepositoryInterface::class),
+            $this->createStub(StatementResultSerializerInterface::class),
+            $this->createStub(StatementSerializerInterface::class),
+            new StatementsFilterFactory($this->createStub(ActorSerializerInterface::class))
         );
 
         $this->expectException(BadRequestHttpException::class);
@@ -355,7 +355,7 @@ class StatementGetPaginationTest extends TestCase
     public function testMoreLinkHidesAndRestoresNextPageParameters(): void
     {
         $cache = new ArrayAdapter();
-        $router = $this->createMock(Router::class);
+        $router = $this->createStub(Router::class);
         $router->method('generate')->willReturnCallback(static function (string $route, array $parameters): string {
             self::assertSame('xapi_lrs.statement.get', $route);
             self::assertCount(1, $parameters);
@@ -380,8 +380,8 @@ class StatementGetPaginationTest extends TestCase
                 return $statements;
             });
 
-        $factory = new StatementsFilterFactory($this->createMock(ActorSerializerInterface::class));
-        $resultSerializer = $this->createMock(StatementResultSerializerInterface::class);
+        $factory = new StatementsFilterFactory($this->createStub(ActorSerializerInterface::class));
+        $resultSerializer = $this->createStub(StatementResultSerializerInterface::class);
         $resultSerializer->method('serializeStatementResult')->willReturnCallback(
             static fn(StatementResult $result): string => json_encode([
                 'statements' => array_map(
@@ -395,7 +395,7 @@ class StatementGetPaginationTest extends TestCase
         $controller = $this->createController(
             $repository,
             $resultSerializer,
-            $this->createMock(StatementSerializerInterface::class),
+            $this->createStub(StatementSerializerInterface::class),
             $factory,
             $cache,
             $router
@@ -420,10 +420,10 @@ class StatementGetPaginationTest extends TestCase
     public function testExpiredMoreLinkReturnsNotFound(): void
     {
         $controller = $this->createController(
-            $this->createMock(StatementRepositoryInterface::class),
-            $this->createMock(StatementResultSerializerInterface::class),
-            $this->createMock(StatementSerializerInterface::class),
-            new StatementsFilterFactory($this->createMock(ActorSerializerInterface::class))
+            $this->createStub(StatementRepositoryInterface::class),
+            $this->createStub(StatementResultSerializerInterface::class),
+            $this->createStub(StatementSerializerInterface::class),
+            new StatementsFilterFactory($this->createStub(ActorSerializerInterface::class))
         );
 
         $this->expectException(NotFoundHttpException::class);
@@ -447,14 +447,14 @@ class StatementGetPaginationTest extends TestCase
             $resultSerializer,
             $statementSerializer,
             new StatementFormatNormalizer(
-                $activityRepository ?? $this->createMock(ActivityRepositoryInterface::class),
-                $verbRepository ?? $this->createMock(VerbRepositoryInterface::class),
-                $activitySerializer ?? $this->createMock(ActivitySerializerInterface::class)
+                $activityRepository ?? $this->createStub(ActivityRepositoryInterface::class),
+                $verbRepository ?? $this->createStub(VerbRepositoryInterface::class),
+                $activitySerializer ?? $this->createStub(ActivitySerializerInterface::class)
             ),
             new StatementGetQueryValidator($filterFactory),
             new StatementContinuationManager(
                 $cache ?? new ArrayAdapter(),
-                $router ?? $this->createMock(Router::class)
+                $router ?? $this->createStub(Router::class)
             )
         );
     }

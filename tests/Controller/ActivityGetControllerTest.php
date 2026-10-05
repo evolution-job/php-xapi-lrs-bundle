@@ -45,7 +45,7 @@ class ActivityGetControllerTest extends TestCase
     {
         $repository = $this->createMock(ActivityRepositoryInterface::class);
         $repository->expects($this->never())->method('findActivityById');
-        $controller = new ActivityGetController($repository, $this->createMock(ActivitySerializerInterface::class));
+        $controller = new ActivityGetController($repository, $this->createStub(ActivitySerializerInterface::class));
 
         try {
             $controller->getActivities(new Request(['activityId' => 'not an IRI']));
@@ -59,7 +59,7 @@ class ActivityGetControllerTest extends TestCase
     {
         $repository = $this->createMock(ActivityRepositoryInterface::class);
         $repository->expects($this->never())->method('findActivityById');
-        $controller = new ActivityGetController($repository, $this->createMock(ActivitySerializerInterface::class));
+        $controller = new ActivityGetController($repository, $this->createStub(ActivitySerializerInterface::class));
 
         try {
             $controller->getActivities(new Request(['activityId' => 'https://example.org/%zz']));
@@ -73,7 +73,7 @@ class ActivityGetControllerTest extends TestCase
     {
         $repository = $this->createMock(ActivityRepositoryInterface::class);
         $repository->expects($this->never())->method('findActivityById');
-        $controller = new ActivityGetController($repository, $this->createMock(ActivitySerializerInterface::class));
+        $controller = new ActivityGetController($repository, $this->createStub(ActivitySerializerInterface::class));
 
         try {
             $controller->getActivities(new Request(['activityId' => 'https://example.org/activity', 'extra' => 'value']));
@@ -89,7 +89,7 @@ class ActivityGetControllerTest extends TestCase
         $repository->expects($this->once())
             ->method('findActivityById')
             ->willThrowException(new NotFoundException('Not found'));
-        $controller = new ActivityGetController($repository, $this->createMock(ActivitySerializerInterface::class));
+        $controller = new ActivityGetController($repository, $this->createStub(ActivitySerializerInterface::class));
 
         $this->expectException(NotFoundHttpException::class);
         $controller->getActivities(new Request(['activityId' => 'https://example.org/activity']));
