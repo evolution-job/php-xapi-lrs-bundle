@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace XApi\LrsBundle\EventListener;
 
+use DateTimeImmutable;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -30,10 +31,10 @@ final readonly class ExceptionListener
     public function onKernelException(ExceptionEvent $exceptionEvent): void
     {
         $throwable = $exceptionEvent->getThrowable();
+        $isXapiRequest = $this->xapiRequestMatcher->matches($exceptionEvent);
 
-        if (!$throwable instanceof XApiException
-            && !$this->xapiRequestMatcher->matches($exceptionEvent)
-        ) {
+        if (!$throwable instanceof XApiException && !$isXapiRequest) {
+
             return;
         }
 
@@ -57,6 +58,12 @@ final readonly class ExceptionListener
 
         // Add X-Experience-API-Version
         $response->headers->set(XapiHeader::VERSION, XapiVersion::V1_0_3);
+        if ($isXapiRequest) {
+            $response->headers->set(
+                XapiHeader::CONSISTENT_THROUGH_HEADER,
+                new DateTimeImmutable()->format(XapiHeader::DATE_FORMAT)
+            );
+        }
 
         $exceptionEvent->setResponse($response);
     }

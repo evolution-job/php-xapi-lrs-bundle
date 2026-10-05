@@ -34,6 +34,7 @@ class ExceptionListenerTest extends TestCase
 
         self::assertSame(400, $event->getResponse()?->getStatusCode());
         self::assertSame('Invalid request', $event->getResponse()?->getContent());
+        self::assertNotNull($event->getResponse()?->headers->get(XapiHeader::CONSISTENT_THROUGH_HEADER));
     }
 
     public function testPackageConflictExceptionBecomesAConflictResponse(): void
