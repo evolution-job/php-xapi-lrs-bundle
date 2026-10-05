@@ -10,6 +10,7 @@
 namespace spec\XApi\LrsBundle\EventListener;
 
 use PhpSpec\ObjectBehavior;
+use Symfony\Component\HttpFoundation\HeaderBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -19,8 +20,8 @@ use Xabbuh\XApi\DataFixtures\StatementFixtures;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use Xabbuh\XApi\Serializer\StateSerializerInterface;
 use XApi\Fixtures\Json\StatementJsonFixtures;
-use XApi\LrsBundle\EventListener\XapiRequestDeserializer;
-use XApi\LrsBundle\EventListener\XapiRequestMatcher;
+use XApi\LrsBundle\Service\RequestDeserializer;
+use XApi\LrsBundle\Service\RequestMatcher;
 
 /**
  * @author Christian Flothmann <christian.flothmann@xabbuh.de>
@@ -33,13 +34,14 @@ class SerializerListenerSpec extends ObjectBehavior
         $parameterBag->has('xapi_lrs.route')->willReturn(true);
         $parameterBag->get('_route', '')->willReturn('xapi_lrs.route');
         $request->attributes = $parameterBag;
+        $request->headers = new HeaderBag();
 
         $requestEvent->getRequest()->willReturn($request);
         $requestEvent->isMainRequest()->willReturn(true);
 
-        $xapiRequestMatcher = new XapiRequestMatcher();
-        $xapiRequestDeserializer = new XapiRequestDeserializer($statementSerializer->getWrappedObject(), $stateSerializer->getWrappedObject());
-        $this->beConstructedWith($xapiRequestDeserializer, $xapiRequestMatcher);
+        $requestMatcher = new RequestMatcher();
+        $requestDeserializer = new RequestDeserializer($statementSerializer->getWrappedObject(), $stateSerializer->getWrappedObject());
+        $this->beConstructedWith($requestDeserializer, $requestMatcher);
     }
 
     public function it_returns_null_if_request_has_no_attribute_xapi_lrs_route(RequestEvent $requestEvent, ParameterBag $parameterBag): void
@@ -56,7 +58,7 @@ class SerializerListenerSpec extends ObjectBehavior
 
         $statement = StatementFixtures::getTypicalStatement();
 
-        $statementSerializer->deserializeStatement($jsonString)->shouldBeCalled()->willReturn($statement);
+        $statementSerializer->deserializeStatement($jsonString, [])->shouldBeCalled()->willReturn($statement);
 
         $parameterBag->get('xapi_serializer')->willReturn('statement');
         $parameterBag->set('statement', $statement)->shouldBeCalled();
@@ -69,7 +71,7 @@ class SerializerListenerSpec extends ObjectBehavior
 
     public function it_throws_a_BadRequestException_if_the_serializer_fails(RequestEvent $requestEvent, StatementSerializerInterface $statementSerializer, Request $request, ParameterBag $parameterBag): void
     {
-        $statementSerializer->deserializeStatement('')->shouldBeCalled()->willThrow(InvalidArgumentException::class);
+        $statementSerializer->deserializeStatement('', [])->shouldBeCalled()->willThrow(InvalidArgumentException::class);
 
         $parameterBag->get('xapi_serializer')->willReturn('statement');
         $request->isMethod(Request::METHOD_OPTIONS)->willReturn(false);

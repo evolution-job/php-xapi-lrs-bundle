@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Xabbuh\XApi\Common\Exception\BadRequestException;
-use XApi\LrsBundle\EventListener\XapiRequestMatcher;
+use XApi\LrsBundle\Service\RequestMatcher;
 
 /**
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
@@ -36,8 +36,8 @@ class VersionListenerSpec extends ObjectBehavior
         $requestEvent->isMainRequest()->willReturn(true);
         $requestEvent->getRequest()->willReturn($request);
 
-        $xapiRequestMatcher = new XapiRequestMatcher();
-        $this->beConstructedWith($xapiRequestMatcher, ['https://learning.repository.example.com']);
+        $requestMatcher = new RequestMatcher();
+        $this->beConstructedWith($requestMatcher, ['https://learning.repository.example.com']);
     }
 
     public function it_returns_null_if_requests_are_not_main(HttpKernelInterface $httpKernel, RequestEvent $requestEvent, Request $request, Response $response): void

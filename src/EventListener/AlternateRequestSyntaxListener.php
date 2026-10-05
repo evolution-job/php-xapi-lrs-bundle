@@ -31,6 +31,9 @@ final readonly class AlternateRequestSyntaxListener
 {
     public function __construct(private RouterInterface $router) { }
 
+    /**
+     * @throws BadRequestException
+     */
     public function onKernelRequest(RequestEvent $requestEvent): void
     {
         if (!$requestEvent->isMainRequest()) {

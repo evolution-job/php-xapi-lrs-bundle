@@ -19,7 +19,7 @@ use Xabbuh\XApi\Common\Exception\NotFoundException;
 use XApi\LrsBundle\App\XapiAttribute;
 use XApi\LrsBundle\App\XapiHeader;
 use XApi\LrsBundle\EventListener\ExceptionListener;
-use XApi\LrsBundle\EventListener\XapiRequestMatcher;
+use XApi\LrsBundle\Service\RequestMatcher;
 
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
@@ -30,7 +30,7 @@ class ExceptionListenerTest extends TestCase
     {
         $event = $this->createExceptionEvent(new BadRequestException('Invalid request'));
 
-        new ExceptionListener(new XapiRequestMatcher())->onKernelException($event);
+        new ExceptionListener(new RequestMatcher())->onKernelException($event);
 
         self::assertSame(400, $event->getResponse()?->getStatusCode());
         self::assertSame('Invalid request', $event->getResponse()?->getContent());
@@ -41,7 +41,7 @@ class ExceptionListenerTest extends TestCase
     {
         $event = $this->createExceptionEvent(new ConflictException('Statement conflict'));
 
-        new ExceptionListener(new XapiRequestMatcher())->onKernelException($event);
+        new ExceptionListener(new RequestMatcher())->onKernelException($event);
 
         self::assertSame(409, $event->getResponse()?->getStatusCode());
         self::assertSame('Statement conflict', $event->getResponse()?->getContent());
@@ -52,7 +52,7 @@ class ExceptionListenerTest extends TestCase
     {
         $event = $this->createExceptionEvent(new NotFoundException('Statement not found'));
 
-        new ExceptionListener(new XapiRequestMatcher())->onKernelException($event);
+        new ExceptionListener(new RequestMatcher())->onKernelException($event);
 
         self::assertSame(404, $event->getResponse()?->getStatusCode());
         self::assertSame('Statement not found', $event->getResponse()?->getContent());

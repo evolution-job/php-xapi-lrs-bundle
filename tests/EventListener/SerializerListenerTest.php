@@ -20,8 +20,8 @@ use Xabbuh\XApi\Model\Statement;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use Xabbuh\XApi\Serializer\StateSerializerInterface;
 use XApi\LrsBundle\EventListener\SerializerListener;
-use XApi\LrsBundle\EventListener\XapiRequestDeserializer;
-use XApi\LrsBundle\EventListener\XapiRequestMatcher;
+use XApi\LrsBundle\Service\RequestDeserializer;
+use XApi\LrsBundle\Service\RequestMatcher;
 
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
@@ -216,8 +216,8 @@ class SerializerListenerTest extends TestCase
     private function createListener(): SerializerListener
     {
         return new SerializerListener(
-            new XapiRequestDeserializer($this->statementSerializer, $this->stateSerializer),
-            new XapiRequestMatcher()
+            new RequestDeserializer($this->statementSerializer, $this->stateSerializer),
+            new RequestMatcher()
         );
     }
 

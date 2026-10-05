@@ -13,6 +13,8 @@ namespace XApi\LrsBundle\EventListener;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use XApi\LrsBundle\Service\RequestDeserializer;
+use XApi\LrsBundle\Service\RequestMatcher;
 
 /**
  * @author Christian Flothmann <christian.flothmann@xabbuh.de>
@@ -21,13 +23,13 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 final readonly class SerializerListener
 {
     public function __construct(
-        private XapiRequestDeserializer $xapiRequestDeserializer,
-        private XapiRequestMatcher $xapiRequestMatcher
+        private RequestDeserializer $requestDeserializer,
+        private RequestMatcher $requestMatcher
     ) { }
 
     public function onKernelRequest(RequestEvent $requestEvent): void
     {
-        if (!$this->xapiRequestMatcher->matches($requestEvent)) {
+        if (!$this->requestMatcher->matches($requestEvent)) {
             return;
         }
 
@@ -39,11 +41,11 @@ final readonly class SerializerListener
 
         switch ($request->attributes->get('xapi_serializer')) {
             case 'state':
-                $request->attributes->set('state', $this->xapiRequestDeserializer->deserializeState($request));
+                $request->attributes->set('state', $this->requestDeserializer->deserializeState($request));
                 break;
 
             case 'statement':
-                $data = $this->xapiRequestDeserializer->deserializeStatement($request);
+                $data = $this->requestDeserializer->deserializeStatement($request);
 
                 if (is_array($data)) {
                     $request->attributes->set('statements', $data);

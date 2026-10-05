@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
-use XApi\LrsBundle\EventListener\XapiRequestMatcher;
+use XApi\LrsBundle\Service\RequestMatcher;
 
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
@@ -33,8 +33,8 @@ class HeadersListenerSpec extends ObjectBehavior
         $headerBag->get('Origin')->willReturn('https://learning.repository.example.com');
         $request->headers = $headerBag;
 
-        $xapiRequestMatcher = new XapiRequestMatcher();
-        $this->beConstructedWith($xapiRequestMatcher, ['https://learning.repository.example.com']);
+        $requestMatcher = new RequestMatcher();
+        $this->beConstructedWith($requestMatcher, ['https://learning.repository.example.com']);
     }
 
     public function it_returns_null_if_requests_are_not_main(HttpKernelInterface $httpKernel, Request $request, Response $response): void

@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-namespace XApi\LrsBundle\EventListener;
+namespace XApi\LrsBundle\Service;
 
 use Symfony\Component\HttpKernel\Event\KernelEvent;
 use XApi\LrsBundle\App\XapiAttribute;
@@ -15,7 +15,7 @@ use XApi\LrsBundle\App\XapiAttribute;
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
-final class XapiRequestMatcher
+final class RequestMatcher
 {
     public function matches(KernelEvent $kernelEvent): bool
     {

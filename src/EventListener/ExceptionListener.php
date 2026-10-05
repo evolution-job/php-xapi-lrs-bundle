@@ -18,6 +18,7 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Xabbuh\XApi\Common\Exception\XApiException;
 use XApi\LrsBundle\App\XapiHeader;
 use XApi\LrsBundle\App\XapiVersion;
+use XApi\LrsBundle\Service\RequestMatcher;
 
 /**
  * Converts Experience API specific domain exceptions into proper HTTP responses.
@@ -26,12 +27,12 @@ use XApi\LrsBundle\App\XapiVersion;
  */
 final readonly class ExceptionListener
 {
-    public function __construct(private XapiRequestMatcher $xapiRequestMatcher) { }
+    public function __construct(private RequestMatcher $requestMatcher) { }
 
     public function onKernelException(ExceptionEvent $exceptionEvent): void
     {
         $throwable = $exceptionEvent->getThrowable();
-        $isXapiRequest = $this->xapiRequestMatcher->matches($exceptionEvent);
+        $isXapiRequest = $this->requestMatcher->matches($exceptionEvent);
 
         if (!$throwable instanceof XApiException && !$isXapiRequest) {
 

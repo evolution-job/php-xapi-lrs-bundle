@@ -35,6 +35,7 @@ final class XApiLrsExtension extends Extension
         $yamlFileLoader->load('event_listener.yaml');
         $yamlFileLoader->load('factory.yaml');
         $yamlFileLoader->load('serializer.yaml');
+        $yamlFileLoader->load('services.yaml');
 
         $container->setParameter('xapi_lrs_allowed_origins', $config['allowed_origins']);
 

@@ -1,0 +1,9 @@
+services:
+    xapi_lrs.request_matcher:
+        class: XApi\LrsBundle\Service\RequestMatcher
+
+    xapi_lrs.request_deserializer:
+        class: XApi\LrsBundle\Service\RequestDeserializer
+        arguments:
+            - '@xapi_lrs.statement.serializer'
+            - '@xapi_lrs.state.serializer'

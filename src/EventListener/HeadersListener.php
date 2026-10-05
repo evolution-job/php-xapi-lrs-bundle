@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use XApi\LrsBundle\App\XapiHeader;
 use XApi\LrsBundle\App\XapiVersion;
+use XApi\LrsBundle\Service\RequestMatcher;
 
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
@@ -23,13 +24,13 @@ final readonly class HeadersListener
      * @param string[] $allowedOrigins
      */
     public function __construct(
-        private XapiRequestMatcher $xapiRequestMatcher,
+        private RequestMatcher $requestMatcher,
         private array $allowedOrigins
     ) { }
 
     public function onKernelResponse(ResponseEvent $responseEvent): void
     {
-        if (!$this->xapiRequestMatcher->matches($responseEvent)) {
+        if (!$this->requestMatcher->matches($responseEvent)) {
             return;
         }
 

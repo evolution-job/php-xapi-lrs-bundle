@@ -16,6 +16,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Xabbuh\XApi\Common\Exception\BadRequestException;
 use XApi\LrsBundle\App\XapiHeader;
 use XApi\LrsBundle\App\XapiVersion;
+use XApi\LrsBundle\Service\RequestMatcher;
 
 /**
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
@@ -23,11 +24,14 @@ use XApi\LrsBundle\App\XapiVersion;
  */
 final readonly class VersionListener
 {
-    public function __construct(private XapiRequestMatcher $xapiRequestMatcher) { }
+    public function __construct(private RequestMatcher $requestMatcher) { }
 
+    /**
+     * @throws BadRequestException
+     */
     public function onKernelRequest(RequestEvent $requestEvent): void
     {
-        if (!$this->xapiRequestMatcher->matches($requestEvent)) {
+        if (!$this->requestMatcher->matches($requestEvent)) {
             return;
         }
 

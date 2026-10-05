@@ -20,7 +20,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Routing\Router;
 use Xabbuh\XApi\Common\Exception\BadRequestException;
 use XApi\Fixtures\Json\StatementJsonFixtures;
-use XApi\LrsBundle\EventListener\XapiRequestMatcher;
+use XApi\LrsBundle\Service\RequestMatcher;
 
 /**
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
@@ -44,8 +44,8 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
 
         $router->matchRequest($request)->willReturn(['xapi_lrs.route' => true]);
 
-        $xapiRequestMatcher = new XapiRequestMatcher();
-        $this->beConstructedWith($router, $xapiRequestMatcher);
+        $requestMatcher = new RequestMatcher();
+        $this->beConstructedWith($router, $requestMatcher);
     }
 
     public function it_returns_null_if_request_is_not_main(RequestEvent $requestEvent): void

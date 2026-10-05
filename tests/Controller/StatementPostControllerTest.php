@@ -275,6 +275,49 @@ class StatementPostControllerTest extends WebTestCase
         $this->assertSame(Response::HTTP_NO_CONTENT, $response->getStatusCode());
     }
 
+    public function testNormalMultipartMixedStatementUploadWithAttachment(): void
+    {
+        $attachmentContent = "\x00\xFFsome text content\r\n";
+        $attachmentHash = hash('sha256', $attachmentContent);
+        $statement = json_decode(StatementJsonFixtures::getMinimalStatement(), true, 512, JSON_THROW_ON_ERROR);
+        $statement['attachments'] = [[
+            'usageType' => 'https://w3id.org/xapi/attachments/usage-type',
+            'display' => ['en-US' => 'Attachment'],
+            'contentType' => 'application/octet-stream',
+            'length' => strlen($attachmentContent),
+            'sha2' => $attachmentHash,
+        ]];
+
+        $boundary = 'xapi-boundary';
+        $body = implode("\r\n", [
+            '--'.$boundary,
+            'Content-Type: application/json',
+            '',
+            json_encode($statement, JSON_THROW_ON_ERROR),
+            '--'.$boundary,
+            'Content-Type: application/octet-stream',
+            'X-Experience-API-Hash: '.$attachmentHash,
+            '',
+            $attachmentContent,
+            '--'.$boundary.'--',
+            '',
+        ]);
+
+        $this->client->request(
+            'POST',
+            '/statements',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'multipart/mixed; boundary='.$boundary, 'HTTP_X-Experience-API-Version' => '1.0.3'],
+            $body
+        );
+
+        $response = $this->client->getResponse();
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+        $responseData = json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $this->assertContains($statement['id'], $responseData);
+    }
+
     /**
      * Query String should only contain "method" parameter
      */
