@@ -20,6 +20,7 @@ use Xabbuh\XApi\DataFixtures\StatementFixtures;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use Xabbuh\XApi\Serializer\StateSerializerInterface;
 use XApi\Fixtures\Json\StatementJsonFixtures;
+use XApi\LrsBundle\Service\MultipartStatementParser;
 use XApi\LrsBundle\Service\RequestDeserializer;
 use XApi\LrsBundle\Service\RequestMatcher;
 
@@ -40,7 +41,11 @@ class SerializerListenerSpec extends ObjectBehavior
         $requestEvent->isMainRequest()->willReturn(true);
 
         $requestMatcher = new RequestMatcher();
-        $requestDeserializer = new RequestDeserializer($statementSerializer->getWrappedObject(), $stateSerializer->getWrappedObject());
+        $requestDeserializer = new RequestDeserializer(
+            $statementSerializer->getWrappedObject(),
+            $stateSerializer->getWrappedObject(),
+            new MultipartStatementParser()
+        );
         $this->beConstructedWith($requestDeserializer, $requestMatcher);
     }
 

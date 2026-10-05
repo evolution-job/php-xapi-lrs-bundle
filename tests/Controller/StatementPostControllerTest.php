@@ -9,6 +9,7 @@
 
 namespace XApi\LrsBundle\Tests\Controller;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -278,44 +279,50 @@ class StatementPostControllerTest extends WebTestCase
     public function testNormalMultipartMixedStatementUploadWithAttachment(): void
     {
         $attachmentContent = "\x00\xFFsome text content\r\n";
-        $attachmentHash = hash('sha256', $attachmentContent);
-        $statement = json_decode(StatementJsonFixtures::getMinimalStatement(), true, 512, JSON_THROW_ON_ERROR);
-        $statement['attachments'] = [[
-            'usageType' => 'https://w3id.org/xapi/attachments/usage-type',
-            'display' => ['en-US' => 'Attachment'],
-            'contentType' => 'application/octet-stream',
-            'length' => strlen($attachmentContent),
-            'sha2' => $attachmentHash,
-        ]];
+        $response = $this->postMultipartStatement($attachmentContent, 'sha256');
 
-        $boundary = 'xapi-boundary';
-        $body = implode("\r\n", [
-            '--'.$boundary,
-            'Content-Type: application/json',
-            '',
-            json_encode($statement, JSON_THROW_ON_ERROR),
-            '--'.$boundary,
-            'Content-Type: application/octet-stream',
-            'X-Experience-API-Hash: '.$attachmentHash,
-            '',
-            $attachmentContent,
-            '--'.$boundary.'--',
-            '',
-        ]);
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+    }
 
-        $this->client->request(
-            'POST',
-            '/statements',
-            [],
-            [],
-            ['CONTENT_TYPE' => 'multipart/mixed; boundary='.$boundary, 'HTTP_X-Experience-API-Version' => '1.0.3'],
-            $body
+    #[DataProvider('supportedSha2Algorithms')]
+    public function testNormalMultipartMixedStatementUploadSupportsSha2Algorithms(string $algorithm): void
+    {
+        $response = $this->postMultipartStatement("\x00\xFFbinary attachment\r\n", $algorithm);
+
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+    }
+
+    public static function supportedSha2Algorithms(): array
+    {
+        return [
+            'SHA-384' => ['sha384'],
+            'SHA-512' => ['sha512'],
+        ];
+    }
+
+    public function testNormalMultipartMixedStatementRejectsMismatchedAttachmentContentType(): void
+    {
+        $response = $this->postMultipartStatement(
+            'attachment',
+            'sha256',
+            'text/plain',
+            'application/octet-stream'
         );
 
-        $response = $this->client->getResponse();
-        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
-        $responseData = json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertContains($statement['id'], $responseData);
+        $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+    }
+
+    public function testNormalMultipartMixedStatementRejectsMismatchedAttachmentContentLength(): void
+    {
+        $response = $this->postMultipartStatement(
+            'attachment',
+            'sha256',
+            'application/octet-stream',
+            null,
+            '9'
+        );
+
+        $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
     }
 
     /**
@@ -415,5 +422,59 @@ class StatementPostControllerTest extends WebTestCase
             ],
             $payload
         );
+    }
+
+    private function postMultipartStatement(
+        string $attachmentContent,
+        string $hashAlgorithm,
+        string $attachmentContentType = 'application/octet-stream',
+        ?string $partContentType = 'application/octet-stream',
+        ?string $partContentLength = null
+    ): Response {
+        $attachmentHash = hash($hashAlgorithm, $attachmentContent);
+        $statement = json_decode(StatementJsonFixtures::getMinimalStatement(), true, 512, JSON_THROW_ON_ERROR);
+        $statement['id'] = '12345678-1234-5678-8234-56781234568'.random_int(0, 9);
+        $partContentLength ??= (string) strlen($attachmentContent);
+        $statement['attachments'] = [[
+            'usageType' => 'https://w3id.org/xapi/attachments/usage-type',
+            'display' => ['en-US' => 'Attachment'],
+            'contentType' => $attachmentContentType,
+            'length' => strlen($attachmentContent),
+            'sha2' => $attachmentHash,
+        ]];
+
+        $boundary = 'xapi-boundary';
+        $attachmentHeaders = [];
+        if (null !== $partContentType) {
+            $attachmentHeaders[] = 'Content-Type: '.$partContentType;
+        }
+        if (null !== $partContentLength) {
+            $attachmentHeaders[] = 'Content-Length: '.$partContentLength;
+        }
+        $attachmentHeaders[] = 'X-Experience-API-Hash: '.$attachmentHash;
+
+        $body = implode("\r\n", [
+            '--'.$boundary,
+            'Content-Type: application/json',
+            '',
+            json_encode($statement, JSON_THROW_ON_ERROR),
+            '--'.$boundary,
+            ...$attachmentHeaders,
+            '',
+            $attachmentContent,
+            '--'.$boundary.'--',
+            '',
+        ]);
+
+        $this->client->request(
+            'POST',
+            '/statements',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'multipart/mixed; boundary='.$boundary, 'HTTP_X-Experience-API-Version' => '1.0.3'],
+            $body
+        );
+
+        return $this->client->getResponse();
     }
 }

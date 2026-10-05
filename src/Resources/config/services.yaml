@@ -2,8 +2,12 @@ services:
     xapi_lrs.request_matcher:
         class: XApi\LrsBundle\Service\RequestMatcher
 
+    xapi_lrs.multipart_statement_parser:
+        class: XApi\LrsBundle\Service\MultipartStatementParser
+
     xapi_lrs.request_deserializer:
         class: XApi\LrsBundle\Service\RequestDeserializer
         arguments:
             - '@xapi_lrs.statement.serializer'
             - '@xapi_lrs.state.serializer'
+            - '@xapi_lrs.multipart_statement_parser'
