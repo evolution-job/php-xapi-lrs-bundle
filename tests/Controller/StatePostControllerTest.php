@@ -95,4 +95,29 @@ class StatePostControllerTest extends TestCase
             self::assertSame(400, $exception->getCode());
         }
     }
+
+    public function testPostRejectsAnExistingEmptyJsonArray(): void
+    {
+        $state = StateFixtures::getTypicalState();
+        $existingState = new State(
+            $state->getActivity(),
+            $state->getAgent(),
+            $state->getStateId(),
+            $state->getRegistrationId(),
+            [],
+            'application/json'
+        );
+        $repository = $this->createMock(StateRepositoryInterface::class);
+        $repository->expects($this->once())->method('findState')->willReturn($existingState);
+        $repository->expects($this->never())->method('storeState');
+
+        $request = new Request(server: ['CONTENT_TYPE' => 'application/json'], content: '{"added":true}');
+
+        try {
+            (new StatePostController($repository))->postState($state, $request);
+            self::fail('Expected POST to reject an existing JSON array.');
+        } catch (BadRequestException $exception) {
+            self::assertSame(400, $exception->getCode());
+        }
+    }
 }
