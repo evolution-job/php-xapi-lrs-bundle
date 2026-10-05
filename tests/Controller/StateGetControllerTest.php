@@ -16,6 +16,7 @@ use Xabbuh\XApi\Common\Exception\BadRequestException;
 use Xabbuh\XApi\DataFixtures\StateFixtures;
 use Xabbuh\XApi\Model\State;
 use XApi\LrsBundle\Controller\StateGetController;
+use XApi\LrsBundle\Response\StateDocumentResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
 
 class StateGetControllerTest extends TestCase
@@ -87,5 +88,42 @@ class StateGetControllerTest extends TestCase
         } catch (BadRequestException $exception) {
             self::assertSame(400, $exception->getCode());
         }
+    }
+
+    public function testMissingStateDocumentReturnsNotFound(): void
+    {
+        $state = StateFixtures::getTypicalState();
+        $repository = $this->createMock(StateRepositoryInterface::class);
+        $repository->expects($this->once())->method('findState')->with($state)->willReturn(null);
+
+        $response = (new StateGetController($repository))->getState(new Request(), $state);
+
+        self::assertSame(404, $response->getStatusCode());
+    }
+
+    public function testHeadStateDocumentOmitsBodyAndRetainsDocumentHeaders(): void
+    {
+        $fixture = StateFixtures::getTypicalState();
+        $state = new State(
+            $fixture->getActivity(),
+            $fixture->getAgent(),
+            $fixture->getStateId(),
+            $fixture->getRegistrationId(),
+            ['state' => true],
+            'application/json'
+        );
+        $repository = $this->createMock(StateRepositoryInterface::class);
+        $repository->expects($this->once())->method('findState')->with($state)->willReturn($state);
+        $getResponse = new StateDocumentResponse($state->getData(), contentType: $state->getContentType());
+
+        $response = (new StateGetController($repository))->getState(
+            new Request(server: ['REQUEST_METHOD' => Request::METHOD_HEAD]),
+            $state
+        );
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('', $response->getContent());
+        self::assertSame($getResponse->headers->get('ETag'), $response->headers->get('ETag'));
+        self::assertSame($state->getContentType(), $response->headers->get('Content-Type'));
     }
 }
