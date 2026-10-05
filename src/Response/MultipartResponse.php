@@ -24,6 +24,8 @@ class MultipartResponse extends JsonResponse
 
     protected string $boundary;
 
+    protected bool $isHeadRequest = false;
+
     /**
      * @var Response[]
      */
@@ -75,6 +77,8 @@ class MultipartResponse extends JsonResponse
     #[Override]
     public function prepare(Request $request): static
     {
+        $this->isHeadRequest = $request->isMethod(Request::METHOD_HEAD);
+
         foreach ($this->parts as $part) {
             $part->prepare($request);
         }
@@ -88,6 +92,10 @@ class MultipartResponse extends JsonResponse
     #[Override]
     public function sendContent(): static
     {
+        if ($this->isHeadRequest) {
+            return $this;
+        }
+
         $content = '';
         foreach ($this->parts as $part) {
             $content .= sprintf('--%s', $this->boundary)."\r\n";
