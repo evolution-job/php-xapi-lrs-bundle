@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 use Xabbuh\XApi\Model\StatementId;
 use Xabbuh\XApi\Model\StatementsFilter;
 use Xabbuh\XApi\Model\Uuid;
+use XApi\LrsBundle\App\IriValidator;
 use XApi\LrsBundle\Exception\BadRequestHttpException;
 use XApi\LrsBundle\Model\StatementsFilterFactory;
 
@@ -88,7 +89,7 @@ final readonly class StatementGetQueryValidator
                 throw new BadRequestHttpException(sprintf('Parameter "%s" must be a non-empty string.', $parameter));
             }
 
-            if (in_array($parameter, ['activity', 'verb'], true) && !$this->isValidIri($value)) {
+            if (in_array($parameter, ['activity', 'verb'], true) && !IriValidator::isValid($value)) {
                 throw new BadRequestHttpException(sprintf('Parameter "%s" must be a valid IRI.', $parameter));
             }
 
@@ -193,10 +194,4 @@ final readonly class StatementGetQueryValidator
             && '' !== trim($matches[1], '0');
     }
 
-    private function isValidIri(string $value): bool
-    {
-        return !(1 !== preg_match('/\A[A-Za-z][A-Za-z0-9+.-]*:.+/', $value)
-            || 0 !== preg_match('/[\s\x00-\x1F\x7F]/u', $value)
-            || false === parse_url($value));
-    }
 }

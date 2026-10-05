@@ -42,6 +42,27 @@ class ActivityGetControllerSpec extends ObjectBehavior
             ->during('getActivities', [$request]);
     }
 
+    public function it_should_throws_a_BadRequestHttpException_if_the_activityid_is_not_a_valid_iri(): void
+    {
+        $request = new Request();
+        $request->query->set('activityId', 'not an IRI');
+
+        $this
+            ->shouldThrow(BadRequestHttpException::class)
+            ->during('getActivities', [$request]);
+    }
+
+    public function it_should_throws_a_BadRequestHttpException_if_the_request_contains_an_unknown_parameter(): void
+    {
+        $request = new Request();
+        $request->query->set('activityId', 'https://example.org/activity');
+        $request->query->set('extra', 'value');
+
+        $this
+            ->shouldThrow(BadRequestHttpException::class)
+            ->during('getActivities', [$request]);
+    }
+
     public function it_should_throws_a_NotFoundHttpException_if_no_activity_matches_activityid(ActivityRepositoryInterface $activityRepository): void
     {
         $activityId = 'http://tincanapi.com/conformancetest/activityid';

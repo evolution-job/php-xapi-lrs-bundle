@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\Model\IRI;
 use Xabbuh\XApi\Serializer\ActivitySerializerInterface;
+use XApi\LrsBundle\App\IriValidator;
 use XApi\LrsBundle\Exception\BadRequestHttpException;
 use XApi\LrsBundle\Exception\NotFoundHttpException;
 use XApi\LrsBundle\Response\JsonResponse;
@@ -33,12 +34,28 @@ final readonly class ActivityGetController
 
     public function getActivities(Request $request): JsonResponse
     {
-        if (!$activityId = $request->query->all()['activityId'] ?? null) {
+        $parameters = $request->query->all();
+        $unknownParameters = array_diff(array_keys($parameters), ['activityId']);
+
+        if ([] !== $unknownParameters) {
+            throw new BadRequestHttpException(sprintf(
+                'Unrecognized query parameter(s): %s.',
+                implode(', ', $unknownParameters)
+            ));
+        }
+
+        if (!array_key_exists('activityId', $parameters)) {
             throw new BadRequestHttpException('Required activityId parameter is missing.');
         }
 
+        $activityId = $parameters['activityId'];
+
         if (!is_string($activityId)) {
             throw new BadRequestHttpException('Required activityId parameter is not a string.');
+        }
+
+        if (!IriValidator::isValid($activityId)) {
+            throw new BadRequestHttpException(sprintf('Parameter activityId ("%s") is not a valid IRI.', $activityId));
         }
 
         try {
