@@ -12,6 +12,7 @@ namespace XApi\LrsBundle\Tests\Controller;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Xabbuh\XApi\Common\Exception\BadRequestException;
+use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\ActivityFixtures;
 use Xabbuh\XApi\Model\Activity;
 use Xabbuh\XApi\Model\IRI;
@@ -108,5 +109,48 @@ class ActivityGetControllerTest extends TestCase
 
         self::assertSame(200, $response->getStatusCode());
         self::assertSame('{"id":"https://example.org/activity"}', $response->getContent());
+    }
+
+    public function testGetActivityFallsBackWhenRepositoryThrowsNotFound(): void
+    {
+        $activityId = 'https://example.org/activity';
+        $repository = $this->createMock(ActivityRepositoryInterface::class);
+        $repository->expects($this->once())
+            ->method('findActivityById')
+            ->willThrowException(new NotFoundException('Activity not found.'));
+        $serializer = $this->createMock(ActivitySerializerInterface::class);
+        $serializer->expects($this->once())
+            ->method('serializeActivity')
+            ->with(self::callback(static fn (Activity $activity): bool => $activity->getId()->getValue() === $activityId))
+            ->willReturn('{"id":"https://example.org/activity"}');
+
+        $response = new ActivityGetController($repository, $serializer)
+            ->getActivities(new Request(['activityId' => $activityId]));
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('{"id":"https://example.org/activity"}', $response->getContent());
+    }
+
+    public function testHeadActivityReturnsHeadersWithoutBody(): void
+    {
+        $activityId = 'https://example.org/activity';
+        $activity = ActivityFixtures::getTypicalActivity();
+        $repository = $this->createMock(ActivityRepositoryInterface::class);
+        $repository->expects($this->once())->method('findActivityById')->willReturn($activity);
+        $serializer = $this->createMock(ActivitySerializerInterface::class);
+        $serializer->expects($this->once())
+            ->method('serializeActivity')
+            ->with($activity)
+            ->willReturn('{"id":"https://example.org/activity"}');
+
+        $response = new ActivityGetController($repository, $serializer)
+            ->getActivities(new Request(
+                ['activityId' => $activityId],
+                server: ['REQUEST_METHOD' => Request::METHOD_HEAD]
+            ));
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('', $response->getContent());
+        self::assertSame('application/json', $response->headers->get('Content-Type'));
     }
 }
