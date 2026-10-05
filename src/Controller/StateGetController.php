@@ -43,11 +43,6 @@ final readonly class StateGetController
         // List of available States
         $states = $this->stateRepository->findStates($state);
 
-        if (!$states) {
-
-            return new JsonXapiResponse(status: Response::HTTP_NOT_FOUND);
-        }
-
         $stateIds = [];
         foreach ($states as $foundState) {
             $stateIds[] = $foundState->getStateId();

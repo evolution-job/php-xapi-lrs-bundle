@@ -15,6 +15,7 @@ use PhpSpec\ObjectBehavior;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\DataFixtures\StateFixtures;
+use Xabbuh\XApi\Model\State;
 use XApi\LrsBundle\Response\JsonXapiResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
 
@@ -38,11 +39,13 @@ class StateGetControllerSpec extends ObjectBehavior
         $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
     }
 
-    public function it_returns_empty_json_response_with_http_status_code_not_found_when_not_exists(StateRepositoryInterface $stateRepository, Request $request): void
+    public function it_returns_an_empty_state_id_list_with_http_status_code_ok_when_no_states_exist(StateRepositoryInterface $stateRepository, Request $request): void
     {
-        $state = StateFixtures::getMinimalState();
+        $typicalState = StateFixtures::getMinimalState();
+        $state = new State($typicalState->getActivity(), $typicalState->getAgent(), null);
 
         $stateRepository->findState($state)->willReturn(null);
+        $stateRepository->findStates($state)->willReturn([]);
         $request->isMethod(Request::METHOD_HEAD)->willReturn(false);
 
         $this->beConstructedWith($stateRepository);
@@ -50,6 +53,7 @@ class StateGetControllerSpec extends ObjectBehavior
         $response = $this->getState($request, $state);
         $response->shouldReturnAnInstanceOf(JsonXapiResponse::class);
 
-        $response->getStatusCode()->shouldReturn(Response::HTTP_NOT_FOUND);
+        $response->getStatusCode()->shouldReturn(Response::HTTP_OK);
+        $response->getContent()->shouldReturn('[]');
     }
 }

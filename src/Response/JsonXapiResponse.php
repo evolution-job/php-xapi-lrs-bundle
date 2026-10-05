@@ -13,7 +13,7 @@ namespace XApi\LrsBundle\Response;
 
 use DateTimeImmutable;
 use JsonException;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\JsonResponse as SymfonyJsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use XApi\LrsBundle\App\XapiHeader;
 use XApi\LrsBundle\App\XapiVersion;
@@ -22,7 +22,7 @@ use XApi\LrsBundle\App\XapiVersion;
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
-class JsonXapiResponse extends JsonResponse
+class JsonXapiResponse extends SymfonyJsonResponse
 {
     public function __construct(mixed $data = null, int $status = Response::HTTP_OK, array $headers = [], bool $json = false, bool $isHeadRequest = false)
     {
@@ -50,6 +50,10 @@ class JsonXapiResponse extends JsonResponse
         Parent::__construct($data, $status, $headers, $json);
 
         if ($isHeadRequest) {
+            $this->setContent(null);
+        }
+
+        if (Response::HTTP_NO_CONTENT === $status) {
             $this->setContent(null);
         }
 
