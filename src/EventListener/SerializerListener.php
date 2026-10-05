@@ -10,7 +10,7 @@ use Xabbuh\XApi\Common\Exception\UnsupportedStatementVersionException;
 use Xabbuh\XApi\Serializer\Exception\DeserializationException;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use Xabbuh\XApi\Serializer\StateSerializerInterface;
-use XApi\LrsBundle\Exception\XapiRequestHttpException;
+use XApi\LrsBundle\Exception\BadRequestHttpException;
 
 /**
  * @author Christian Flothmann <christian.flothmann@xabbuh.de>
@@ -77,7 +77,7 @@ final readonly class SerializerListener
             }
         } catch (UnsupportedStatementVersionException|InvalidArgumentException|DeserializationException|JsonException $unsupportedStatementVersionException) {
 
-            throw new XapiRequestHttpException(
+            throw new BadRequestHttpException(
                 sprintf(
                     'The content of the request cannot be deserialized into a valid xAPI %s.',
                     $request->attributes->get('xapi_serializer')

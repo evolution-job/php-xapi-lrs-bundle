@@ -33,10 +33,7 @@ class AttachmentResponse extends Response
     #[Override]
     public function prepare(Request $request): static
     {
-        if (!$this->headers->has('Content-Type')) {
-            $this->headers->set('Content-Type', $this->attachment->getContentType());
-        }
-
+        $this->headers->set('Content-Type', $this->attachment->getContentType());
         $this->headers->set('Content-Transfer-Encoding', 'binary');
         $this->headers->set('X-Experience-API-Hash', $this->attachment->getSha2());
 

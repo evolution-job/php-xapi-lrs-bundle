@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace XApi\LrsBundle\EventListener;
 
 use Symfony\Component\HttpFoundation\Response;
@@ -7,7 +9,7 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use XApi\LrsBundle\App\XapiHeader;
 use XApi\LrsBundle\App\XapiVersion;
-use XApi\LrsBundle\Exception\XapiRequestHttpException;
+use XApi\LrsBundle\Exception\XapiExceptionInterface;
 
 /**
  * Converts Experience API specific domain exceptions into proper HTTP responses.
@@ -22,7 +24,7 @@ final readonly class ExceptionListener
     {
         $exception = $exceptionEvent->getThrowable();
 
-        if (!$exception instanceof XapiRequestHttpException
+        if (!$exception instanceof XapiExceptionInterface
             && !$this->xapiRequestMatcher->matches($exceptionEvent)
         ) {
             return;
@@ -41,9 +43,7 @@ final readonly class ExceptionListener
         ]);
 
         // Add X-Experience-API-Version
-        if (!$response->headers->has(XapiHeader::VERSION)) {
-            $response->headers->set(XapiHeader::VERSION, XapiVersion::V1_0_3);
-        }
+        $response->headers->set(XapiHeader::VERSION, XapiVersion::V1_0_3);
 
         $exceptionEvent->setResponse($response);
     }

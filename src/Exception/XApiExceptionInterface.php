@@ -1,0 +1,8 @@
+<?php
+
+namespace XApi\LrsBundle\Exception;
+
+interface XApiExceptionInterface
+{
+
+}

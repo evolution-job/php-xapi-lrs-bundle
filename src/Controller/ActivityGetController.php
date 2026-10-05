@@ -13,11 +13,11 @@ namespace XApi\LrsBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\Model\IRI;
 use Xabbuh\XApi\Serializer\ActivitySerializerInterface;
+use XApi\LrsBundle\Exception\BadRequestHttpException;
+use XApi\LrsBundle\Exception\NotFoundHttpException;
 use XApi\LrsBundle\Response\JsonXapiResponse;
 use XApi\Repository\Api\ActivityRepositoryInterface;
 

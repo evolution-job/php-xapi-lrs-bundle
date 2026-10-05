@@ -14,17 +14,18 @@ namespace XApi\LrsBundle\Controller;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\Model\Statement;
 use Xabbuh\XApi\Model\StatementId;
+use XApi\LrsBundle\Exception\BadRequestHttpException;
+use XApi\LrsBundle\Exception\ConflictHttpException;
 use XApi\LrsBundle\Response\JsonXapiResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
 /**
  * @author Christian Flothmann <christian.flothmann@xabbuh.de>
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
 final readonly class StatementPutController
 {

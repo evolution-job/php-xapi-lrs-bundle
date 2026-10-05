@@ -20,7 +20,7 @@ use Symfony\Component\Routing\RouterInterface;
 use Throwable;
 use XApi\LrsBundle\App\XapiAttribute;
 use XApi\LrsBundle\App\XapiHeader;
-use XApi\LrsBundle\Exception\XapiRequestHttpException;
+use XApi\LrsBundle\Exception\BadRequestHttpException;
 
 /**
  * Handles xAPI Alternate Request Syntax (POST Tunneling) for ALL methods (GET, PUT, DELETE, etc.)
@@ -54,7 +54,7 @@ final readonly class AlternateRequestSyntaxListener
         }
 
         if (!in_array($method, [Request::METHOD_GET, Request::METHOD_PUT, Request::METHOD_DELETE, Request::METHOD_POST], true)) {
-            throw new XapiRequestHttpException(sprintf('The tunneled method "%s" is not supported by xAPI alternate request syntax.', $method));
+            throw new BadRequestHttpException(sprintf('The tunneled method "%s" is not supported by xAPI alternate request syntax.', $method));
         }
 
         // STRICT CONFORMANCE: "The Learning Record Provider MUST NOT include any
@@ -65,7 +65,7 @@ final readonly class AlternateRequestSyntaxListener
         );
 
         if ([] !== $unexpectedParameters) {
-            throw new XapiRequestHttpException(
+            throw new BadRequestHttpException(
                 'Including other query parameters than "method" in the URL is not allowed. You must send them inside the request body.'
             );
         }
@@ -165,24 +165,24 @@ final readonly class AlternateRequestSyntaxListener
         try {
             $content = $request->getContent();
             if (!is_string($content) || $content === '') {
-                throw new XapiRequestHttpException('Missing JSON request payload.');
+                throw new BadRequestHttpException('Missing JSON request payload.');
             }
             $payload = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException) {
-            throw new XapiRequestHttpException('Invalid JSON request payload.');
+            throw new BadRequestHttpException('Invalid JSON request payload.');
         }
 
         $idBody = $payload['id'] ?? null;
         if ($idBody === null) {
-            throw new XapiRequestHttpException('Statement id must be present in the JSON body for PUT requests.');
+            throw new BadRequestHttpException('Statement id must be present in the JSON body for PUT requests.');
         }
 
         if ($idFromForm === null) {
-            throw new XapiRequestHttpException('The "statementId" parameter is required in the body for alternative PUT requests.');
+            throw new BadRequestHttpException('The "statementId" parameter is required in the body for alternative PUT requests.');
         }
 
         if ($idFromForm !== $idBody) {
-            throw new XapiRequestHttpException('The "statementId" parameter must match the statement id inside the JSON body.');
+            throw new BadRequestHttpException('The "statementId" parameter must match the statement id inside the JSON body.');
         }
     }
 
@@ -217,7 +217,7 @@ final readonly class AlternateRequestSyntaxListener
             $content = json_encode($isBatch ? $statements : $statements[0], JSON_THROW_ON_ERROR);
 
         } catch (JsonException) {
-            throw new XapiRequestHttpException('Invalid JSON payload while processing attachments.');
+            throw new BadRequestHttpException('Invalid JSON payload while processing attachments.');
         }
 
         return $content;

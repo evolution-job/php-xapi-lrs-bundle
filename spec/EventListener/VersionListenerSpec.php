@@ -8,9 +8,9 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use XApi\LrsBundle\EventListener\XapiRequestMatcher;
+use XApi\LrsBundle\Exception\BadRequestHttpException;
 
 class VersionListenerSpec extends ObjectBehavior
 {
