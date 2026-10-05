@@ -13,12 +13,11 @@ namespace XApi\LrsBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\Model\IRI;
 use Xabbuh\XApi\Serializer\ActivitySerializerInterface;
 use XApi\LrsBundle\App\IriValidator;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
-use XApi\LrsBundle\Exception\NotFoundHttpException;
 use XApi\LrsBundle\Response\JsonResponse;
 use XApi\Repository\Api\ActivityRepositoryInterface;
 
@@ -38,24 +37,24 @@ final readonly class ActivityGetController
         $unknownParameters = array_diff(array_keys($parameters), ['activityId']);
 
         if ([] !== $unknownParameters) {
-            throw new BadRequestHttpException(sprintf(
+            throw new BadRequestException(sprintf(
                 'Unrecognized query parameter(s): %s.',
                 implode(', ', $unknownParameters)
             ));
         }
 
         if (!array_key_exists('activityId', $parameters)) {
-            throw new BadRequestHttpException('Required activityId parameter is missing.');
+            throw new BadRequestException('Required activityId parameter is missing.');
         }
 
         $activityId = $parameters['activityId'];
 
         if (!is_string($activityId)) {
-            throw new BadRequestHttpException('Required activityId parameter is not a string.');
+            throw new BadRequestException('Required activityId parameter is not a string.');
         }
 
         if (!IriValidator::isValid($activityId)) {
-            throw new BadRequestHttpException(sprintf('Parameter activityId ("%s") is not a valid IRI.', $activityId));
+            throw new BadRequestException(sprintf('Parameter activityId ("%s") is not a valid IRI.', $activityId));
         }
 
         try {
@@ -69,8 +68,8 @@ final readonly class ActivityGetController
                 $request->isMethod(Request::METHOD_HEAD)
             );
 
-        } catch (NotFoundException $notFoundException) {
-            throw new NotFoundHttpException(sprintf('No activity matching the following id "%s" has been found.', $activityId), $notFoundException);
+        } catch (NotFoundException) {
+            throw new NotFoundException(sprintf('No activity matching the following id "%s" has been found.', $activityId));
         }
     }
 }

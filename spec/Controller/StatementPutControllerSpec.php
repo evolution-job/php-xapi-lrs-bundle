@@ -14,11 +14,11 @@ namespace spec\XApi\LrsBundle\Controller;
 use PhpSpec\ObjectBehavior;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
+use Xabbuh\XApi\Common\Exception\ConflictException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\StatementFixtures;
 use Xabbuh\XApi\Model\StatementId;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
-use XApi\LrsBundle\Exception\ConflictHttpException;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
 
@@ -27,7 +27,7 @@ use XApi\Repository\Api\StatementRepositoryInterface;
  */
 class StatementPutControllerSpec extends ObjectBehavior
 {
-    public function it_throws_a_BadRequestHttpException_if_a_statement_id_is_not_part_of_a_put_request(StatementRepositoryInterface $statementRepository): void
+    public function it_throws_a_BadRequestException_if_a_statement_id_is_not_part_of_a_put_request(StatementRepositoryInterface $statementRepository): void
     {
         $statement = StatementFixtures::getTypicalStatement();
         $request = new Request();
@@ -35,11 +35,11 @@ class StatementPutControllerSpec extends ObjectBehavior
         $this->beConstructedWith($statementRepository);
 
         $this
-            ->shouldThrow(BadRequestHttpException::class)
+            ->shouldThrow(BadRequestException::class)
             ->during('putStatements', [$request, $statement]);
     }
 
-    public function it_throws_a_BadRequestHttpException_if_the_given_statement_id_as_part_of_a_put_request_is_not_a_valid_uuid(StatementRepositoryInterface $statementRepository): void
+    public function it_throws_a_BadRequestException_if_the_given_statement_id_as_part_of_a_put_request_is_not_a_valid_uuid(StatementRepositoryInterface $statementRepository): void
     {
         $statement = StatementFixtures::getTypicalStatement();
         $request = new Request();
@@ -48,7 +48,7 @@ class StatementPutControllerSpec extends ObjectBehavior
         $this->beConstructedWith($statementRepository);
 
         $this
-            ->shouldThrow(BadRequestHttpException::class)
+            ->shouldThrow(BadRequestException::class)
             ->during('putStatements', [$request, $statement]);
     }
 
@@ -69,7 +69,7 @@ class StatementPutControllerSpec extends ObjectBehavior
         $response->getStatusCode()->shouldReturn(Response::HTTP_NO_CONTENT);
     }
 
-    public function it_throws_a_ConflictHttpException_if_the_id_parameter_and_the_statement_id_do_not_match_during_a_put_request(StatementRepositoryInterface $statementRepository): void
+    public function it_throws_a_ConflictException_if_the_id_parameter_and_the_statement_id_do_not_match_during_a_put_request(StatementRepositoryInterface $statementRepository): void
     {
         $statement = StatementFixtures::getTypicalStatement();
         $statementId = StatementId::fromString('39e24cc4-69af-4b01-a824-1fdc6ea8a3af');
@@ -79,7 +79,7 @@ class StatementPutControllerSpec extends ObjectBehavior
         $this->beConstructedWith($statementRepository);
 
         $this
-            ->shouldThrow(ConflictHttpException::class)
+            ->shouldThrow(ConflictException::class)
             ->during('putStatements', [$request, $statement]);
     }
 
@@ -113,7 +113,7 @@ class StatementPutControllerSpec extends ObjectBehavior
         $this->putStatements($request, $statement);
     }
 
-    public function it_throws_a_ConflictHttpException_if_an_existing_statement_with_the_same_id_is_not_equal_during_a_put_request(StatementRepositoryInterface $statementRepository): void
+    public function it_throws_a_ConflictException_if_an_existing_statement_with_the_same_id_is_not_equal_during_a_put_request(StatementRepositoryInterface $statementRepository): void
     {
         $statement = StatementFixtures::getTypicalStatement();
         $existingStatement = StatementFixtures::getAttachmentStatement()->withId($statement->getId());
@@ -125,7 +125,7 @@ class StatementPutControllerSpec extends ObjectBehavior
         $this->beConstructedWith($statementRepository);
 
         $this
-            ->shouldThrow(ConflictHttpException::class)
+            ->shouldThrow(ConflictException::class)
             ->during('putStatements', [$request, $statement]);
     }
 }

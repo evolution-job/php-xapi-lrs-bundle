@@ -14,9 +14,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Router;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
+use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\Model\IRL;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
-use XApi\LrsBundle\Exception\NotFoundHttpException;
 
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
@@ -45,15 +45,15 @@ final readonly class StatementContinuationManager
         }
 
         if (1 !== count($parameters) || !is_string($parameters['moreId']) || !preg_match('/\A[a-f0-9]{64}\z/', $parameters['moreId'])) {
-            throw new BadRequestHttpException('The moreId parameter must be a valid statement continuation token and used by itself.');
+            throw new BadRequestException('The moreId parameter must be a valid statement continuation token and used by itself.');
         }
 
         $cachedParameters = $this->cache->get(self::CACHE_PREFIX.$parameters['moreId'], static function (ItemInterface $item): never {
-            throw new NotFoundHttpException('The statement continuation link is invalid or has expired.');
+            throw new NotFoundException('The statement continuation link is invalid or has expired.');
         });
 
         if (!is_array($cachedParameters)) {
-            throw new NotFoundHttpException('The statement continuation link is invalid or has expired.');
+            throw new NotFoundException('The statement continuation link is invalid or has expired.');
         }
 
         return $cachedParameters;

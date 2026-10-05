@@ -20,6 +20,7 @@ use Random\RandomException;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\Common\Exception\UnsupportedStatementVersionException;
 use Xabbuh\XApi\Model\IRL;
@@ -30,8 +31,6 @@ use Xabbuh\XApi\Serializer\Exception\ActorDeserializationException;
 use Xabbuh\XApi\Serializer\StatementResultSerializerInterface;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use XApi\LrsBundle\App\XapiVersion;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
-use XApi\LrsBundle\Exception\NotFoundHttpException;
 use XApi\LrsBundle\Response\AttachmentResponse;
 use XApi\LrsBundle\Response\JsonResponse;
 use XApi\LrsBundle\Response\MultipartResponse;
@@ -81,8 +80,8 @@ final readonly class StatementGetController
         if (null !== $statementId) {
             try {
                 $statement = $this->statementRepository->findStatementById(StatementId::fromString($statementId));
-            } catch (NotFoundException $exception) {
-                throw new NotFoundHttpException('The requested statement was not found.', $exception);
+            } catch (NotFoundException) {
+                throw new NotFoundException('The requested statement was not found.');
             }
 
             return $this->buildSingleStatementResponse($request, $statement, $includeAttachments, $format);
@@ -92,8 +91,8 @@ final readonly class StatementGetController
         if (null !== $voidedStatementId) {
             try {
                 $statement = $this->statementRepository->findVoidedStatementById(StatementId::fromString($voidedStatementId));
-            } catch (NotFoundException $exception) {
-                throw new NotFoundHttpException('The requested voided statement was not found.', $exception);
+            } catch (NotFoundException) {
+                throw new NotFoundException('The requested voided statement was not found.');
             }
 
             return $this->buildSingleStatementResponse($request, $statement, $includeAttachments, $format);
@@ -104,8 +103,8 @@ final readonly class StatementGetController
         do {
             try {
                 $statementsFilter = $this->statementGetQueryValidator->createStatementsFilter($parameterBag, $fetchLimit, $until);
-            } catch (ActorDeserializationException $exception) {
-                throw new BadRequestHttpException('The agent parameter must be a valid xAPI Agent or Group object.', $exception);
+            } catch (ActorDeserializationException) {
+                throw new BadRequestException('The agent parameter must be a valid xAPI Agent or Group object.');
             }
 
             $statements = $this->statementRepository->findStatementsBy($statementsFilter);

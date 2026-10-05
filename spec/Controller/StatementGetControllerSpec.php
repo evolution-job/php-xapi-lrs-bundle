@@ -21,6 +21,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Router;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\StatementFixtures;
 use Xabbuh\XApi\Model\IRL;
@@ -33,8 +34,6 @@ use Xabbuh\XApi\Serializer\StatementResultSerializerInterface;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use XApi\Fixtures\Json\StatementJsonFixtures;
 use XApi\Fixtures\Json\StatementResultJsonFixtures;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
-use XApi\LrsBundle\Exception\NotFoundHttpException;
 use XApi\LrsBundle\Model\StatementsFilterFactory;
 use XApi\LrsBundle\Response\JsonResponse;
 use XApi\LrsBundle\Response\MultipartResponse;
@@ -91,18 +90,18 @@ class StatementGetControllerSpec extends ObjectBehavior
         );
     }
 
-    public function it_throws_a_BadRequestHttpException_if_the_request_has_given_statement_id_and_voided_statement_id(): void
+    public function it_throws_a_BadRequestException_if_the_request_has_given_statement_id_and_voided_statement_id(): void
     {
         $request = new Request();
         $request->query->set('statementId', StatementFixtures::DEFAULT_STATEMENT_ID);
         $request->query->set('voidedStatementId', StatementFixtures::DEFAULT_STATEMENT_ID);
 
         $this
-            ->shouldThrow(BadRequestHttpException::class)
+            ->shouldThrow(BadRequestException::class)
             ->during('getStatements', [$request]);
     }
 
-    public function it_throws_a_BadRequestHttpException_if_the_request_has_statement_id_and_format_and_attachements_and_any_other_parameters(): void
+    public function it_throws_a_BadRequestException_if_the_request_has_statement_id_and_format_and_attachements_and_any_other_parameters(): void
     {
         $request = new Request();
         $request->query->set('statementId', StatementFixtures::DEFAULT_STATEMENT_ID);
@@ -111,11 +110,11 @@ class StatementGetControllerSpec extends ObjectBehavior
         $request->query->set('related_agents', false);
 
         $this
-            ->shouldThrow(new BadRequestHttpException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "related_agents" besides "attachments" or "format".'))
+            ->shouldThrow(new BadRequestException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "related_agents" besides "attachments" or "format".'))
             ->during('getStatements', [$request]);
     }
 
-    public function it_throws_a_BadRequestHttpException_if_the_request_has_voided_statement_id_and_format_and_any_other_parameters_except_attachments(): void
+    public function it_throws_a_BadRequestException_if_the_request_has_voided_statement_id_and_format_and_any_other_parameters_except_attachments(): void
     {
         $request = new Request();
         $request->query->set('voidedStatementId', StatementFixtures::DEFAULT_STATEMENT_ID);
@@ -123,11 +122,11 @@ class StatementGetControllerSpec extends ObjectBehavior
         $request->query->set('related_agents', false);
 
         $this
-            ->shouldThrow(new BadRequestHttpException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "related_agents" besides "attachments" or "format".'))
+            ->shouldThrow(new BadRequestException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "related_agents" besides "attachments" or "format".'))
             ->during('getStatements', [$request]);
     }
 
-    public function it_throws_a_BadRequestHttpException_if_the_request_has_statement_id_and_attachments_and_any_other_parameters_except_format(): void
+    public function it_throws_a_BadRequestException_if_the_request_has_statement_id_and_attachments_and_any_other_parameters_except_format(): void
     {
         $request = new Request();
         $request->query->set('statementId', StatementFixtures::DEFAULT_STATEMENT_ID);
@@ -135,18 +134,18 @@ class StatementGetControllerSpec extends ObjectBehavior
         $request->query->set('related_agents', false);
 
         $this
-            ->shouldThrow(new BadRequestHttpException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "related_agents" besides "attachments" or "format".'))
+            ->shouldThrow(new BadRequestException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "related_agents" besides "attachments" or "format".'))
             ->during('getStatements', [$request]);
     }
 
-    public function it_throws_a_BadRequestHttpException_if_the_request_has_voided_statement_id_and_any_other_parameters_except_format_and_attachments(): void
+    public function it_throws_a_BadRequestException_if_the_request_has_voided_statement_id_and_any_other_parameters_except_format_and_attachments(): void
     {
         $request = new Request();
         $request->query->set('voidedStatementId', StatementFixtures::DEFAULT_STATEMENT_ID);
         $request->query->set('related_agents', false);
 
         $this
-            ->shouldThrow(new BadRequestHttpException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "related_agents" besides "attachments" or "format".'))
+            ->shouldThrow(new BadRequestException('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "related_agents" besides "attachments" or "format".'))
             ->during('getStatements', [$request]);
     }
 
@@ -243,7 +242,7 @@ class StatementGetControllerSpec extends ObjectBehavior
 
         $statementRepository->findStatementById(StatementId::fromString(StatementFixtures::DEFAULT_STATEMENT_ID))->willThrow(NotFoundException::class);
 
-        $this->shouldThrow(NotFoundHttpException::class)->during('getStatements', [$request]);
+        $this->shouldThrow(NotFoundException::class)->during('getStatements', [$request]);
     }
 
     public function it_throws_not_found_if_a_voided_statement_id_does_not_exist(
@@ -254,7 +253,7 @@ class StatementGetControllerSpec extends ObjectBehavior
 
         $statementRepository->findVoidedStatementById(StatementId::fromString(StatementFixtures::DEFAULT_STATEMENT_ID))->willThrow(NotFoundException::class);
 
-        $this->shouldThrow(NotFoundHttpException::class)->during('getStatements', [$request]);
+        $this->shouldThrow(NotFoundException::class)->during('getStatements', [$request]);
     }
 
     public function it_rejects_unrecognized_query_parameters(): void
@@ -262,7 +261,7 @@ class StatementGetControllerSpec extends ObjectBehavior
         $request = new Request();
         $request->query->set('unknown', 'value');
 
-        $this->shouldThrow(BadRequestHttpException::class)->during('getStatements', [$request]);
+        $this->shouldThrow(BadRequestException::class)->during('getStatements', [$request]);
     }
 
     public function it_rejects_unsupported_statement_formats(): void
@@ -270,7 +269,7 @@ class StatementGetControllerSpec extends ObjectBehavior
         $request = new Request();
         $request->query->set('format', 'other');
 
-        $this->shouldThrow(BadRequestHttpException::class)->during('getStatements', [$request]);
+        $this->shouldThrow(BadRequestException::class)->during('getStatements', [$request]);
     }
 
     public function it_returns_a_paginated_envelope_for_statements_list(

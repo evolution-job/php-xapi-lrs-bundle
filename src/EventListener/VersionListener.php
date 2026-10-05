@@ -14,9 +14,9 @@ namespace XApi\LrsBundle\EventListener;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
 use XApi\LrsBundle\App\XapiHeader;
 use XApi\LrsBundle\App\XapiVersion;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
 
 /**
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
@@ -39,7 +39,7 @@ final readonly class VersionListener
         }
 
         if (null === $version = $request->headers->get(XapiHeader::VERSION)) {
-            throw new BadRequestHttpException(sprintf('Missing required "%s" header.', XapiHeader::VERSION));
+            throw new BadRequestException(sprintf('Missing required "%s" header.', XapiHeader::VERSION));
         }
 
         if (preg_match('/^1\.0(?:\.\d+)?$/', $version)) {
@@ -50,6 +50,6 @@ final readonly class VersionListener
             return;
         }
 
-        throw new BadRequestHttpException(sprintf('xAPI version "%s" is not supported.', $version));
+        throw new BadRequestException(sprintf('xAPI version "%s" is not supported.', $version));
     }
 }

@@ -3,11 +3,11 @@
 namespace XApi\LrsBundle\Tests\Controller;
 
 use PHPUnit\Framework\TestCase;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
+use Xabbuh\XApi\Common\Exception\ConflictException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\StatementFixtures;
 use XApi\LrsBundle\Controller\StatementPostController;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
-use XApi\LrsBundle\Exception\ConflictHttpException;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
 /**
@@ -38,7 +38,7 @@ class StatementPostControllerBatchTest extends TestCase
 
         $controller = new StatementPostController($repository);
 
-        $this->expectException(ConflictHttpException::class);
+        $this->expectException(ConflictException::class);
         $controller->postStatements([$newStatement, $conflictingStatement]);
     }
 
@@ -51,7 +51,7 @@ class StatementPostControllerBatchTest extends TestCase
 
         $controller = new StatementPostController($repository);
 
-        $this->expectException(BadRequestHttpException::class);
+        $this->expectException(BadRequestException::class);
         $controller->postStatements([$statement, $statement]);
     }
 

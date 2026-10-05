@@ -15,9 +15,9 @@ use DateTimeImmutable;
 use PhpSpec\ObjectBehavior;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
 use Xabbuh\XApi\DataFixtures\StateFixtures;
 use Xabbuh\XApi\Model\State;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
 use XApi\LrsBundle\Response\JsonResponse;
 use XApi\LrsBundle\Response\StateDocumentResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
@@ -99,7 +99,7 @@ class StateGetControllerSpec extends ObjectBehavior
         $this->beConstructedWith($stateRepository);
 
         $this
-            ->shouldThrow(BadRequestHttpException::class)
+            ->shouldThrow(BadRequestException::class)
             ->during('getState', [$request, $state]);
     }
 }

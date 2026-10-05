@@ -9,8 +9,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
 use XApi\LrsBundle\EventListener\XapiRequestMatcher;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
 
 /**
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
@@ -52,28 +52,28 @@ class VersionListenerSpec extends ObjectBehavior
         $this->onKernelRequest($requestEvent)->shouldReturn(null);
     }
 
-    public function it_throws_a_BadRequestHttpException_if_no_X_Experience_API_Version_header_is_set(RequestEvent $requestEvent, Request $request, HeaderBag $headerBag): void
+    public function it_throws_a_BadRequestException_if_no_X_Experience_API_Version_header_is_set(RequestEvent $requestEvent, Request $request, HeaderBag $headerBag): void
     {
         $headerBag->get('X-Experience-API-Version')->shouldBeCalled()->willReturn(null);
         $request->isMethod(Request::METHOD_OPTIONS)->willReturn(false);
         $this
-            ->shouldThrow(new BadRequestHttpException('Missing required "X-Experience-API-Version" header.'))
+            ->shouldThrow(new BadRequestException('Missing required "X-Experience-API-Version" header.'))
             ->during('onKernelRequest', [$requestEvent]);
     }
 
-    public function it_throws_a_BadRequestHttpException_if_specified_version_is_not_supported(RequestEvent $requestEvent, Request $request, HeaderBag $headerBag): void
+    public function it_throws_a_BadRequestException_if_specified_version_is_not_supported(RequestEvent $requestEvent, Request $request, HeaderBag $headerBag): void
     {
         $headerBag->get('X-Experience-API-Version')->shouldBeCalled()->willReturn('0.9.5');
         $request->isMethod(Request::METHOD_OPTIONS)->willReturn(false);
 
         $this
-            ->shouldThrow(new BadRequestHttpException('xAPI version "0.9.5" is not supported.'))
+            ->shouldThrow(new BadRequestException('xAPI version "0.9.5" is not supported.'))
             ->during('onKernelRequest', [$requestEvent]);
 
         $headerBag->get('X-Experience-API-Version')->shouldBeCalled()->willReturn('1.1.0');
 
         $this
-            ->shouldThrow(new BadRequestHttpException('xAPI version "1.1.0" is not supported.'))
+            ->shouldThrow(new BadRequestException('xAPI version "1.1.0" is not supported.'))
             ->during('onKernelRequest', [$requestEvent]);
     }
 

@@ -3,7 +3,7 @@
 namespace XApi\LrsBundle\App;
 
 use DateTimeImmutable;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
 
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
@@ -17,7 +17,7 @@ final class XapiTimestampParser
             $value,
             $matches
         )) {
-            throw new BadRequestHttpException(sprintf('Parameter "%s" must be a valid ISO 8601 timestamp.', $parameter));
+            throw new BadRequestException(sprintf('Parameter "%s" must be a valid ISO 8601 timestamp.', $parameter));
         }
 
         $fraction = str_pad(substr($matches['fraction'] ?? '0', 0, 6), 6, '0');
@@ -29,7 +29,7 @@ final class XapiTimestampParser
         $errors = DateTimeImmutable::getLastErrors();
 
         if (false === $timestamp || (false !== $errors && (0 !== $errors['warning_count'] || 0 !== $errors['error_count']))) {
-            throw new BadRequestHttpException(sprintf('Parameter "%s" must be a valid ISO 8601 timestamp.', $parameter));
+            throw new BadRequestException(sprintf('Parameter "%s" must be a valid ISO 8601 timestamp.', $parameter));
         }
 
         return $timestamp;

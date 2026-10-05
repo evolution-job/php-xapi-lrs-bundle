@@ -5,10 +5,10 @@ namespace XApi\LrsBundle\Tests\Controller;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Router;
 use Symfony\Contracts\Cache\CacheInterface;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
+use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\StatementFixtures;
 use Xabbuh\XApi\Model\Activity;
 use Xabbuh\XApi\Model\IRI;
@@ -62,7 +62,7 @@ class StatementGetPaginationTest extends TestCase
             try {
                 $controller->getStatements($request);
                 self::fail(sprintf('Expected invalid "%s" to be rejected.', $name));
-            } catch (BadRequestHttpException) {
+            } catch (BadRequestException) {
                 self::assertTrue(true);
             }
         }
@@ -82,7 +82,7 @@ class StatementGetPaginationTest extends TestCase
         $request = new Request();
         $request->query->set('agent', '{"mbox":"mailto:learner@example.com"}');
 
-        $this->expectException(BadRequestHttpException::class);
+        $this->expectException(BadRequestException::class);
         $controller->getStatements($request);
     }
 
@@ -290,7 +290,7 @@ class StatementGetPaginationTest extends TestCase
                 try {
                     $controller->getStatements(Request::create('/statements?'.$parameter.'='.rawurlencode($timestamp)));
                     self::fail(sprintf('Expected malformed %s timestamp to be rejected.', $parameter));
-                } catch (BadRequestHttpException) {
+                } catch (BadRequestException) {
                     self::assertTrue(true);
                 }
             }
@@ -348,7 +348,7 @@ class StatementGetPaginationTest extends TestCase
             new StatementsFilterFactory($this->createStub(ActorSerializerInterface::class))
         );
 
-        $this->expectException(BadRequestHttpException::class);
+        $this->expectException(BadRequestException::class);
         $controller->getStatements(Request::create('/statements?unknown=value'));
     }
 
@@ -426,7 +426,7 @@ class StatementGetPaginationTest extends TestCase
             new StatementsFilterFactory($this->createStub(ActorSerializerInterface::class))
         );
 
-        $this->expectException(NotFoundHttpException::class);
+        $this->expectException(NotFoundException::class);
 
         $controller->getStatements(Request::create('/statements?moreId='.str_repeat('a', 64)));
     }

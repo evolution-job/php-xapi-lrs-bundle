@@ -15,8 +15,8 @@ use JsonException;
 use stdClass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
 use Xabbuh\XApi\Model\State;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
 use XApi\LrsBundle\Response\JsonResponse;
 use XApi\Repository\Api\StateRepositoryInterface;
 
@@ -52,18 +52,18 @@ final readonly class StatePostController
             || !is_array($existingData)
             || ([] !== $existingData && array_is_list($existingData))
         ) {
-            throw new BadRequestHttpException('POST can only merge an existing JSON object using application/json.');
+            throw new BadRequestException('POST can only merge an existing JSON object using application/json.');
         }
 
         try {
             $postedObject = json_decode($request->getContent(), false, 512, JSON_THROW_ON_ERROR);
             $postedData = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $jsonException) {
-            throw new BadRequestHttpException('The posted document is not valid JSON.', $jsonException);
+        } catch (JsonException) {
+            throw new BadRequestException('The posted document is not valid JSON.');
         }
 
         if (!$postedObject instanceof stdClass) {
-            throw new BadRequestHttpException('The posted document must be a JSON object.');
+            throw new BadRequestException('The posted document must be a JSON object.');
         }
 
         $mergedData = array_replace($existingData, $postedData);

@@ -7,13 +7,13 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
 use Xabbuh\XApi\DataFixtures\StatementFixtures;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use Xabbuh\XApi\Serializer\StateSerializerInterface;
 use XApi\Fixtures\Json\StatementJsonFixtures;
 use XApi\LrsBundle\EventListener\XapiRequestDeserializer;
 use XApi\LrsBundle\EventListener\XapiRequestMatcher;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
 
 /**
  * @author Christian Flothmann <christian.flothmann@xabbuh.de>
@@ -60,7 +60,7 @@ class SerializerListenerSpec extends ObjectBehavior
         $this->onKernelRequest($requestEvent);
     }
 
-    public function it_throws_a_BadRequestHttpException_if_the_serializer_fails(RequestEvent $requestEvent, StatementSerializerInterface $statementSerializer, Request $request, ParameterBag $parameterBag): void
+    public function it_throws_a_BadRequestException_if_the_serializer_fails(RequestEvent $requestEvent, StatementSerializerInterface $statementSerializer, Request $request, ParameterBag $parameterBag): void
     {
         $statementSerializer->deserializeStatement('')->shouldBeCalled()->willThrow(InvalidArgumentException::class);
 
@@ -71,7 +71,7 @@ class SerializerListenerSpec extends ObjectBehavior
         $request->attributes = $parameterBag;
 
         $this
-            ->shouldThrow(BadRequestHttpException::class)
+            ->shouldThrow(BadRequestException::class)
             ->during('onKernelRequest', [$requestEvent]);
     }
 }

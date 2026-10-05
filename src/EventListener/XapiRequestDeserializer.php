@@ -5,14 +5,13 @@ namespace XApi\LrsBundle\EventListener;
 use JsonException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
-use Throwable;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
 use Xabbuh\XApi\Common\Exception\UnsupportedStatementVersionException;
 use Xabbuh\XApi\Model\State;
 use Xabbuh\XApi\Model\Statement;
 use Xabbuh\XApi\Serializer\Exception\DeserializationException;
 use Xabbuh\XApi\Serializer\StatementSerializerInterface;
 use Xabbuh\XApi\Serializer\StateSerializerInterface;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
 
 final readonly class XapiRequestDeserializer
 {
@@ -60,12 +59,12 @@ final readonly class XapiRequestDeserializer
                 null === $state->getStateId()
                 && in_array($request->getMethod(), [Request::METHOD_POST, Request::METHOD_PUT], true)
             ) {
-                throw new BadRequestHttpException('The stateId parameter is required for this request.');
+                throw new BadRequestException('The stateId parameter is required for this request.');
             }
 
             return $state;
-        } catch (UnsupportedStatementVersionException|InvalidArgumentException|DeserializationException|JsonException $exception) {
-            throw $this->createBadRequestException('state', $exception);
+        } catch (UnsupportedStatementVersionException|InvalidArgumentException|DeserializationException|JsonException) {
+            throw $this->createBadRequestException('state');
         }
     }
 
@@ -94,16 +93,15 @@ final readonly class XapiRequestDeserializer
             }
 
             return $this->statementSerializer->deserializeStatement($content);
-        } catch (UnsupportedStatementVersionException|InvalidArgumentException|DeserializationException|JsonException $exception) {
-            throw $this->createBadRequestException('statement', $exception);
+        } catch (UnsupportedStatementVersionException|InvalidArgumentException|DeserializationException|JsonException) {
+            throw $this->createBadRequestException('statement');
         }
     }
 
-    private function createBadRequestException(string $type, Throwable $throwable): BadRequestHttpException
+    private function createBadRequestException(string $type): BadRequestException
     {
-        return new BadRequestHttpException(
-            sprintf('The content of the request cannot be deserialized into a valid xAPI %s.', $type),
-            $throwable
+        return new BadRequestException(
+            sprintf('The content of the request cannot be deserialized into a valid xAPI %s.', $type)
         );
     }
 }

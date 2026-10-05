@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
 use Xabbuh\XApi\DataFixtures\StateFixtures;
 use Xabbuh\XApi\Model\State;
 use Xabbuh\XApi\Model\Statement;
@@ -14,7 +15,6 @@ use Xabbuh\XApi\Serializer\StateSerializerInterface;
 use XApi\LrsBundle\EventListener\SerializerListener;
 use XApi\LrsBundle\EventListener\XapiRequestDeserializer;
 use XApi\LrsBundle\EventListener\XapiRequestMatcher;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
 
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
@@ -134,7 +134,7 @@ class SerializerListenerTest extends TestCase
             try {
                 $this->listener->onKernelRequest($event);
                 self::fail('Expected a missing stateId to be rejected.');
-            } catch (BadRequestHttpException) {
+            } catch (BadRequestException) {
                 self::assertFalse($request->attributes->has('state'));
             }
         }

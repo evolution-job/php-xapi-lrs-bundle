@@ -4,13 +4,12 @@ namespace XApi\LrsBundle\Tests\Controller;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\ActivityFixtures;
 use Xabbuh\XApi\Model\IRI;
 use Xabbuh\XApi\Serializer\ActivitySerializerInterface;
 use XApi\LrsBundle\Controller\ActivityGetController;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
-use XApi\LrsBundle\Exception\NotFoundHttpException;
 use XApi\LrsBundle\Response\JsonResponse;
 use XApi\Repository\Api\ActivityRepositoryInterface;
 
@@ -50,8 +49,8 @@ class ActivityGetControllerTest extends TestCase
         try {
             $controller->getActivities(new Request(['activityId' => 'not an IRI']));
             self::fail('Expected malformed activityId to be rejected.');
-        } catch (BadRequestHttpException $exception) {
-            self::assertSame(400, $exception->getStatusCode());
+        } catch (BadRequestException $exception) {
+            self::assertSame(400, $exception->getCode());
         }
     }
 
@@ -64,8 +63,8 @@ class ActivityGetControllerTest extends TestCase
         try {
             $controller->getActivities(new Request(['activityId' => 'https://example.org/%zz']));
             self::fail('Expected malformed percent escape to be rejected.');
-        } catch (BadRequestHttpException $exception) {
-            self::assertSame(400, $exception->getStatusCode());
+        } catch (BadRequestException $exception) {
+            self::assertSame(400, $exception->getCode());
         }
     }
 
@@ -78,8 +77,8 @@ class ActivityGetControllerTest extends TestCase
         try {
             $controller->getActivities(new Request(['activityId' => 'https://example.org/activity', 'extra' => 'value']));
             self::fail('Expected unrecognized query parameter to be rejected.');
-        } catch (BadRequestHttpException $exception) {
-            self::assertSame(400, $exception->getStatusCode());
+        } catch (BadRequestException $exception) {
+            self::assertSame(400, $exception->getCode());
         }
     }
 
@@ -91,7 +90,7 @@ class ActivityGetControllerTest extends TestCase
             ->willThrowException(new NotFoundException('Not found'));
         $controller = new ActivityGetController($repository, $this->createStub(ActivitySerializerInterface::class));
 
-        $this->expectException(NotFoundHttpException::class);
+        $this->expectException(NotFoundException::class);
         $controller->getActivities(new Request(['activityId' => 'https://example.org/activity']));
     }
 }

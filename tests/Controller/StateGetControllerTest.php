@@ -5,10 +5,10 @@ namespace XApi\LrsBundle\Tests\Controller;
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
 use Xabbuh\XApi\DataFixtures\StateFixtures;
 use Xabbuh\XApi\Model\State;
 use XApi\LrsBundle\Controller\StateGetController;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
 use XApi\Repository\Api\StateRepositoryInterface;
 
 class StateGetControllerTest extends TestCase
@@ -77,8 +77,8 @@ class StateGetControllerTest extends TestCase
         try {
             new StateGetController($repository)->getState(new Request(['since' => 'not-a-timestamp']), $state);
             self::fail('Expected invalid since timestamp to be rejected.');
-        } catch (BadRequestHttpException $exception) {
-            self::assertSame(400, $exception->getStatusCode());
+        } catch (BadRequestException $exception) {
+            self::assertSame(400, $exception->getCode());
         }
     }
 }

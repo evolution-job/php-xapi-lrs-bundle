@@ -11,9 +11,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ServerBag;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Routing\Router;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
 use XApi\Fixtures\Json\StatementJsonFixtures;
 use XApi\LrsBundle\EventListener\XapiRequestMatcher;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
 
 /**
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
@@ -79,7 +79,7 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
         $this->onKernelRequest($requestEvent)->shouldReturn(null);
     }
 
-    public function it_throws_a_BadRequestHttpException_if_other_query_parameter_than_method_is_set(RequestEvent $requestEvent): void
+    public function it_throws_a_BadRequestException_if_other_query_parameter_than_method_is_set(RequestEvent $requestEvent): void
     {
         $request = new Request(
             query: ['method' => 'POST', 'foo' => 'bar'],
@@ -88,7 +88,7 @@ class AlternateRequestSyntaxListenerSpec extends ObjectBehavior
 
         $requestEvent->getRequest()->willReturn($request);
 
-        $this->onKernelRequest($requestEvent)->shouldThrow(BadRequestHttpException::class);
+        $this->onKernelRequest($requestEvent)->shouldThrow(BadRequestException::class);
     }
 
     public function it_sets_the_request_method_equals_to_method_query_parameter(RequestEvent $requestEvent, Request $request): void

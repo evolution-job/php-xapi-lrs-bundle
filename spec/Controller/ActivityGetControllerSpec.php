@@ -13,13 +13,12 @@ namespace spec\XApi\LrsBundle\Controller;
 
 use PhpSpec\ObjectBehavior;
 use Symfony\Component\HttpFoundation\Request;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\ActivityFixtures;
 use Xabbuh\XApi\Model\IRI;
 use Xabbuh\XApi\Serializer\ActivitySerializerInterface;
 use XApi\Fixtures\Json\ActivityJsonFixtures;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
-use XApi\LrsBundle\Exception\NotFoundHttpException;
 use XApi\LrsBundle\Response\JsonResponse;
 use XApi\Repository\Api\ActivityRepositoryInterface;
 
@@ -33,37 +32,37 @@ class ActivityGetControllerSpec extends ObjectBehavior
         $this->beConstructedWith($activityRepository, $activitySerializer);
     }
 
-    public function it_should_throws_a_BadRequestHttpException_if_an_activityid_is_not_part_of_a_get_request(): void
+    public function it_should_throws_a_BadRequestException_if_an_activityid_is_not_part_of_a_get_request(): void
     {
         $request = new Request();
 
         $this
-            ->shouldThrow(BadRequestHttpException::class)
+            ->shouldThrow(BadRequestException::class)
             ->during('getActivities', [$request]);
     }
 
-    public function it_should_throws_a_BadRequestHttpException_if_the_activityid_is_not_a_valid_iri(): void
+    public function it_should_throws_a_BadRequestException_if_the_activityid_is_not_a_valid_iri(): void
     {
         $request = new Request();
         $request->query->set('activityId', 'not an IRI');
 
         $this
-            ->shouldThrow(BadRequestHttpException::class)
+            ->shouldThrow(BadRequestException::class)
             ->during('getActivities', [$request]);
     }
 
-    public function it_should_throws_a_BadRequestHttpException_if_the_request_contains_an_unknown_parameter(): void
+    public function it_should_throws_a_BadRequestException_if_the_request_contains_an_unknown_parameter(): void
     {
         $request = new Request();
         $request->query->set('activityId', 'https://example.org/activity');
         $request->query->set('extra', 'value');
 
         $this
-            ->shouldThrow(BadRequestHttpException::class)
+            ->shouldThrow(BadRequestException::class)
             ->during('getActivities', [$request]);
     }
 
-    public function it_should_throws_a_NotFoundHttpException_if_no_activity_matches_activityid(ActivityRepositoryInterface $activityRepository): void
+    public function it_should_throws_a_NotFoundException_if_no_activity_matches_activityid(ActivityRepositoryInterface $activityRepository): void
     {
         $activityId = 'http://tincanapi.com/conformancetest/activityid';
 
@@ -73,7 +72,7 @@ class ActivityGetControllerSpec extends ObjectBehavior
         $activityRepository->findActivityById(IRI::fromString($activityId))->shouldBeCalled()->willThrow(new NotFoundException(''));
 
         $this
-            ->shouldThrow(NotFoundHttpException::class)
+            ->shouldThrow(NotFoundException::class)
             ->during('getActivities', [$request]);
     }
 

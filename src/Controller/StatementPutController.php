@@ -14,11 +14,11 @@ namespace XApi\LrsBundle\Controller;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
+use Xabbuh\XApi\Common\Exception\ConflictException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\Model\Statement;
 use Xabbuh\XApi\Model\StatementId;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
-use XApi\LrsBundle\Exception\ConflictHttpException;
 use XApi\LrsBundle\Response\JsonResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
@@ -34,11 +34,11 @@ final readonly class StatementPutController
     public function putStatements(Request $request, Statement $statement): JsonResponse
     {
         if (null === $id = $request->query->all()['statementId'] ?? null) {
-            throw new BadRequestHttpException('Required statementId parameter is missing.');
+            throw new BadRequestException('Required statementId parameter is missing.');
         }
 
         if (!is_string($id)) {
-            throw new BadRequestHttpException('Required statementId parameter is not a string.');
+            throw new BadRequestException('Required statementId parameter is not a string.');
         }
 
         $statement = $this->resolveStatement($id, $statement);
@@ -47,7 +47,7 @@ final readonly class StatementPutController
             $existingStatement = $this->statementRepository->findStatementById($statement->getId());
 
             if (!$existingStatement->equals($statement)) {
-                throw new ConflictHttpException('The new statement is not equal to an existing statement with the same id.');
+                throw new ConflictException('The new statement is not equal to an existing statement with the same id.');
             }
         } catch (NotFoundException) {
             $this->statementRepository->storeStatement($statement);
@@ -69,12 +69,12 @@ final readonly class StatementPutController
                 throw new InvalidArgumentException('');
             }
 
-        } catch (InvalidArgumentException $invalidArgumentException) {
-            throw new BadRequestHttpException(sprintf('Parameter statementId ("%s") is not a valid UUID.', $id), $invalidArgumentException);
+        } catch (InvalidArgumentException) {
+            throw new BadRequestException(sprintf('Parameter statementId ("%s") is not a valid UUID.', $id));
         }
 
         if (!$statementId->equals($statement->getId())) {
-            throw new ConflictHttpException(sprintf('Id parameter ("%s") and statement id ("%s") do not match.', $id, $statement->getId()->getValue()));
+            throw new ConflictException(sprintf('Id parameter ("%s") and statement id ("%s") do not match.', $id, $statement->getId()->getValue()));
         }
 
         return $statement;

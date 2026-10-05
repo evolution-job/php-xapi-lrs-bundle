@@ -7,9 +7,9 @@ namespace XApi\LrsBundle\EventListener;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Xabbuh\XApi\Common\Exception\XApiException;
 use XApi\LrsBundle\App\XapiHeader;
 use XApi\LrsBundle\App\XapiVersion;
-use XApi\LrsBundle\Exception\XapiExceptionInterface;
 
 /**
  * Converts Experience API specific domain exceptions into proper HTTP responses.
@@ -24,7 +24,7 @@ final readonly class ExceptionListener
     {
         $throwable = $exceptionEvent->getThrowable();
 
-        if (!$throwable instanceof XapiExceptionInterface
+        if (!$throwable instanceof XApiException
             && !$this->xapiRequestMatcher->matches($exceptionEvent)
         ) {
             return;
@@ -35,6 +35,12 @@ final readonly class ExceptionListener
 
         if ($throwable instanceof HttpExceptionInterface) {
             $statusCode = $throwable->getStatusCode();
+            $message = $throwable->getMessage();
+        } elseif ($throwable instanceof XApiException) {
+            if (Response::HTTP_BAD_REQUEST <= $throwable->getCode() && 600 > $throwable->getCode()) {
+                $statusCode = $throwable->getCode();
+            }
+
             $message = $throwable->getMessage();
         }
 

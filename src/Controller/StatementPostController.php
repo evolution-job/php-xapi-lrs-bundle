@@ -12,12 +12,12 @@
 namespace XApi\LrsBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
+use Xabbuh\XApi\Common\Exception\ConflictException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\Model\Statement;
 use Xabbuh\XApi\Model\StatementId;
 use Xabbuh\XApi\Model\Uuid;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
-use XApi\LrsBundle\Exception\ConflictHttpException;
 use XApi\LrsBundle\Response\JsonResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
@@ -53,7 +53,7 @@ final readonly class StatementPostController
             $statementId = $statement->getId()->getValue();
 
             if (isset($statementIds[$statementId])) {
-                throw new BadRequestHttpException(sprintf('The statement batch contains duplicate statement id "%s".', $statementId));
+                throw new BadRequestException(sprintf('The statement batch contains duplicate statement id "%s".', $statementId));
             }
 
             $statementIds[$statementId] = true;
@@ -93,7 +93,7 @@ final readonly class StatementPostController
             $existingStatement = $this->statementRepository->findStatementById($statement->getId());
 
             if (!$existingStatement->equals($statement)) {
-                throw new ConflictHttpException('The new statement is not equal to an existing statement with the same id.');
+                throw new ConflictException('The new statement is not equal to an existing statement with the same id.');
             }
         } catch (NotFoundException) {
             return true;

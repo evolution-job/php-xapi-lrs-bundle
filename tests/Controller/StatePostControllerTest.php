@@ -4,10 +4,10 @@ namespace XApi\LrsBundle\Tests\Controller;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
 use Xabbuh\XApi\DataFixtures\StateFixtures;
 use Xabbuh\XApi\Model\State;
 use XApi\LrsBundle\Controller\StatePostController;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
 use XApi\Repository\Api\StateRepositoryInterface;
 
 /**
@@ -74,8 +74,8 @@ class StatePostControllerTest extends TestCase
         try {
             new StatePostController($repository)->postState($state, $request);
             self::fail('Expected POST to reject a non-JSON document.');
-        } catch (BadRequestHttpException $exception) {
-            self::assertSame(400, $exception->getStatusCode());
+        } catch (BadRequestException $exception) {
+            self::assertSame(400, $exception->getCode());
         }
     }
 
@@ -91,8 +91,8 @@ class StatePostControllerTest extends TestCase
         try {
             new StatePostController($repository)->postState($state, $request);
             self::fail('Expected POST to reject a JSON array.');
-        } catch (BadRequestHttpException $exception) {
-            self::assertSame(400, $exception->getStatusCode());
+        } catch (BadRequestException $exception) {
+            self::assertSame(400, $exception->getCode());
         }
     }
 }

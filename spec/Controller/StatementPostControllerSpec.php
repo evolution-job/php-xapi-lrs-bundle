@@ -14,10 +14,10 @@ namespace spec\XApi\LrsBundle\Controller;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Symfony\Component\HttpFoundation\Response;
+use Xabbuh\XApi\Common\Exception\ConflictException;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\StatementFixtures;
 use Xabbuh\XApi\Model\StatementId;
-use XApi\LrsBundle\Exception\ConflictHttpException;
 use XApi\LrsBundle\Response\JsonResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
 
@@ -69,7 +69,7 @@ class StatementPostControllerSpec extends ObjectBehavior
         $this->postStatement($statement);
     }
 
-    public function it_throws_a_ConflictHttpException_if_an_existing_statement_with_the_same_id_is_not_equal_during_a_post_request(StatementRepositoryInterface $statementRepository): void
+    public function it_throws_a_ConflictException_if_an_existing_statement_with_the_same_id_is_not_equal_during_a_post_request(StatementRepositoryInterface $statementRepository): void
     {
         $statement = StatementFixtures::getTypicalStatement();
         $existingStatement = StatementFixtures::getAttachmentStatement()->withId($statement->getId());
@@ -79,7 +79,7 @@ class StatementPostControllerSpec extends ObjectBehavior
         $this->beConstructedWith($statementRepository);
 
         $this
-            ->shouldThrow(ConflictHttpException::class)
+            ->shouldThrow(ConflictException::class)
             ->during('postStatement', [$statement]);
     }
 

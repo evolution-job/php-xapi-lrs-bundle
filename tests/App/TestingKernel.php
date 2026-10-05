@@ -28,7 +28,7 @@ use XApi\Repository\Api\VerbRepositoryInterface;
  */
 class FakeActivityRepository implements ActivityRepositoryInterface
 {
-    public function findActivityById(IRI $iri): ?Activity { }
+    public function findActivityById(IRI $iri): ?Activity { return null; }
 }
 
 class FakeVerbRepository implements VerbRepositoryInterface
@@ -50,9 +50,9 @@ class FakeStatementRepository implements StatementRepositoryInterface
 class FakeStateRepository implements StateRepositoryInterface
 {
 
-    public function findState(State $state): ?State { }
+    public function findState(State $state): ?State { return null; }
 
-    public function findStates(State $state, ?DateTimeImmutable $since = null): array { }
+    public function findStates(State $state, ?DateTimeImmutable $since = null): array { return []; }
 
     public function removeState(State $state, bool $flush = true): void { }
 

@@ -13,12 +13,12 @@ use DateMalformedStringException;
 use DateTimeImmutable;
 use InvalidArgumentException as PhpInvalidArgumentException;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Xabbuh\XApi\Common\Exception\BadRequestException;
 use Xabbuh\XApi\Model\StatementId;
 use Xabbuh\XApi\Model\StatementsFilter;
 use Xabbuh\XApi\Model\Uuid;
 use XApi\LrsBundle\App\IriValidator;
 use XApi\LrsBundle\App\XapiTimestampParser;
-use XApi\LrsBundle\Exception\BadRequestHttpException;
 use XApi\LrsBundle\Model\StatementsFilterFactory;
 
 /**
@@ -49,18 +49,18 @@ final readonly class StatementGetQueryValidator
     public function __construct(private StatementsFilterFactory $statementsFilterFactory) { }
 
     /**
-     * @throws BadRequestHttpException
+     * @throws BadRequestException
      */
     public function validate(ParameterBag $parameterBag): void
     {
         $unknownParameters = array_diff(array_keys($parameterBag->all()), array_keys(self::ALLOWED_PARAMETERS));
         if ([] !== $unknownParameters) {
-            throw new BadRequestHttpException(sprintf('Unrecognized query parameter(s): "%s".', implode('", "', $unknownParameters)));
+            throw new BadRequestException(sprintf('Unrecognized query parameter(s): "%s".', implode('", "', $unknownParameters)));
         }
 
         $format = $parameterBag->get('format', 'exact');
         if (!in_array($format, ['ids', 'exact', 'canonical'], true)) {
-            throw new BadRequestHttpException('The format parameter must be one of "ids", "exact", or "canonical".');
+            throw new BadRequestException('The format parameter must be one of "ids", "exact", or "canonical".');
         }
 
         foreach (['statementId', 'voidedStatementId'] as $parameter) {
@@ -70,13 +70,13 @@ final readonly class StatementGetQueryValidator
 
             $value = $parameterBag->get($parameter);
             if (!is_string($value)) {
-                throw new BadRequestHttpException(sprintf('Parameter "%s" must be a UUID string.', $parameter));
+                throw new BadRequestException(sprintf('Parameter "%s" must be a UUID string.', $parameter));
             }
 
             try {
                 StatementId::fromString($value);
-            } catch (PhpInvalidArgumentException $exception) {
-                throw new BadRequestHttpException(sprintf('Parameter "%s" must be a valid UUID.', $parameter), $exception);
+            } catch (PhpInvalidArgumentException) {
+                throw new BadRequestException(sprintf('Parameter "%s" must be a valid UUID.', $parameter));
             }
         }
 
@@ -87,18 +87,18 @@ final readonly class StatementGetQueryValidator
 
             $value = $parameterBag->get($parameter);
             if (!is_string($value) || '' === $value) {
-                throw new BadRequestHttpException(sprintf('Parameter "%s" must be a non-empty string.', $parameter));
+                throw new BadRequestException(sprintf('Parameter "%s" must be a non-empty string.', $parameter));
             }
 
             if (in_array($parameter, ['activity', 'verb'], true) && !IriValidator::isValid($value)) {
-                throw new BadRequestHttpException(sprintf('Parameter "%s" must be a valid IRI.', $parameter));
+                throw new BadRequestException(sprintf('Parameter "%s" must be a valid IRI.', $parameter));
             }
 
             if ('registration' === $parameter) {
                 try {
                     Uuid::fromString($value);
-                } catch (PhpInvalidArgumentException $exception) {
-                    throw new BadRequestHttpException('Parameter "registration" must be a valid UUID.', $exception);
+                } catch (PhpInvalidArgumentException) {
+                    throw new BadRequestException('Parameter "registration" must be a valid UUID.');
                 }
             }
         }
@@ -110,7 +110,7 @@ final readonly class StatementGetQueryValidator
 
             $value = $parameterBag->get($parameter);
             if (!in_array($value, ['true', 'false', true, false], true)) {
-                throw new BadRequestHttpException(sprintf('Parameter "%s" must be either "true" or "false".', $parameter));
+                throw new BadRequestException(sprintf('Parameter "%s" must be either "true" or "false".', $parameter));
             }
         }
 
@@ -125,12 +125,12 @@ final readonly class StatementGetQueryValidator
             $value = $parameterBag->get($parameter);
             $validated = filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
             if (false === $validated || ('offset' === $parameter && PHP_INT_MAX - self::SERVER_LIMIT - 1 < $validated)) {
-                throw new BadRequestHttpException(sprintf('Parameter "%s" must be a non-negative integer.', $parameter));
+                throw new BadRequestException(sprintf('Parameter "%s" must be a non-negative integer.', $parameter));
             }
         }
 
         if ($hasStatementId && $hasVoidedStatementId) {
-            throw new BadRequestHttpException('Request must not have both statementId and voidedStatementId parameters at the same time.');
+            throw new BadRequestException('Request must not have both statementId and voidedStatementId parameters at the same time.');
         }
 
         $queryParameters = $parameterBag->all();
@@ -144,7 +144,7 @@ final readonly class StatementGetQueryValidator
         if (($hasStatementId || $hasVoidedStatementId) && count($queryParameters)) {
             $badParameters = implode('", "', array_keys($queryParameters));
 
-            throw new BadRequestHttpException(sprintf('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "%s" besides "attachments" or "format".', $badParameters));
+            throw new BadRequestException(sprintf('Request must not contain statementId or voidedStatementId parameters, and also any other parameter like "%s" besides "attachments" or "format".', $badParameters));
         }
     }
 
