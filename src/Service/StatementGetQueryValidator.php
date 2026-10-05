@@ -51,24 +51,24 @@ final readonly class StatementGetQueryValidator
     /**
      * @throws BadRequestHttpException
      */
-    public function validate(ParameterBag $query): void
+    public function validate(ParameterBag $parameterBag): void
     {
-        $unknownParameters = array_diff(array_keys($query->all()), array_keys(self::ALLOWED_PARAMETERS));
+        $unknownParameters = array_diff(array_keys($parameterBag->all()), array_keys(self::ALLOWED_PARAMETERS));
         if ([] !== $unknownParameters) {
             throw new BadRequestHttpException(sprintf('Unrecognized query parameter(s): "%s".', implode('", "', $unknownParameters)));
         }
 
-        $format = $query->get('format', 'exact');
+        $format = $parameterBag->get('format', 'exact');
         if (!in_array($format, ['ids', 'exact', 'canonical'], true)) {
             throw new BadRequestHttpException('The format parameter must be one of "ids", "exact", or "canonical".');
         }
 
         foreach (['statementId', 'voidedStatementId'] as $parameter) {
-            if (!$query->has($parameter)) {
+            if (!$parameterBag->has($parameter)) {
                 continue;
             }
 
-            $value = $query->get($parameter);
+            $value = $parameterBag->get($parameter);
             if (!is_string($value)) {
                 throw new BadRequestHttpException(sprintf('Parameter "%s" must be a UUID string.', $parameter));
             }
@@ -81,11 +81,11 @@ final readonly class StatementGetQueryValidator
         }
 
         foreach (['activity', 'verb', 'agent', 'registration'] as $parameter) {
-            if (!$query->has($parameter)) {
+            if (!$parameterBag->has($parameter)) {
                 continue;
             }
 
-            $value = $query->get($parameter);
+            $value = $parameterBag->get($parameter);
             if (!is_string($value) || '' === $value) {
                 throw new BadRequestHttpException(sprintf('Parameter "%s" must be a non-empty string.', $parameter));
             }
@@ -104,25 +104,25 @@ final readonly class StatementGetQueryValidator
         }
 
         foreach (['ascending', 'attachments', 'related_activities', 'related_agents'] as $parameter) {
-            if (!$query->has($parameter)) {
+            if (!$parameterBag->has($parameter)) {
                 continue;
             }
 
-            $value = $query->get($parameter);
+            $value = $parameterBag->get($parameter);
             if (!in_array($value, ['true', 'false', true, false], true)) {
                 throw new BadRequestHttpException(sprintf('Parameter "%s" must be either "true" or "false".', $parameter));
             }
         }
 
-        $hasStatementId = $query->has('statementId');
-        $hasVoidedStatementId = $query->has('voidedStatementId');
+        $hasStatementId = $parameterBag->has('statementId');
+        $hasVoidedStatementId = $parameterBag->has('voidedStatementId');
 
         foreach (['limit', 'offset'] as $parameter) {
-            if (!$query->has($parameter)) {
+            if (!$parameterBag->has($parameter)) {
                 continue;
             }
 
-            $value = $query->get($parameter);
+            $value = $parameterBag->get($parameter);
             $validated = filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
             if (false === $validated || ('offset' === $parameter && PHP_INT_MAX - self::SERVER_LIMIT - 1 < $validated)) {
                 throw new BadRequestHttpException(sprintf('Parameter "%s" must be a non-negative integer.', $parameter));
@@ -133,7 +133,7 @@ final readonly class StatementGetQueryValidator
             throw new BadRequestHttpException('Request must not have both statementId and voidedStatementId parameters at the same time.');
         }
 
-        $queryParameters = $query->all();
+        $queryParameters = $parameterBag->all();
         unset(
             $queryParameters['attachments'],
             $queryParameters['format'],
@@ -151,12 +151,12 @@ final readonly class StatementGetQueryValidator
     /**
      * @throws DateMalformedStringException
      */
-    public function createStatementsFilter(ParameterBag $query, int $limit, ?DateTimeImmutable $until): StatementsFilter
+    public function createStatementsFilter(ParameterBag $parameterBag, int $limit, ?DateTimeImmutable $until): StatementsFilter
     {
-        $filterQuery = clone $query;
+        $filterQuery = clone $parameterBag;
         $filterQuery->set('limit', $limit);
 
-        if (null !== $until && $this->hasNonZeroFraction($query->get('until'))) {
+        if ($until instanceof DateTimeImmutable && $this->hasNonZeroFraction($parameterBag->get('until'))) {
             $filterQuery->set('until', $until->modify('+1 second')->format('c'));
         }
 

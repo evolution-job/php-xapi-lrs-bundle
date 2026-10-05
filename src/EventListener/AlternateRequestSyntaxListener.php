@@ -131,6 +131,7 @@ final readonly class AlternateRequestSyntaxListener
                 }
             }
         }
+        
         return null;
     }
 
@@ -167,6 +168,7 @@ final readonly class AlternateRequestSyntaxListener
             if (!is_string($content) || $content === '') {
                 throw new BadRequestHttpException('Missing JSON request payload.');
             }
+            
             $payload = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException) {
             throw new BadRequestHttpException('Invalid JSON request payload.');
@@ -212,6 +214,7 @@ final readonly class AlternateRequestSyntaxListener
                     }
                 }
             }
+            
             unset($statement, $attachment);
 
             $content = json_encode($isBatch ? $statements : $statements[0], JSON_THROW_ON_ERROR);

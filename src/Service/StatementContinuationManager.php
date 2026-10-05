@@ -24,6 +24,7 @@ use XApi\LrsBundle\Exception\NotFoundHttpException;
 final readonly class StatementContinuationManager
 {
     private const string CACHE_PREFIX = 'xapi_more_';
+
     private const int CACHE_TTL = 86400;
 
     public function __construct(

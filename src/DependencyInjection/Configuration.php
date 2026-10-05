@@ -33,17 +33,18 @@ final class Configuration implements ConfigurationInterface
                     ->defaultValue(['self'])
                     ->beforeNormalization()
                     ->ifString()
-                    ->then(static function (string $value): array { return [$value]; })
+                    ->then(static fn(string $value): array => [$value])
                     ->end()
                     ->validate()
                     ->always(function (array $values): array {
-                        foreach ($values as $origin) {
-                            if (!filter_var($origin, FILTER_VALIDATE_URL)) {
-                                throw new InvalidArgumentException(sprintf('Invalid domain "%s".', $origin));
+                        foreach ($values as $value) {
+                            if (!filter_var($value, FILTER_VALIDATE_URL)) {
+                                throw new InvalidArgumentException(sprintf('Invalid domain "%s".', $value));
                             }
-                            $domain = parse_url($origin, PHP_URL_HOST);
+                            
+                            $domain = parse_url($value, PHP_URL_HOST);
                             if (!filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
-                                throw new InvalidArgumentException(sprintf('Invalid domain "%s".', $origin));
+                                throw new InvalidArgumentException(sprintf('Invalid domain "%s".', $value));
                             }
                         }
 

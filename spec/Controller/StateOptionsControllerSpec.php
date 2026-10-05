@@ -16,22 +16,23 @@ use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use XApi\LrsBundle\Controller\StateOptionsController;
 
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
 class StateOptionsControllerSpec extends ObjectBehavior
 {
-    public function it_is_initializable()
+    public function it_is_initializable(): void
     {
-        $this->shouldHaveType('XApi\LrsBundle\Controller\StateOptionsController');
+        $this->shouldHaveType(StateOptionsController::class);
     }
 
-    public function it_returns_a_204_response_if_required_parameters_are_missing(Request $request, ParameterBag $query)
+    public function it_returns_a_204_response_if_required_parameters_are_missing(Request $request, ParameterBag $parameterBag): void
     {
         $request->query = new InputBag([]);
-        $query->get('activityId')->willReturn(null);
-        $query->get('agent')->willReturn(null);
+        $parameterBag->get('activityId')->willReturn(null);
+        $parameterBag->get('agent')->willReturn(null);
 
         $response = $this->optionsState($request);
 
@@ -39,11 +40,11 @@ class StateOptionsControllerSpec extends ObjectBehavior
         $response->getStatusCode()->shouldReturn(Response::HTTP_NO_CONTENT);
     }
 
-    public function it_returns_a_204_response_if_parameters_are_present(Request $request, ParameterBag $query)
+    public function it_returns_a_204_response_if_parameters_are_present(Request $request, ParameterBag $parameterBag): void
     {
         $request->query = new InputBag([]);
-        $query->get('activityId')->willReturn('http://example.com');
-        $query->get('agent')->willReturn('{"mbox":"mailto:test@example.com"}');
+        $parameterBag->get('activityId')->willReturn('http://example.com');
+        $parameterBag->get('agent')->willReturn('{"mbox":"mailto:test@example.com"}');
 
         $response = $this->optionsState($request);
 

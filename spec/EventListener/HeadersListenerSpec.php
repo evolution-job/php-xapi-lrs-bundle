@@ -30,10 +30,10 @@ class HeadersListenerSpec extends ObjectBehavior
         $this->beConstructedWith($xapiRequestMatcher, ['https://learning.repository.example.com']);
     }
 
-    public function it_returns_null_if_requests_are_not_main(HttpKernelInterface $kernel, Request $request, Response $response): void
+    public function it_returns_null_if_requests_are_not_main(HttpKernelInterface $httpKernel, Request $request, Response $response): void
     {
         $responseEvent = new ResponseEvent(
-            $kernel->getWrappedObject(),
+            $httpKernel->getWrappedObject(),
             $request->getWrappedObject(),
             HttpKernelInterface::SUB_REQUEST,
             $response->getWrappedObject()
@@ -42,14 +42,14 @@ class HeadersListenerSpec extends ObjectBehavior
         $this->onKernelResponse($responseEvent)->shouldReturn(null);
     }
 
-    public function it_returns_null_if_not_xapi_route(HttpKernelInterface $kernel, Request $request, ParameterBag $parameterBag, Response $response): void
+    public function it_returns_null_if_not_xapi_route(HttpKernelInterface $httpKernel, Request $request, ParameterBag $parameterBag, Response $response): void
     {
         $parameterBag->has('xapi_lrs.route')->shouldBeCalled()->willReturn(false);
         $request->attributes = $parameterBag;
         $request->isMethod(Request::METHOD_OPTIONS)->willReturn(false);
 
         $responseEvent = new ResponseEvent(
-            $kernel->getWrappedObject(),
+            $httpKernel->getWrappedObject(),
             $request->getWrappedObject(),
             HttpKernelInterface::MAIN_REQUEST,
             $response->getWrappedObject()
@@ -58,7 +58,7 @@ class HeadersListenerSpec extends ObjectBehavior
         $this->onKernelResponse($responseEvent)->shouldReturn(null);
     }
 
-    public function it_sets_headers_in_response_for_options_request(HttpKernelInterface $kernel, Request $request, Response $response, ResponseHeaderBag $responseHeaderBag): void
+    public function it_sets_headers_in_response_for_options_request(HttpKernelInterface $httpKernel, Request $request, Response $response, ResponseHeaderBag $responseHeaderBag): void
     {
         $request->isMethod(Request::METHOD_OPTIONS)->willReturn(true);
 
@@ -75,7 +75,7 @@ class HeadersListenerSpec extends ObjectBehavior
         $response->headers = $responseHeaderBag;
 
         $responseEvent = new ResponseEvent(
-            $kernel->getWrappedObject(),
+            $httpKernel->getWrappedObject(),
             $request->getWrappedObject(),
             HttpKernelInterface::MAIN_REQUEST,
             $response->getWrappedObject()
@@ -84,7 +84,7 @@ class HeadersListenerSpec extends ObjectBehavior
         $this->onKernelResponse($responseEvent)->shouldReturn(null);
     }
 
-    public function it_sets_headers_in_response_for_not_options_request(HttpKernelInterface $kernel, Request $request, Response $response, ResponseHeaderBag $responseHeaderBag): void
+    public function it_sets_headers_in_response_for_not_options_request(HttpKernelInterface $httpKernel, Request $request, Response $response, ResponseHeaderBag $responseHeaderBag): void
     {
         $request->isMethod(Request::METHOD_OPTIONS)->willReturn(false);
 
@@ -97,7 +97,7 @@ class HeadersListenerSpec extends ObjectBehavior
         $response->headers = $responseHeaderBag;
 
         $responseEvent = new ResponseEvent(
-            $kernel->getWrappedObject(),
+            $httpKernel->getWrappedObject(),
             $request->getWrappedObject(),
             HttpKernelInterface::MAIN_REQUEST,
             $response->getWrappedObject()

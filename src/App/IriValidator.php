@@ -1,7 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace XApi\LrsBundle\App;
 
+/**
+ * @author Mathieu Boldo <mathieu.boldo@entrili.com>
+ */
 final class IriValidator
 {
     public static function isValid(string $value): bool

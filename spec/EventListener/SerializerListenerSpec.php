@@ -31,8 +31,8 @@ class SerializerListenerSpec extends ObjectBehavior
         $requestEvent->isMainRequest()->willReturn(true);
 
         $xapiRequestMatcher = new XapiRequestMatcher();
-        $requestDeserializer = new XapiRequestDeserializer($statementSerializer->getWrappedObject(), $stateSerializer->getWrappedObject());
-        $this->beConstructedWith($requestDeserializer, $xapiRequestMatcher);
+        $xapiRequestDeserializer = new XapiRequestDeserializer($statementSerializer->getWrappedObject(), $stateSerializer->getWrappedObject());
+        $this->beConstructedWith($xapiRequestDeserializer, $xapiRequestMatcher);
     }
 
     public function it_returns_null_if_request_has_no_attribute_xapi_lrs_route(RequestEvent $requestEvent, ParameterBag $parameterBag): void

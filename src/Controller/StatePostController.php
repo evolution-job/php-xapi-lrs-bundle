@@ -58,8 +58,8 @@ final readonly class StatePostController
         try {
             $postedObject = json_decode($request->getContent(), false, 512, JSON_THROW_ON_ERROR);
             $postedData = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new BadRequestHttpException('The posted document is not valid JSON.', $exception);
+        } catch (JsonException $jsonException) {
+            throw new BadRequestHttpException('The posted document is not valid JSON.', $jsonException);
         }
 
         if (!$postedObject instanceof stdClass) {

@@ -24,14 +24,14 @@ use XApi\Repository\Api\StateRepositoryInterface;
  */
 class StatePostControllerSpec extends ObjectBehavior
 {
-    public function it_should_store_a_state(StateRepositoryInterface $stateRepositoryInterface): void
+    public function it_should_store_a_state(StateRepositoryInterface $stateRepository): void
     {
         $state = StateFixtures::getTypicalState();
 
-        $stateRepositoryInterface->findState($state)->willReturn(null);
-        $stateRepositoryInterface->storeState($state)->shouldBeCalled();
+        $stateRepository->findState($state)->willReturn(null);
+        $stateRepository->storeState($state)->shouldBeCalled();
 
-        $this->beConstructedWith($stateRepositoryInterface);
+        $this->beConstructedWith($stateRepository);
 
         $response = $this->postState($state, new Request());
 

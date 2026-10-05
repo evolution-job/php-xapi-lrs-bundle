@@ -22,13 +22,13 @@ use XApi\Repository\Api\StateRepositoryInterface;
  */
 class StatePutControllerSpec extends ObjectBehavior
 {
-    public function it_should_store_a_state(StateRepositoryInterface $stateRepositoryInterface): void
+    public function it_should_store_a_state(StateRepositoryInterface $stateRepository): void
     {
         $state = StateFixtures::getTypicalState();
 
-        $stateRepositoryInterface->storeState($state)->shouldBeCalled();
+        $stateRepository->storeState($state)->shouldBeCalled();
 
-        $this->beConstructedWith($stateRepositoryInterface);
+        $this->beConstructedWith($stateRepository);
 
         $response = $this->putState($state);
 

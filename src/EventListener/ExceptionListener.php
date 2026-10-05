@@ -22,9 +22,9 @@ final readonly class ExceptionListener
 
     public function onKernelException(ExceptionEvent $exceptionEvent): void
     {
-        $exception = $exceptionEvent->getThrowable();
+        $throwable = $exceptionEvent->getThrowable();
 
-        if (!$exception instanceof XapiExceptionInterface
+        if (!$throwable instanceof XapiExceptionInterface
             && !$this->xapiRequestMatcher->matches($exceptionEvent)
         ) {
             return;
@@ -33,9 +33,9 @@ final readonly class ExceptionListener
         $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
         $message = 'Internal Server Error';
 
-        if ($exception instanceof HttpExceptionInterface) {
-            $statusCode = $exception->getStatusCode();
-            $message = $exception->getMessage();
+        if ($throwable instanceof HttpExceptionInterface) {
+            $statusCode = $throwable->getStatusCode();
+            $message = $throwable->getMessage();
         }
 
         $response = new Response($message, $statusCode, [

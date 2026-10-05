@@ -10,26 +10,21 @@ use XApi\LrsBundle\App\XapiAttribute;
  */
 final class XapiRequestMatcher
 {
-    public function matches(KernelEvent $event): bool
+    public function matches(KernelEvent $kernelEvent): bool
     {
-        if (!$event->isMainRequest()) {
+        if (!$kernelEvent->isMainRequest()) {
             return false;
         }
 
-        $request = $event->getRequest();
+        $request = $kernelEvent->getRequest();
 
         if (!$request->attributes->has(XapiAttribute::LRS_ROUTE)) {
             return false;
         }
 
-        if (!str_starts_with(
+        return str_starts_with(
                 $request->attributes->get('_route', ''),
                 XapiAttribute::ROUTE_PREFIX,
-            )
-        ) {
-            return false;
-        }
-
-        return true;
+            );
     }
 }

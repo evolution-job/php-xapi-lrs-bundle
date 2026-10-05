@@ -12,6 +12,7 @@
 namespace XApi\LrsBundle\Controller;
 
 use DateMalformedStringException;
+use DateTime;
 use DateTimeImmutable;
 use JsonException;
 use Psr\Cache\InvalidArgumentException;
@@ -43,22 +44,20 @@ use XApi\Repository\Api\StatementRepositoryInterface;
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
-final class StatementGetController
+final readonly class StatementGetController
 {
     private const int SERVER_LIMIT = 100;
 
     public function __construct(
-        private readonly StatementRepositoryInterface $statementRepository,
-        private readonly StatementResultSerializerInterface $statementResultSerializer,
-        private readonly StatementSerializerInterface $statementSerializer,
-        private readonly StatementFormatNormalizer $formatNormalizer,
-        private readonly StatementGetQueryValidator $queryValidator,
-        private readonly StatementContinuationManager $continuationManager
+        private StatementRepositoryInterface $statementRepository,
+        private StatementResultSerializerInterface $statementResultSerializer,
+        private StatementSerializerInterface $statementSerializer,
+        private StatementFormatNormalizer $statementFormatNormalizer,
+        private StatementGetQueryValidator $statementGetQueryValidator,
+        private StatementContinuationManager $statementContinuationManager
     ) { }
 
     /**
-     * @param Request $request
-     * @return JsonResponse|MultipartResponse
      * @throws DateMalformedStringException
      * @throws InvalidArgumentException
      * @throws JsonException
@@ -67,17 +66,17 @@ final class StatementGetController
      */
     public function getStatements(Request $request): JsonResponse|MultipartResponse
     {
-        $parameters = $this->continuationManager->resolveParameters($request);
-        $query = new ParameterBag($parameters);
-        $this->queryValidator->validate($query);
+        $parameters = $this->statementContinuationManager->resolveParameters($request);
+        $parameterBag = new ParameterBag($parameters);
+        $this->statementGetQueryValidator->validate($parameterBag);
 
-        $format = $query->get('format', 'exact');
-        $includeAttachments = $query->filter('attachments', false, FILTER_VALIDATE_BOOLEAN);
-        $limit = $this->getPageSize($query);
-        $offset = $query->getInt('offset');
-        $since = $query->has('since') ? $this->queryValidator->parseTimestamp($query->get('since'), 'since') : null;
-        $statementId = $query->get('statementId');
-        $until = $query->has('until') ? $this->queryValidator->parseTimestamp($query->get('until'), 'until') : null;
+        $format = $parameterBag->get('format', 'exact');
+        $includeAttachments = $parameterBag->filter('attachments', false, FILTER_VALIDATE_BOOLEAN);
+        $limit = $this->getPageSize($parameterBag);
+        $offset = $parameterBag->getInt('offset');
+        $since = $parameterBag->has('since') ? $this->statementGetQueryValidator->parseTimestamp($parameterBag->get('since'), 'since') : null;
+        $statementId = $parameterBag->get('statementId');
+        $until = $parameterBag->has('until') ? $this->statementGetQueryValidator->parseTimestamp($parameterBag->get('until'), 'until') : null;
 
         if (null !== $statementId) {
             try {
@@ -89,7 +88,7 @@ final class StatementGetController
             return $this->buildSingleStatementResponse($request, $statement, $includeAttachments, $format);
         }
 
-        $voidedStatementId = $query->get('voidedStatementId');
+        $voidedStatementId = $parameterBag->get('voidedStatementId');
         if (null !== $voidedStatementId) {
             try {
                 $statement = $this->statementRepository->findVoidedStatementById(StatementId::fromString($voidedStatementId));
@@ -104,7 +103,7 @@ final class StatementGetController
         $fetchLimit = $requiredCount;
         do {
             try {
-                $statementsFilter = $this->queryValidator->createStatementsFilter($query, $fetchLimit, $until);
+                $statementsFilter = $this->statementGetQueryValidator->createStatementsFilter($parameterBag, $fetchLimit, $until);
             } catch (ActorDeserializationException $exception) {
                 throw new BadRequestHttpException('The agent parameter must be a valid xAPI Agent or Group object.', $exception);
             }
@@ -123,7 +122,7 @@ final class StatementGetController
         $hasMore = count($statements) > $offset + $limit;
         $statements = array_slice($statements, $offset, $limit);
 
-        $more = $hasMore ? $this->continuationManager->createMoreUrl($query->all(), $limit, $offset) : null;
+        $more = $hasMore ? $this->statementContinuationManager->createMoreUrl($parameterBag->all(), $limit, $offset) : null;
 
         return $this->buildMultiStatementsResponse($request, $statements, $includeAttachments, $more, $format);
     }
@@ -131,7 +130,7 @@ final class StatementGetController
     /**
      * @param Statement[] $statements
      */
-    protected function buildMultipartResponse(JsonResponse $JsonXapiResponse, array $statements): MultipartResponse
+    protected function buildMultipartResponse(JsonResponse $jsonResponse, array $statements): MultipartResponse
     {
         $attachmentsParts = [];
 
@@ -141,7 +140,7 @@ final class StatementGetController
             }
         }
 
-        return new MultipartResponse($JsonXapiResponse, $attachmentsParts);
+        return new MultipartResponse($jsonResponse, $attachmentsParts);
     }
 
     /**
@@ -153,21 +152,21 @@ final class StatementGetController
         Request $request,
         array $statements,
         bool $includeAttachments = false,
-        ?IRL $more = null,
+        ?IRL $irl = null,
         string $format = 'exact'
     ): JsonResponse|MultipartResponse {
 
-        $statementResult = new StatementResult($statements, $more ?? IRL::fromString(''));
+        $statementResult = new StatementResult($statements, $irl ?? IRL::fromString(''));
         $json = $this->statementResultSerializer->serializeStatementResult($statementResult);
-        $json = $this->formatNormalizer->normalize($json, $format, $request, true);
+        $json = $this->statementFormatNormalizer->normalize($json, $format, $request, true);
 
-        $JsonXapiResponse = new JsonResponse($json, Response::HTTP_OK, json: true, isHeadRequest: $request->isMethod(Request::METHOD_HEAD));
+        $jsonResponse = new JsonResponse($json, Response::HTTP_OK, json: true, isHeadRequest: $request->isMethod(Request::METHOD_HEAD));
 
         if ($includeAttachments) {
-            return $this->buildMultipartResponse($JsonXapiResponse, $statements);
+            return $this->buildMultipartResponse($jsonResponse, $statements);
         }
 
-        return $JsonXapiResponse;
+        return $jsonResponse;
     }
 
     /**
@@ -185,7 +184,7 @@ final class StatementGetController
         }
 
         $json = $this->statementSerializer->serializeStatement($statement);
-        $json = $this->formatNormalizer->normalize($json, $format, $request);
+        $json = $this->statementFormatNormalizer->normalize($json, $format, $request);
 
         $response = new JsonResponse($json, Response::HTTP_OK, json: true, isHeadRequest: $request->isMethod(Request::METHOD_HEAD));
 
@@ -204,7 +203,7 @@ final class StatementGetController
      */
     private function filterByStoredTime(array $statements, ?DateTimeImmutable $since, ?DateTimeImmutable $until): array
     {
-        if (null === $since && null === $until) {
+        if (!$since instanceof DateTimeImmutable && !$until instanceof DateTimeImmutable) {
             return $statements;
         }
 
@@ -212,22 +211,22 @@ final class StatementGetController
             array_filter(
                 $statements,
                 static function (Statement $statement) use ($since, $until): bool {
-                    if (null === $statement->getStored()) {
+                    if (!$statement->getStored() instanceof DateTime) {
                         return false;
                     }
 
                     $stored = DateTimeImmutable::createFromMutable($statement->getStored());
 
-                    return (null === $since || $stored > $since)
-                        && (null === $until || $stored <= $until);
+                    return (!$since instanceof DateTimeImmutable || $stored > $since)
+                        && (!$until instanceof DateTimeImmutable || $stored <= $until);
                 }
             )
         );
     }
 
-    private function getPageSize(ParameterBag $query): int
+    private function getPageSize(ParameterBag $parameterBag): int
     {
-        $limit = $query->getInt('limit');
+        $limit = $parameterBag->getInt('limit');
 
         return 0 === $limit || self::SERVER_LIMIT < $limit ? self::SERVER_LIMIT : $limit;
     }

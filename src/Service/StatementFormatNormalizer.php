@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\Model\Activity;
 use Xabbuh\XApi\Model\IRI;
+use Xabbuh\XApi\Model\LanguageMap;
 use Xabbuh\XApi\Model\Verb;
 use Xabbuh\XApi\Serializer\ActivitySerializerInterface;
 use XApi\Repository\Api\ActivityRepositoryInterface;
@@ -46,6 +47,7 @@ final readonly class StatementFormatNormalizer
                 foreach ($data['statements'] as &$statement) {
                     $this->reduceStatementToIds($statement);
                 }
+
                 unset($statement);
             } else {
                 $this->reduceStatementToIds($data);
@@ -61,6 +63,7 @@ final readonly class StatementFormatNormalizer
             foreach ($data['statements'] as &$statement) {
                 $this->canonicalizeStatement($statement, $request, $activities, $verbs);
             }
+
             unset($statement);
         } else {
             $this->canonicalizeStatement($data, $request, $activities, $verbs);
@@ -90,12 +93,13 @@ final readonly class StatementFormatNormalizer
                         $verbs[$verbId] = $statement['verb'];
                     } else {
                         $canonicalVerb = ['id' => $verb->getId()->getValue()];
-                        if (null !== ($display = $verb->getDisplay())) {
+                        if (($display = $verb->getDisplay()) instanceof LanguageMap) {
                             $canonicalVerb['display'] = [];
                             foreach ($display->languageTags() as $languageTag) {
                                 $canonicalVerb['display'][$languageTag] = $display[$languageTag];
                             }
                         }
+
                         $verbs[$verbId] = $canonicalVerb;
                     }
                 } catch (NotFoundException) {
@@ -120,8 +124,10 @@ final readonly class StatementFormatNormalizer
                         $this->canonicalizeActivity($activity, $request, $activities);
                     }
                 }
+
                 unset($activity);
             }
+
             unset($contextActivities);
         }
     }
@@ -199,9 +205,11 @@ final readonly class StatementFormatNormalizer
                         $this->filterLanguageMap($component['description'], $request);
                     }
                 }
+
                 unset($component);
             }
         }
+
         unset($definition);
     }
 
@@ -245,6 +253,7 @@ final readonly class StatementFormatNormalizer
             foreach ($members as &$member) {
                 $this->reduceActorToIds($member);
             }
+
             unset($member);
             $actor['member'] = $members;
         }
@@ -301,8 +310,10 @@ final readonly class StatementFormatNormalizer
                     foreach ($activities as &$activity) {
                         unset($activity['definition']);
                     }
+
                     unset($activity);
                 }
+
                 unset($activities);
             }
         }

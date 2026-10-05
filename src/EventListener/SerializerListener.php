@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace XApi\LrsBundle\EventListener;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -12,7 +14,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 final readonly class SerializerListener
 {
     public function __construct(
-        private XapiRequestDeserializer $requestDeserializer,
+        private XapiRequestDeserializer $xapiRequestDeserializer,
         private XapiRequestMatcher $xapiRequestMatcher
     ) { }
 
@@ -30,11 +32,11 @@ final readonly class SerializerListener
 
         switch ($request->attributes->get('xapi_serializer')) {
             case 'state':
-                $request->attributes->set('state', $this->requestDeserializer->deserializeState($request));
+                $request->attributes->set('state', $this->xapiRequestDeserializer->deserializeState($request));
                 break;
 
             case 'statement':
-                $data = $this->requestDeserializer->deserializeStatement($request);
+                $data = $this->xapiRequestDeserializer->deserializeStatement($request);
 
                 if (is_array($data)) {
                     $request->attributes->set('statements', $data);
@@ -47,6 +49,7 @@ final readonly class SerializerListener
                 } else {
                     $request->attributes->set('statement', $data);
                 }
+                
                 break;
         }
     }

@@ -43,9 +43,7 @@ class MultipartResponse extends JsonResponse
     ) {
         parent::__construct(null, $status, $headers);
 
-        if (null === $subtype) {
-            $subtype = 'mixed';
-        }
+        $subtype ??= 'mixed';
 
         $this->subtype = $subtype;
         $this->boundary = uniqid('', true);

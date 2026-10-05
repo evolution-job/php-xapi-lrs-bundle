@@ -26,7 +26,7 @@ use Xabbuh\XApi\Serializer\ActorSerializerInterface;
  */
 class StatementsFilterFactory
 {
-    public function __construct(private ActorSerializerInterface $actorSerializer) { }
+    public function __construct(private readonly ActorSerializerInterface $actorSerializer) { }
 
     /**
      * @throws DateMalformedStringException

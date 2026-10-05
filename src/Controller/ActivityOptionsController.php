@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the xAPI package.
  *
@@ -8,11 +10,9 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace XApi\LrsBundle\Controller;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -20,14 +20,13 @@ use Symfony\Component\HttpFoundation\Response;
  */
 final class ActivityOptionsController
 {
-    public function optionsActivities(Request $request): JsonResponse
+    public function optionsActivities(): JsonResponse
     {
         $headers = [
             'Allow'                        => 'GET, HEAD',
             'Access-Control-Allow-Methods' => 'GET, HEAD, OPTIONS',
             'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Experience-API-Version, X-Experience-API-Consistent-Through',
         ];
-
         return new JsonResponse(null, Response::HTTP_NO_CONTENT, $headers);
     }
 }

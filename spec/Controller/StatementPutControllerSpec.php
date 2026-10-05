@@ -95,7 +95,7 @@ class StatementPutControllerSpec extends ObjectBehavior
 
         $this->beConstructedWith($statementRepository);
 
-        $statement = $statement->withId(null);
+        $statement = $statement->withId();
         $this->putStatements($request, $statement);
     }
 

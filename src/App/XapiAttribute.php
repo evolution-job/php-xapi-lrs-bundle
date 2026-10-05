@@ -10,5 +10,6 @@ namespace XApi\LrsBundle\App;
 final class XapiAttribute
 {
     public const string LRS_ROUTE = 'xapi_lrs.route';
+    
     public const string ROUTE_PREFIX = 'xapi_lrs';
 }

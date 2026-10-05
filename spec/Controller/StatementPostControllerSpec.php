@@ -16,6 +16,7 @@ use Prophecy\Argument;
 use Symfony\Component\HttpFoundation\Response;
 use Xabbuh\XApi\Common\Exception\NotFoundException;
 use Xabbuh\XApi\DataFixtures\StatementFixtures;
+use Xabbuh\XApi\Model\StatementId;
 use XApi\LrsBundle\Exception\ConflictHttpException;
 use XApi\LrsBundle\Response\JsonResponse;
 use XApi\Repository\Api\StatementRepositoryInterface;
@@ -27,9 +28,9 @@ class StatementPostControllerSpec extends ObjectBehavior
 {
     public function it_assigns_an_id_if_the_statement_does_not_have_one(StatementRepositoryInterface $statementRepository): void
     {
-        $statement = StatementFixtures::getTypicalStatement()->withId(null);
+        $statement = StatementFixtures::getTypicalStatement()->withId();
 
-        $statementRepository->findStatementById(Argument::type(\Xabbuh\XApi\Model\StatementId::class))->willThrow(new NotFoundException(''));
+        $statementRepository->findStatementById(Argument::type(StatementId::class))->willThrow(new NotFoundException(''));
         $statementRepository->storeStatement(Argument::that(static fn($storedStatement): bool => null !== $storedStatement->getId()))
             ->will(static fn($arguments) => $arguments[0]->getId());
 

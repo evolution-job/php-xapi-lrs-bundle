@@ -278,24 +278,24 @@ class StatementGetControllerSpec extends ObjectBehavior
         Router $router,
         StatementRepositoryInterface $statementRepository,
         StatementResultSerializerInterface $statementResultSerializer,
-        StatementsFilterFactory $statementFilterFactory,
-    ) {
+        StatementsFilterFactory $statementsFilterFactory,
+    ): void {
         $request->query = new InputBag(['limit' => 1, 'offset' => 1]);
         $request->isMethod(Request::METHOD_HEAD)->willReturn(false);
-        $filter = new StatementsFilter();
-        $statementFilterFactory->createFromParameterBag(Argument::type(ParameterBag::class))->willReturn($filter);
+        $statementsFilter = new StatementsFilter();
+        $statementsFilterFactory->createFromParameterBag(Argument::type(ParameterBag::class))->willReturn($statementsFilter);
 
         $statements = StatementFixtures::getStatementCollection();
         $statements[] = $statements[0];
-        $statementRepository->findStatementsBy($filter)->willReturn($statements);
+        $statementRepository->findStatementsBy($statementsFilter)->willReturn($statements);
         $router->generate(
             'xapi_lrs.statement.get',
             Argument::that(static fn(array $parameters): bool => 1 === count($parameters)
                 && isset($parameters['moreId'])
                 && 1 === preg_match('/\A[a-f0-9]{64}\z/', $parameters['moreId']))
         )->willReturn('/statements?moreId='.str_repeat('a', 64));
-        $more = IRL::fromString('/statements?moreId='.str_repeat('a', 64));
-        $statementResult = new StatementResult([$statements[1]], $more);
+        $irl = IRL::fromString('/statements?moreId='.str_repeat('a', 64));
+        $statementResult = new StatementResult([$statements[1]], $irl);
 
         $statementResultSerializer->serializeStatementResult($statementResult)->shouldBeCalled()->willReturn(StatementResultJsonFixtures::getStatementResultWithMore());
 

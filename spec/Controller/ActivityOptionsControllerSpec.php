@@ -16,21 +16,22 @@ use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use XApi\LrsBundle\Controller\ActivityOptionsController;
 
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
 class ActivityOptionsControllerSpec extends ObjectBehavior
 {
-    public function it_is_initializable()
+    public function it_is_initializable(): void
     {
-        $this->shouldHaveType('XApi\LrsBundle\Controller\ActivityOptionsController');
+        $this->shouldHaveType(ActivityOptionsController::class);
     }
 
-    public function it_returns_a_204_response_if_the_activityId_parameter_is_missing(Request $request, ParameterBag $query)
+    public function it_returns_a_204_response_if_the_activityId_parameter_is_missing(Request $request, ParameterBag $parameterBag): void
     {
         $request->query = new InputBag([]);
-        $query->get('activityId')->willReturn(null);
+        $parameterBag->get('activityId')->willReturn(null);
 
         $response = $this->optionsActivities($request);
 
@@ -38,10 +39,10 @@ class ActivityOptionsControllerSpec extends ObjectBehavior
         $response->getStatusCode()->shouldReturn(Response::HTTP_NO_CONTENT);
     }
 
-    public function it_returns_a_204_response_if_the_activityId_parameter_is_present(Request $request, ParameterBag $query)
+    public function it_returns_a_204_response_if_the_activityId_parameter_is_present(Request $request, ParameterBag $parameterBag): void
     {
         $request->query = new InputBag([]);
-        $query->get('activityId')->willReturn('http://example.com');
+        $parameterBag->get('activityId')->willReturn('http://example.com');
 
         $response = $this->optionsActivities($request);
 
