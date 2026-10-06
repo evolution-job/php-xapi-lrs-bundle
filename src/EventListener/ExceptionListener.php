@@ -12,9 +12,11 @@ declare(strict_types=1);
 namespace XApi\LrsBundle\EventListener;
 
 use DateTimeImmutable;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
 use Xabbuh\XApi\Common\Exception\XApiException;
 use XApi\LrsBundle\App\XapiHeader;
 use XApi\LrsBundle\App\XapiVersion;
@@ -25,6 +27,7 @@ use XApi\LrsBundle\Service\RequestMatcher;
  *
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
+#[AsEventListener(event: KernelEvents::EXCEPTION, method: 'onKernelException', priority: 50)]
 final readonly class ExceptionListener
 {
     public function __construct(private RequestMatcher $requestMatcher) { }

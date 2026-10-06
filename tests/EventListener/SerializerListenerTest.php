@@ -89,7 +89,7 @@ class SerializerListenerTest extends TestCase
         $request = new Request([], [], [
             'xapi_lrs.route' => true,
             '_route' => 'xapi_lrs.statement.post',
-            '_controller' => 'xapi_lrs.controller.statement.post::postStatement',
+            '_controller' => 'XApi\LrsBundle\Controller\StatementPostController::postStatement',
             'xapi_serializer' => 'statement',
         ], [], [], [], $jsonContent);
         $event = new RequestEvent($this->createStub(HttpKernelInterface::class), $request, HttpKernelInterface::MAIN_REQUEST);
@@ -100,7 +100,7 @@ class SerializerListenerTest extends TestCase
         $this->assertFalse($request->attributes->has('statement'));
         $this->assertSame($statementsArray, $request->attributes->get('statements'));
         $this->assertSame(
-            'xapi_lrs.controller.statement.post::postStatements',
+            'XApi\LrsBundle\Controller\StatementPostController::postStatements',
             $request->attributes->get('_controller')
         );
     }

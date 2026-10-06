@@ -45,23 +45,23 @@ final class XApiLrsExtension extends Extension
             case 'mongodb':
                 $yamlFileLoader->load('doctrine.yaml');
 
-                $container->setAlias('xapi_lrs.doctrine.object_manager', $config['object_manager_service']);
-                $container->setAlias('xapi_lrs.repository.activity', 'xapi_lrs.repository.activity.doctrine');
-                $container->setAlias('xapi_lrs.repository.verb', 'xapi_lrs.repository.verb.doctrine');
-                $container->setAlias('xapi_lrs.repository.state', 'xapi_lrs.repository.state.doctrine');
-                $container->setAlias('xapi_lrs.repository.profile', 'xapi_lrs.repository.profile.doctrine');
-                $container->setAlias('xapi_lrs.repository.statement', 'xapi_lrs.repository.statement.doctrine');
+                $container->setAlias('Doctrine\\Persistence\\ObjectManager', $config['object_manager_service']);
+                $container->setAlias('XApi\\Repository\\Api\\ActivityRepositoryInterface', 'XApi\\Repository\\Doctrine\\Repository\\ActivityRepository');
+                $container->setAlias('XApi\\Repository\\Api\\VerbRepositoryInterface', 'XApi\\Repository\\Doctrine\\Repository\\VerbRepository');
+                $container->setAlias('XApi\\Repository\\Api\\StateRepositoryInterface', 'XApi\\Repository\\Doctrine\\Repository\\StateRepository');
+                $container->setAlias('XApi\\Repository\\Api\\ProfileRepositoryInterface', 'XApi\\Repository\\Doctrine\\Repository\\ProfileRepository');
+                $container->setAlias('XApi\\Repository\\Api\\StatementRepositoryInterface', 'XApi\\Repository\\Doctrine\\Repository\\StatementRepository');
                 break;
             case 'orm':
                 $yamlFileLoader->load('doctrine.yaml');
                 $yamlFileLoader->load('orm.yaml');
 
-                $container->setAlias('xapi_lrs.doctrine.object_manager', $config['object_manager_service']);
-                $container->setAlias('xapi_lrs.repository.activity', 'xapi_lrs.repository.activity.doctrine');
-                $container->setAlias('xapi_lrs.repository.verb', 'xapi_lrs.repository.verb.doctrine');
-                $container->setAlias('xapi_lrs.repository.state', 'xapi_lrs.repository.state.doctrine');
-                $container->setAlias('xapi_lrs.repository.profile', 'xapi_lrs.repository.profile.doctrine');
-                $container->setAlias('xapi_lrs.repository.statement', 'xapi_lrs.repository.statement.doctrine');
+                $container->setAlias('Doctrine\\Persistence\\ObjectManager', $config['object_manager_service']);
+                $container->setAlias('XApi\\Repository\\Api\\ActivityRepositoryInterface', 'XApi\\Repository\\Doctrine\\Repository\\ActivityRepository');
+                $container->setAlias('XApi\\Repository\\Api\\VerbRepositoryInterface', 'XApi\\Repository\\Doctrine\\Repository\\VerbRepository');
+                $container->setAlias('XApi\\Repository\\Api\\StateRepositoryInterface', 'XApi\\Repository\\Doctrine\\Repository\\StateRepository');
+                $container->setAlias('XApi\\Repository\\Api\\ProfileRepositoryInterface', 'XApi\\Repository\\Doctrine\\Repository\\ProfileRepository');
+                $container->setAlias('XApi\\Repository\\Api\\StatementRepositoryInterface', 'XApi\\Repository\\Doctrine\\Repository\\StatementRepository');
                 break;
         }
     }

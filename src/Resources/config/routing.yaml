@@ -3,76 +3,109 @@ xapi_lrs.agent.get:
     path: /agents
     methods: [ GET, HEAD ]
     defaults:
-        _controller: 'xapi_lrs.controller.agent.get::getAgent'
+        _controller: 'XApi\LrsBundle\Controller\AgentGetController::getAgent'
         xapi_lrs.route: true
 
 # Agent Profile
 xapi_lrs.agent.profile.get:
     path: /agents/profile
     methods: [ GET, HEAD ]
-    defaults: { _controller: 'xapi_lrs.controller.profile.get::getAgentProfile', xapi_lrs.route: true }
+    defaults:
+        _controller: 'XApi\LrsBundle\Controller\ProfileGetController::getAgentProfile'
+        xapi_lrs.route: true
+
 xapi_lrs.agent.profile.post:
     path: /agents/profile
     methods: [ POST ]
-    defaults: { _controller: 'xapi_lrs.controller.profile.post::postAgentProfile', xapi_lrs.route: true }
+    defaults:
+        _controller: 'XApi\LrsBundle\Controller\ProfilePostController::postAgentProfile'
+        xapi_lrs.route: true
+
 xapi_lrs.agent.profile.put:
     path: /agents/profile
     methods: [ PUT ]
-    defaults: { _controller: 'xapi_lrs.controller.profile.put::putAgentProfile', xapi_lrs.route: true }
+    defaults:
+        _controller: 'XApi\LrsBundle\Controller\ProfilePutController::putAgentProfile'
+        xapi_lrs.route: true
+
 xapi_lrs.agent.profile.delete:
     path: /agents/profile
     methods: [ DELETE ]
-    defaults: { _controller: 'xapi_lrs.controller.profile.delete::deleteAgentProfile', xapi_lrs.route: true }
+    defaults:
+        _controller: 'XApi\LrsBundle\Controller\ProfileDeleteController::deleteAgentProfile'
+        xapi_lrs.route: true
+
 xapi_lrs.agent.profile.options:
     path: /agents/profile
     methods: [ OPTIONS ]
-    defaults: { _controller: 'xapi_lrs.controller.profile.options::optionsProfiles', xapi_lrs.route: true }
+    defaults:
+        _controller: 'XApi\LrsBundle\Controller\ProfileOptionsController::optionsProfiles'
+        xapi_lrs.route: true
 
 # Activity Profile
 xapi_lrs.activity.profile.get:
     path: /activities/profile
     methods: [ GET, HEAD ]
-    defaults: { _controller: 'xapi_lrs.controller.profile.get::getActivityProfile', xapi_lrs.route: true }
+    defaults:
+        _controller: 'XApi\LrsBundle\Controller\ProfileGetController::getActivityProfile'
+        xapi_lrs.route: true
+
 xapi_lrs.activity.profile.post:
     path: /activities/profile
     methods: [ POST ]
-    defaults: { _controller: 'xapi_lrs.controller.profile.post::postActivityProfile', xapi_lrs.route: true }
+    defaults:
+        _controller: 'XApi\LrsBundle\Controller\ProfilePostController::postActivityProfile'
+        xapi_lrs.route: true
+
 xapi_lrs.activity.profile.put:
     path: /activities/profile
     methods: [ PUT ]
-    defaults: { _controller: 'xapi_lrs.controller.profile.put::putActivityProfile', xapi_lrs.route: true }
+    defaults:
+        _controller: 'XApi\LrsBundle\Controller\ProfilePutController::putActivityProfile'
+        xapi_lrs.route: true
+
 xapi_lrs.activity.profile.delete:
     path: /activities/profile
     methods: [ DELETE ]
-    defaults: { _controller: 'xapi_lrs.controller.profile.delete::deleteActivityProfile', xapi_lrs.route: true }
+    defaults:
+        _controller: 'XApi\LrsBundle\Controller\ProfileDeleteController::deleteActivityProfile'
+        xapi_lrs.route: true
+
 xapi_lrs.activity.profile.options:
     path: /activities/profile
     methods: [ OPTIONS ]
-    defaults: { _controller: 'xapi_lrs.controller.profile.options::optionsProfiles', xapi_lrs.route: true }
+    defaults:
+        _controller: 'XApi\LrsBundle\Controller\ProfileOptionsController::optionsProfiles'
+        xapi_lrs.route: true
 
 # About
 xapi_lrs.about.get:
     path: /about
     methods: [ GET, HEAD ]
-    defaults: { _controller: 'xapi_lrs.controller.about.get::getAbout', xapi_lrs.route: true }
+    defaults:
+        _controller: 'XApi\LrsBundle\Controller\AboutGetController::getAbout'
+        xapi_lrs.route: true
+
 xapi_lrs.about.options:
     path: /about
     methods: [ OPTIONS ]
-    defaults: { _controller: 'xapi_lrs.controller.about.options::optionsAbout', xapi_lrs.route: true }
+    defaults:
+        _controller: 'XApi\LrsBundle\Controller\AboutOptionsController::optionsAbout'
+        xapi_lrs.route: true
 
 # Activity
 xapi_lrs.activity.get:
     path: /activities
     methods: [ GET, HEAD ]
     defaults:
-        _controller: 'xapi_lrs.controller.activity.get::getActivities'
+        _controller: 'XApi\LrsBundle\Controller\ActivityGetController::getActivities'
         xapi_lrs.route: true
 
 xapi_lrs.activities.options:
     path: /activities
     methods: [ OPTIONS ]
     defaults:
-        _controller: 'xapi_lrs.controller.activity.options::optionsActivities'
+        _controller: 'XApi\LrsBundle\Controller\ActivityOptionsController::optionsActivities'
         xapi_lrs.route: true
 
 # State
@@ -80,7 +113,7 @@ xapi_lrs.state.get:
     path: /activities/state
     methods: [ GET, HEAD ]
     defaults:
-        _controller: 'xapi_lrs.controller.state.get::getState'
+        _controller: 'XApi\LrsBundle\Controller\StateGetController::getState'
         xapi_serializer: state
         xapi_lrs.route: true
 
@@ -88,14 +121,14 @@ xapi_lrs.state.options:
     path: /activities/state
     methods: [ OPTIONS ]
     defaults:
-        _controller: 'xapi_lrs.controller.state.options::optionsState'
+        _controller: 'XApi\LrsBundle\Controller\StateOptionsController::optionsState'
         xapi_lrs.route: true
 
 xapi_lrs.state.post:
     path: /activities/state
     methods: [ POST ]
     defaults:
-        _controller: 'xapi_lrs.controller.state.post::postState'
+        _controller: 'XApi\LrsBundle\Controller\StatePostController::postState'
         xapi_serializer: state
         xapi_lrs.route: true
 
@@ -103,7 +136,7 @@ xapi_lrs.state.put:
     path: /activities/state
     methods: [ PUT ]
     defaults:
-        _controller: 'xapi_lrs.controller.state.put::putState'
+        _controller: 'XApi\LrsBundle\Controller\StatePutController::putState'
         xapi_serializer: state
         xapi_lrs.route: true
 
@@ -111,7 +144,7 @@ xapi_lrs.state.delete:
     path: /activities/state
     methods: [ DELETE ]
     defaults:
-        _controller: 'xapi_lrs.controller.state.delete::deleteState'
+        _controller: 'XApi\LrsBundle\Controller\StateDeleteController::deleteState'
         xapi_serializer: state
         xapi_lrs.route: true
 
@@ -120,21 +153,21 @@ xapi_lrs.statement.get:
     path: /statements
     methods: [ GET, HEAD ]
     defaults:
-        _controller: 'xapi_lrs.controller.statement.get::getStatements'
+        _controller: 'XApi\LrsBundle\Controller\StatementGetController::getStatements'
         xapi_lrs.route: true
 
 xapi_lrs.statement.options:
     path: /statements
     methods: [ OPTIONS ]
     defaults:
-        _controller: 'xapi_lrs.controller.statement.options::optionsStatements'
+        _controller: 'XApi\LrsBundle\Controller\StatementOptionsController::optionsStatements'
         xapi_lrs.route: true
 
 xapi_lrs.statement.post:
     path: /statements
     methods: [ POST ]
     defaults:
-        _controller: 'xapi_lrs.controller.statement.post::postStatement'
+        _controller: 'XApi\LrsBundle\Controller\StatementPostController::postStatement'
         xapi_serializer: statement
         xapi_lrs.route: true
 
@@ -142,6 +175,6 @@ xapi_lrs.statement.put:
     path: /statements
     methods: [ PUT ]
     defaults:
-        _controller: 'xapi_lrs.controller.statement.put::putStatements'
+        _controller: 'XApi\LrsBundle\Controller\StatementPutController::putStatements'
         xapi_serializer: statement
         xapi_lrs.route: true

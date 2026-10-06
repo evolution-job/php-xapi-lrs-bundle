@@ -1,30 +1,25 @@
 services:
-    xapi_lrs.repository.profile.doctrine:
-        class: XApi\Repository\Doctrine\Repository\ProfileRepository
+    _defaults:
+        autowire: true
+        autoconfigure: true
         public: false
-        arguments:
-            - '@xapi_lrs.repository.mapped_profile'
 
-    xapi_lrs.repository.activity.doctrine:
-        class: XApi\Repository\Doctrine\Repository\ActivityRepository
-        public: false
+    XApi\Repository\Doctrine\Repository\ActivityRepository:
         arguments:
-            - '@xapi_lrs.repository.mapped_statementObject'
+            - '@XApi\Repository\ORM\StatementObjectRepository'
 
-    xapi_lrs.repository.verb.doctrine:
-        class: XApi\Repository\Doctrine\Repository\VerbRepository
-        public: false
+    XApi\Repository\Doctrine\Repository\ProfileRepository:
         arguments:
-            - '@xapi_lrs.repository.mapped_verb'
+            - '@XApi\Repository\ORM\ProfileRepository'
 
-    xapi_lrs.repository.state.doctrine:
-        class: XApi\Repository\Doctrine\Repository\StateRepository
-        public: false
+    XApi\Repository\Doctrine\Repository\StateRepository:
         arguments:
-            - '@xapi_lrs.repository.mapped_state'
+            - '@XApi\Repository\ORM\StateRepository'
 
-    xapi_lrs.repository.statement.doctrine:
-        class: XApi\Repository\Doctrine\Repository\StatementRepository
-        public: false
+    XApi\Repository\Doctrine\Repository\StatementRepository:
         arguments:
-            - '@xapi_lrs.repository.mapped_statement'
+            - '@XApi\Repository\ORM\StatementRepository'
+
+    XApi\Repository\Doctrine\Repository\VerbRepository:
+        arguments:
+            - '@XApi\Repository\ORM\VerbRepository'

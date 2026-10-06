@@ -137,11 +137,11 @@ class TestingKernel extends Kernel
                 'allowed_origins'        => ['https://lrs.example.com', 'https://learning.repository.example.com'],
             ]);
 
-            $container->register('xapi_lrs.repository.activity', FakeActivityRepository::class)->setPublic(true);
-            $container->register('xapi_lrs.repository.profile', FakeProfileRepository::class)->setPublic(true);
-            $container->register('xapi_lrs.repository.state', FakeStateRepository::class)->setPublic(true);
-            $container->register('xapi_lrs.repository.statement', FakeStatementRepository::class)->setPublic(true);
-            $container->register('xapi_lrs.repository.verb', FakeVerbRepository::class)->setPublic(true);
+            $container->register(ActivityRepositoryInterface::class, FakeActivityRepository::class)->setPublic(true);
+            $container->register(ProfileRepositoryInterface::class, FakeProfileRepository::class)->setPublic(true);
+            $container->register(StateRepositoryInterface::class, FakeStateRepository::class)->setPublic(true);
+            $container->register(StatementRepositoryInterface::class, FakeStatementRepository::class)->setPublic(true);
+            $container->register(VerbRepositoryInterface::class, FakeVerbRepository::class)->setPublic(true);
         });
     }
 

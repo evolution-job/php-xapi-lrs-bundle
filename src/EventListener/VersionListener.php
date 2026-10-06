@@ -11,8 +11,10 @@ declare(strict_types=1);
 
 namespace XApi\LrsBundle\EventListener;
 
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 use Xabbuh\XApi\Common\Exception\BadRequestException;
 use XApi\LrsBundle\App\XapiHeader;
 use XApi\LrsBundle\App\XapiVersion;
@@ -22,6 +24,7 @@ use XApi\LrsBundle\Service\RequestMatcher;
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
+#[AsEventListener(event: KernelEvents::REQUEST, method: 'onKernelRequest', priority: -1)]
 final readonly class VersionListener
 {
     public function __construct(private RequestMatcher $requestMatcher) { }

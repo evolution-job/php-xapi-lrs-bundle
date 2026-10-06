@@ -11,8 +11,10 @@ declare(strict_types=1);
 
 namespace XApi\LrsBundle\EventListener;
 
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 use XApi\LrsBundle\Service\RequestDeserializer;
 use XApi\LrsBundle\Service\RequestMatcher;
 
@@ -20,6 +22,7 @@ use XApi\LrsBundle\Service\RequestMatcher;
  * @author Christian Flothmann <christian.flothmann@xabbuh.de>
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
+#[AsEventListener(event: KernelEvents::REQUEST, method: 'onKernelRequest', priority: -2)]
 final readonly class SerializerListener
 {
     public function __construct(

@@ -1,75 +1,64 @@
 services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
     # Profile Repository
-    xapi_lrs.doctrine.profile.class_metadata:
+    XApi\Repository\Doctrine\Mapping\Profile:
         class: Doctrine\ORM\Mapping\ClassMetadata
-        public: false
-        factory: [ '@xapi_lrs.doctrine.object_manager', 'getClassMetadata' ]
+        factory: [ '@Doctrine\Persistence\ObjectManager', 'getClassMetadata' ]
         arguments:
             - 'XApi\Repository\Doctrine\Mapping\Profile'
 
-    xapi_lrs.repository.mapped_profile:
-        class: XApi\Repository\ORM\ProfileRepository
-        public: false
+    XApi\Repository\ORM\ProfileRepository:
         arguments:
-            - '@xapi_lrs.doctrine.object_manager'
-            - '@xapi_lrs.doctrine.profile.class_metadata'
+            - '@Doctrine\Persistence\ObjectManager'
+            - '@XApi\Repository\Doctrine\Mapping\Profile'
 
     # State Repository
-    xapi_lrs.doctrine.state.class_metadata:
+    XApi\Repository\Doctrine\Mapping\State:
         class: Doctrine\ORM\Mapping\ClassMetadata
-        public: false
-        factory: [ '@xapi_lrs.doctrine.object_manager', 'getClassMetadata' ]
+        factory: [ '@Doctrine\Persistence\ObjectManager', 'getClassMetadata' ]
         arguments:
             - 'XApi\Repository\Doctrine\Mapping\State'
 
-    xapi_lrs.repository.mapped_state:
-        class: XApi\Repository\ORM\StateRepository
-        public: false
+    XApi\Repository\ORM\StateRepository:
         arguments:
-            - '@xapi_lrs.doctrine.object_manager'
-            - '@xapi_lrs.doctrine.state.class_metadata'
+            - '@Doctrine\Persistence\ObjectManager'
+            - '@XApi\Repository\Doctrine\Mapping\State'
 
     # Statement Repository
-    xapi_lrs.doctrine.statement.class_metadata:
+    XApi\Repository\Doctrine\Mapping\Statement:
         class: Doctrine\ORM\Mapping\ClassMetadata
-        public: false
-        factory: [ '@xapi_lrs.doctrine.object_manager', 'getClassMetadata' ]
+        factory: [ '@Doctrine\Persistence\ObjectManager', 'getClassMetadata' ]
         arguments:
             - 'XApi\Repository\Doctrine\Mapping\Statement'
 
-    xapi_lrs.repository.mapped_statement:
-        class: XApi\Repository\ORM\StatementRepository
-        public: false
+    XApi\Repository\ORM\StatementRepository:
         arguments:
-            - '@xapi_lrs.doctrine.object_manager'
-            - '@xapi_lrs.doctrine.statement.class_metadata'
+            - '@Doctrine\Persistence\ObjectManager'
+            - '@XApi\Repository\Doctrine\Mapping\Statement'
 
     # StatementObject Repository
-    xapi_lrs.doctrine.statementObject.class_metadata:
+    XApi\Repository\Doctrine\Mapping\StatementObject:
         class: Doctrine\ORM\Mapping\ClassMetadata
-        public: false
-        factory: [ '@xapi_lrs.doctrine.object_manager', 'getClassMetadata' ]
+        factory: [ '@Doctrine\Persistence\ObjectManager', 'getClassMetadata' ]
         arguments:
             - 'XApi\Repository\Doctrine\Mapping\StatementObject'
 
-    xapi_lrs.repository.mapped_statementObject:
-        class: XApi\Repository\ORM\StatementObjectRepository
-        public: false
+    XApi\Repository\ORM\StatementObjectRepository:
         arguments:
-            - '@xapi_lrs.doctrine.object_manager'
-            - '@xapi_lrs.doctrine.statementObject.class_metadata'
+            - '@Doctrine\Persistence\ObjectManager'
+            - '@XApi\Repository\Doctrine\Mapping\StatementObject'
 
     # Verb Repository
-    xapi_lrs.doctrine.verb.class_metadata:
+    XApi\Repository\Doctrine\Mapping\Verb:
         class: Doctrine\ORM\Mapping\ClassMetadata
-        public: false
-        factory: [ '@xapi_lrs.doctrine.object_manager', 'getClassMetadata' ]
+        factory: [ '@Doctrine\Persistence\ObjectManager', 'getClassMetadata' ]
         arguments:
             - 'XApi\Repository\Doctrine\Mapping\Verb'
 
-    xapi_lrs.repository.mapped_verb:
-        class: XApi\Repository\ORM\VerbRepository
-        public: false
+    XApi\Repository\ORM\VerbRepository:
         arguments:
-            - '@xapi_lrs.doctrine.object_manager'
-            - '@xapi_lrs.doctrine.verb.class_metadata'
+            - '@Doctrine\Persistence\ObjectManager'
+            - '@XApi\Repository\Doctrine\Mapping\Verb'

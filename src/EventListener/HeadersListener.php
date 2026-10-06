@@ -9,8 +9,10 @@
 
 namespace XApi\LrsBundle\EventListener;
 
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 use XApi\LrsBundle\App\XapiHeader;
 use XApi\LrsBundle\App\XapiVersion;
 use XApi\LrsBundle\Service\RequestMatcher;
@@ -18,6 +20,7 @@ use XApi\LrsBundle\Service\RequestMatcher;
 /**
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
+#[AsEventListener(event: KernelEvents::RESPONSE, method: 'onKernelResponse')]
 final readonly class HeadersListener
 {
     /**

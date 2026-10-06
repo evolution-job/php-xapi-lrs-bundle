@@ -11,9 +11,11 @@ namespace XApi\LrsBundle\EventListener;
 
 use InvalidArgumentException;
 use JsonException;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
 use Throwable;
 use Xabbuh\XApi\Common\Exception\BadRequestException;
@@ -27,6 +29,7 @@ use XApi\LrsBundle\App\XapiHeader;
  * @author Jérôme Parmentier <jerome.parmentier@acensi.fr>
  * @author Mathieu Boldo <mathieu.boldo@entrili.com>
  */
+#[AsEventListener(event: KernelEvents::REQUEST, method: 'onKernelRequest', priority: 35)]
 final readonly class AlternateRequestSyntaxListener
 {
     public function __construct(private RouterInterface $router) { }

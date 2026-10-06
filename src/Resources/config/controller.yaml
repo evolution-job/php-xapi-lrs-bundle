@@ -1,157 +1,134 @@
 services:
     # Agents
-    xapi_lrs.controller.agent.get:
-        class: XApi\LrsBundle\Controller\AgentGetController
+    XApi\LrsBundle\Controller\AgentGetController:
         arguments:
-            - '@xapi_lrs.profile.request_parser'
+            - '@XApi\LrsBundle\Service\ProfileRequestParser'
         tags:
             - { name: 'controller.service_arguments' }
 
     # Profiles
-    xapi_lrs.profile.service:
-        class: XApi\LrsBundle\Service\ProfileService
+    XApi\LrsBundle\Service\ProfileService:
         arguments:
-            - '@xapi_lrs.repository.profile'
-            - '@xapi_lrs.profile.request_parser'
+            - '@XApi\Repository\Api\ProfileRepositoryInterface'
+            - '@XApi\LrsBundle\Service\ProfileRequestParser'
 
-    xapi_lrs.controller.profile.get:
-        class: XApi\LrsBundle\Controller\ProfileGetController
+    XApi\LrsBundle\Controller\ProfileGetController:
         arguments:
-            - '@xapi_lrs.profile.service'
+            - '@XApi\LrsBundle\Service\ProfileService'
         tags:
             - { name: 'controller.service_arguments' }
 
-    xapi_lrs.controller.profile.post:
-        class: XApi\LrsBundle\Controller\ProfilePostController
+    XApi\LrsBundle\Controller\ProfilePostController:
         arguments:
-            - '@xapi_lrs.profile.service'
+            - '@XApi\LrsBundle\Service\ProfileService'
         tags:
             - { name: 'controller.service_arguments' }
 
-    xapi_lrs.controller.profile.put:
-        class: XApi\LrsBundle\Controller\ProfilePutController
+    XApi\LrsBundle\Controller\ProfilePutController:
         arguments:
-            - '@xapi_lrs.profile.service'
+            - '@XApi\LrsBundle\Service\ProfileService'
         tags:
             - { name: 'controller.service_arguments' }
 
-    xapi_lrs.controller.profile.delete:
-        class: XApi\LrsBundle\Controller\ProfileDeleteController
+    XApi\LrsBundle\Controller\ProfileDeleteController:
         arguments:
-            - '@xapi_lrs.profile.service'
+            - '@XApi\LrsBundle\Service\ProfileService'
         tags:
             - { name: 'controller.service_arguments' }
 
-    xapi_lrs.controller.profile.options:
-        class: XApi\LrsBundle\Controller\ProfileOptionsController
+    XApi\LrsBundle\Controller\ProfileOptionsController:
         tags:
             - { name: 'controller.service_arguments' }
 
     # About
-    xapi_lrs.controller.about.get:
-        class: XApi\LrsBundle\Controller\AboutGetController
+    XApi\LrsBundle\Controller\AboutGetController:
         tags:
             - { name: 'controller.service_arguments' }
 
-    xapi_lrs.controller.about.options:
-        class: XApi\LrsBundle\Controller\AboutOptionsController
+    XApi\LrsBundle\Controller\AboutOptionsController:
         tags:
             - { name: 'controller.service_arguments' }
 
     # Activity
-    xapi_lrs.controller.activity.get:
-        class: XApi\LrsBundle\Controller\ActivityGetController
+    XApi\LrsBundle\Controller\ActivityGetController:
         arguments:
-            - '@xapi_lrs.repository.activity'
-            - '@xapi_lrs.activity.serializer'
+            - '@XApi\Repository\Api\ActivityRepositoryInterface'
+            - '@Xabbuh\XApi\Serializer\ActivitySerializerInterface'
         tags:
             - { name: 'controller.service_arguments' }
 
-    xapi_lrs.controller.activity.options:
-        class: XApi\LrsBundle\Controller\ActivityOptionsController
+    XApi\LrsBundle\Controller\ActivityOptionsController:
         tags:
             - { name: 'controller.service_arguments' }
 
     # State
-    xapi_lrs.controller.state.get:
-        class: XApi\LrsBundle\Controller\StateGetController
+    XApi\LrsBundle\Controller\StateGetController:
         arguments:
-            - '@xapi_lrs.repository.state'
+            - '@XApi\Repository\Api\StateRepositoryInterface'
         tags:
             - { name: 'controller.service_arguments' }
 
-    xapi_lrs.controller.state.options:
-        class: XApi\LrsBundle\Controller\StateOptionsController
+    XApi\LrsBundle\Controller\StateOptionsController:
         tags:
             - { name: 'controller.service_arguments' }
 
-    xapi_lrs.controller.state.post:
-        class: XApi\LrsBundle\Controller\StatePostController
+    XApi\LrsBundle\Controller\StatePostController:
         arguments:
-            - '@xapi_lrs.repository.state'
+            - '@XApi\Repository\Api\StateRepositoryInterface'
         tags:
             - { name: 'controller.service_arguments' }
 
-    xapi_lrs.controller.state.put:
-        class: XApi\LrsBundle\Controller\StatePutController
+    XApi\LrsBundle\Controller\StatePutController:
         arguments:
-            - '@xapi_lrs.repository.state'
+            - '@XApi\Repository\Api\StateRepositoryInterface'
         tags:
             - { name: 'controller.service_arguments' }
 
-    xapi_lrs.controller.state.delete:
-        class: XApi\LrsBundle\Controller\StateDeleteController
+    XApi\LrsBundle\Controller\StateDeleteController:
         arguments:
-            - '@xapi_lrs.repository.state'
+            - '@XApi\Repository\Api\StateRepositoryInterface'
         tags:
             - { name: 'controller.service_arguments' }
 
     # Statement
-    xapi_lrs.statement.format_normalizer:
-        class: XApi\LrsBundle\Service\StatementFormatNormalizer
+    XApi\LrsBundle\Service\StatementFormatNormalizer:
         arguments:
-            - '@xapi_lrs.repository.activity'
-            - '@xapi_lrs.repository.verb'
-            - '@xapi_lrs.activity.serializer'
+            - '@XApi\Repository\Api\ActivityRepositoryInterface'
+            - '@XApi\Repository\Api\VerbRepositoryInterface'
+            - '@Xabbuh\XApi\Serializer\ActivitySerializerInterface'
 
-    xapi_lrs.statement.query_validator:
-        class: XApi\LrsBundle\Service\StatementGetQueryValidator
+    XApi\LrsBundle\Service\StatementGetQueryValidator:
         arguments:
-            - '@xapi_lrs.factory.statements_filter'
+            - '@XApi\LrsBundle\Model\StatementsFilterFactory'
 
-    xapi_lrs.statement.continuation_manager:
-        class: XApi\LrsBundle\Service\StatementContinuationManager
+    XApi\LrsBundle\Service\StatementContinuationManager:
         arguments:
             - '@cache.app'
             - '@router'
 
-    xapi_lrs.controller.statement.get:
-        class: XApi\LrsBundle\Controller\StatementGetController
+    XApi\LrsBundle\Controller\StatementGetController:
         arguments:
-            - '@xapi_lrs.repository.statement'
-            - '@xapi_lrs.statement_result.serializer'
-            - '@xapi_lrs.statement.serializer'
-            - '@xapi_lrs.statement.format_normalizer'
-            - '@xapi_lrs.statement.query_validator'
-            - '@xapi_lrs.statement.continuation_manager'
+            - '@XApi\Repository\Api\StatementRepositoryInterface'
+            - '@Xabbuh\XApi\Serializer\StatementResultSerializerInterface'
+            - '@Xabbuh\XApi\Serializer\StatementSerializerInterface'
+            - '@XApi\LrsBundle\Service\StatementFormatNormalizer'
+            - '@XApi\LrsBundle\Service\StatementGetQueryValidator'
+            - '@XApi\LrsBundle\Service\StatementContinuationManager'
         tags:
             - { name: 'controller.service_arguments' }
 
-    xapi_lrs.controller.statement.options:
-        class: XApi\LrsBundle\Controller\StatementOptionsController
+    XApi\LrsBundle\Controller\StatementOptionsController:
         tags:
             - { name: 'controller.service_arguments' }
 
-    xapi_lrs.controller.statement.post:
-        class: XApi\LrsBundle\Controller\StatementPostController
+    XApi\LrsBundle\Controller\StatementPostController:
         arguments:
-            - '@xapi_lrs.repository.statement'
+            - '@XApi\Repository\Api\StatementRepositoryInterface'
         tags:
             - { name: 'controller.service_arguments' }
 
-    xapi_lrs.controller.statement.put:
-        class: XApi\LrsBundle\Controller\StatementPutController
+    XApi\LrsBundle\Controller\StatementPutController:
         arguments:
-            - '@xapi_lrs.repository.statement'
+            - '@XApi\Repository\Api\StatementRepositoryInterface'
         tags:
             - { name: 'controller.service_arguments' }
